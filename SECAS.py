@@ -916,6 +916,49 @@ class VerifyCode:
 
         return True
 
+    '''async def is_condition(self, position) -> bool:
+        def get_se_variable_from_str(data) -> list:
+            open_brackets = 0
+            open_bracket_pos = []
+            close_bracket_pos = []
+            for index, char in enumerate(data):
+                if "{" in char:
+                    open_brackets += 1
+                    if open_brackets > 1:
+                        return False
+                    else:
+                        open_bracket_pos.append(index)
+                if "}" in char:
+                    open_brackets -= 1
+                    if open_brackets < 0:
+                        return False
+                    else:
+                        close_bracket_pos.append(index)
+
+            if not open_brackets == 0:
+                return False
+
+            for index in range(0, len(open_bracket_pos)):
+                se_variables = []
+                se_variables.append(data[open_bracket_pos[index]:close_bracket_pos[index] + 1])
+
+                return se_variables
+                final_bool = []
+                open_variables = []
+
+                   if char == "=":
+                        final_bool.append("==")
+                    elif char == ""
+
+                try:
+                    result = eval(data)
+                    return result
+                except:
+                    return False
+            while True:
+                input_data = input("Wprowadź dane: ")
+                result = check_boolean_input(input_data)'''
+
     async def is_required_length(self, min_len: int, max_len) -> bool:
         if not min_len <= len(self.line_processing_list) - 1:
             await self.invalid_min_length(abs(len(self.line_processing_list) - 1 - min_len))

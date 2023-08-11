@@ -97,12 +97,6 @@ class VerifyCode:
         error_with_arrows = ' '.join(self.line_processing_list)
         self.error_reasons.append([self.line_processing_index, error_with_arrows, reason, link])
 
-    async def invalid_label_or_line(self, position):
-        reason = f"Invalid label/line number | Redirecting to nowhere"
-        link = "https://pastebin.com/Wj97g1JX"
-
-        await self.error_template(position, reason, link=link)
-
     async def invalid_min_length(self, number_missing: int):
         reason = f"Missing arguments | {number_missing}"
 
@@ -847,10 +841,11 @@ class VerifyCode:
                 return True
 
         except:
-            pass
+            reason = f"Invalid label/line number | Redirecting to nowhere"
+            link = "https://pastebin.com/Wj97g1JX"
 
-        await self.invalid_label_or_line(position)
-        return False
+            await self.error_template(position, reason, link=link)
+            return False
 
     async def is_valid_math_operation(self, line_index: int) -> bool:
         open_brackets = 0

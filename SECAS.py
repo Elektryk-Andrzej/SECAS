@@ -12,6 +12,7 @@ bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 async def proccess_verify_request(script):
     async with (script.ctx.channel.typing()):
         try:
+            # register all labels
             for index, line in enumerate(script.code):
                 script.line_processing_list = line.split(" ")
                 script.line_processing_list[-1].strip("\n")
@@ -20,9 +21,10 @@ async def proccess_verify_request(script):
 
                     script.line_processing_list.pop(0)
 
-                if ":" in (iterator := script.line_processing_list[-1]):
-                    script.iterators.append(iterator.strip(":"))
+                if ":" in (label := script.line_processing_list[-1]):
+                    script.labels.append(label.strip(":"))
 
+            # for all lines to be verified
             for index, line in enumerate(script.code):
                 script.line_processing_index = index
                 script.line_processing_str = line.strip("\n")
@@ -30,6 +32,7 @@ async def proccess_verify_request(script):
                 script.line_processing_list[-1].strip("\n")
                 script.line_already_added_to_result = False
 
+                # delete .v from the first line
                 if index == 0 and len(script.line_processing_list) > 1 and\
                         script.line_processing_list[0].startswith("."):
 
@@ -44,6 +47,7 @@ async def proccess_verify_request(script):
                                                     link=None)
                         script.errored = True'''
 
+                # run check for action if exists
                 if (action_name := script.line_processing_list[0]) in script.actions:
                     action_done = await script.actions[action_name]()
 
@@ -53,19 +57,24 @@ async def proccess_verify_request(script):
                         await script.add_line_to_result("🟥")
                         script.errored = True
 
+                # = comments, so change color for em
                 elif "#" in script.line_processing_list[0]:
                     await script.add_line_to_result("🟦")
 
+                # blank space should be black
                 elif all(znak.isspace() for znak in script.line_processing_list) or \
                         script.line_processing_list == ['']:
                     await script.add_line_to_result("⬛")
 
+                # labels have purple
                 elif ":" in script.line_processing_list[-1]:
                     await script.add_line_to_result("🟪")
 
+                # flags have white
                 elif "!--" in script.line_processing_list[0]:
                     await script.add_line_to_result("⬜")
 
+                # if nothing matches, then error
                 else:
                     await script.add_line_to_result("🟥")
                     await script.error_template(0, "Invalid action | Find all here",
@@ -119,7 +128,8 @@ async def on_message(message):
                   "SETROLE * ClassD\n"
                   "HINTPLAYER {CLASSD} 6 You have 45 seconds of life left!\n"
                   "WAITSEC 45\n"
-                  "KILL {CLASSD} Exploded```\n",
+                  "KILL {CLASSD} Exploded```\n"
+                  "It also supports txt files, for when you reach the character limit!",
             inline=False
         )
 

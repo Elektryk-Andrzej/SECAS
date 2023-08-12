@@ -71,7 +71,7 @@ class VerifyCode:
         self.embed_content: str = ""
         self.errored: bool = False
         self.line_processing_index: int = 0
-        self.iterators = ["NEXT", "START"]
+        self.labels = ["NEXT", "START"]
         self.line_already_added_to_result: bool = False
         self.room_types = bot_variables.room_type
         self.item_types = bot_variables.item_type
@@ -857,7 +857,7 @@ class VerifyCode:
         try:
             iterator = self.line_processing_list[position]
 
-            if iterator in self.iterators:
+            if iterator in self.labels:
                 return True
             elif int(iterator) <= len(self.line_processing_list) and not int(iterator) < 1:
                 return True

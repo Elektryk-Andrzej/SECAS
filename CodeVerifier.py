@@ -779,6 +779,9 @@ class VerifyCode:
         elif star_allowed and self.line_processing_list[line_index] == "*":
             return True
 
+        elif ":" in self.line_processing_list[line_index]:
+            return True
+
         else:
             if var_type[0] == "DEBUG_ROOM_TYPE":
                 reason = "Invalid room variable | Find all here"

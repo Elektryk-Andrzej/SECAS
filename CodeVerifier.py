@@ -139,8 +139,8 @@ class VerifyCode:
             self.processed_lines.append(f"`{len(self.processed_lines) + 1}`{emoji}")
 
         else:
-            self.processed_lines.append(f"`{len(self.processed_lines) + 1}`{emoji}` "
-                                        f"{self.line_processing_str} `")
+            self.processed_lines.append(f"`{len(self.processed_lines) + 1}`{emoji}"
+                                        f"` {self.line_processing_str} `")
 
         self.line_already_added_to_result = True
 

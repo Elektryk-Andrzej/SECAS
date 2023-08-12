@@ -2,9 +2,7 @@ import discord
 import discord.ext.commands
 from discord.ext import commands
 
-# import asyncio
 from DO_NOT_SHIP.TOKEN import TOKEN
-# import re
 from discord.utils import get
 from CodeVerifier import VerifyCode
 
@@ -12,27 +10,32 @@ bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
 
 async def proccess_verify_request(script):
-    async with script.ctx.channel.typing():
+    async with (script.ctx.channel.typing()):
         try:
             for index, line in enumerate(script.code):
-                if index == 0:
-                    continue
-
                 script.line_processing_list = line.split(" ")
                 script.line_processing_list[-1].strip("\n")
+                if index == 0 and len(script.line_processing_list) > 1 and\
+                        script.line_processing_list[0].startswith("."):
+
+                    script.line_processing_list.pop(0)
 
                 if ":" in (iterator := script.line_processing_list[-1]):
                     script.iterators.append(iterator.strip(":"))
 
             for index, line in enumerate(script.code):
-                if index == 0:
-                    continue
-
                 script.line_processing_index = index
                 script.line_processing_str = line.strip("\n")
                 script.line_processing_list = line.split(" ")
                 script.line_processing_list[-1].strip("\n")
                 script.line_already_added_to_result = False
+
+                if index == 0 and len(script.line_processing_list) > 1 and\
+                        script.line_processing_list[0].startswith("."):
+
+                    script.line_processing_str = script.line_processing_str.strip(
+                        f"{script.line_processing_list[0]} ")
+                    script.line_processing_list.pop(0)
 
                 '''for position, argument in enumerate(script.line_processing_list):
                     if argument == "":
@@ -87,8 +90,6 @@ async def on_ready():
             type=discord.ActivityType.watching,
             name=f".v / .i"),
         status=discord.Status.online)
-    script = VerifyCode(None, None, "sus")
-    print(script.se_player_vars)
 
 
 @bot.event
@@ -148,7 +149,7 @@ async def on_message(message):
         return
 
     elif message.attachments and message.attachments[0].filename.endswith('.txt')\
-            and message.content.startswith(".vf") or message.content.startswith(".VF"):
+            and message.content.startswith(".v") or message.content.startswith(".V"):
 
         attachment = message.attachments[0]
         file = await attachment.read()

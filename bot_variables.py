@@ -300,8 +300,9 @@ se_player_variable = [
     "{HCZ}",
     "{LCZ}",
     "{POCKET}",
-    "{SURFACE}"
+    "{SURFACE}",
     "{RESPAWNEDPLAYERS}",
+    "{EVPLAYER}"
 ]
 
 enable_disable_key = [

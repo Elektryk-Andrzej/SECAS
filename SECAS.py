@@ -11,6 +11,74 @@ from CodeVerifier import VerifyCode
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
 
+async def proccess_verify_request(script):
+    async with script.ctx.channel.typing():
+        try:
+            for index, line in enumerate(script.code):
+                if index == 0:
+                    continue
+
+                script.line_processing_list = line.split(" ")
+                script.line_processing_list[-1].strip("\n")
+
+                if ":" in (iterator := script.line_processing_list[-1]):
+                    script.iterators.append(iterator.strip(":"))
+
+            for index, line in enumerate(script.code):
+                if index == 0:
+                    continue
+
+                script.line_processing_index = index
+                script.line_processing_str = line.strip("\n")
+                script.line_processing_list = line.split(" ")
+                script.line_processing_list[-1].strip("\n")
+                script.line_already_added_to_result = False
+
+                '''for position, argument in enumerate(script.line_processing_list):
+                    if argument == "":
+                        await script.add_line_to_result("🟥")
+                        await script.error_template(position, "Invalid space character | Delete it",
+                                                    link=None)
+                        script.errored = True'''
+
+                if (action_name := script.line_processing_list[0]) in script.actions:
+                    action_done = await script.actions[action_name]()
+
+                    if action_done:
+                        await script.add_line_to_result("🟩")
+                    else:
+                        await script.add_line_to_result("🟥")
+                        script.errored = True
+
+                elif "#" in script.line_processing_list[0]:
+                    await script.add_line_to_result("🟦")
+
+                elif all(znak.isspace() for znak in script.line_processing_list) or \
+                        script.line_processing_list == ['']:
+                    await script.add_line_to_result("⬛")
+
+                elif ":" in script.line_processing_list[-1]:
+                    await script.add_line_to_result("🟪")
+
+                elif "!--" in script.line_processing_list[0]:
+                    await script.add_line_to_result("⬜")
+
+                else:
+                    await script.add_line_to_result("🟥")
+                    await script.error_template(0, "Invalid action | Find all here",
+                                                link="https://pastebin.com/6C0ry80E")
+
+                    script.errored = True
+
+            await script.send_result_embed()
+
+        except Exception as e:
+            await script.ctx.reply("An error occured while generating the overviev.\n"
+                                   "Please report it to <@762016625096261652>, thank you.\n"
+                                   f"`{e}`")
+    del script
+
+
 @bot.event
 async def on_ready():
     print(f"Zalogowano jako {bot.user}")
@@ -19,6 +87,8 @@ async def on_ready():
             type=discord.ActivityType.watching,
             name=f".v / .i"),
         status=discord.Status.online)
+    script = VerifyCode(None, None, "sus")
+    print(script.se_player_vars)
 
 
 @bot.event
@@ -77,78 +147,21 @@ async def on_message(message):
         await message.reply(embed=embed, mention_author=False)
         return
 
+    elif message.attachments and message.attachments[0].filename.endswith('.txt')\
+            and message.content.startswith(".vf") or message.content.startswith(".VF"):
+
+        attachment = message.attachments[0]
+        file = await attachment.read()
+        file_content = file.decode('utf-8')
+        script = VerifyCode(message, bot, file_content)
+
+        await proccess_verify_request(script)
+
     elif message.content.startswith(".v") or message.content.startswith(".V"):
         print(f"{message.author} requested code verification")
-        script = VerifyCode(message, bot)
+        script = VerifyCode(message, bot, message.content)
 
-        async with message.channel.typing():
-            try:
-                script.code = message.content.split("\n")
-
-                for index, line in enumerate(script.code):
-                    if index == 0:
-                        continue
-
-                    script.line_processing_list = line.split(" ")
-                    script.line_processing_list[-1].strip("\n")
-
-                    if ":" in (iterator := script.line_processing_list[-1]):
-                        script.iterators.append(iterator.strip(":"))
-
-                for index, line in enumerate(script.code):
-                    if index == 0:
-                        continue
-
-                    script.line_processing_index = index
-                    script.line_processing_str = line.strip("\n")
-                    script.line_processing_list = line.split(" ")
-                    script.line_processing_list[-1].strip("\n")
-                    script.line_already_added_to_result = False
-
-                    '''for position, argument in enumerate(script.line_processing_list):
-                        if argument == "":
-                            await script.add_line_to_result("🟥")
-                            await script.error_template(position, "Invalid space character | Delete it",
-                                                        link=None)
-                            script.errored = True'''
-
-                    if (action_name := script.line_processing_list[0]) in script.actions:
-                        action_done = await script.actions[action_name]()
-
-                        if action_done:
-                            await script.add_line_to_result("🟩")
-                        else:
-                            await script.add_line_to_result("🟥")
-                            script.errored = True
-
-                    elif "#" in script.line_processing_list[0]:
-                        await script.add_line_to_result("🟦")
-
-                    elif all(znak.isspace() for znak in script.line_processing_list) or \
-                            script.line_processing_list == ['']:
-                        await script.add_line_to_result("⬛")
-
-                    elif ":" in script.line_processing_list[-1]:
-                        await script.add_line_to_result("🟪")
-
-                    elif "!--" in script.line_processing_list[0]:
-                        await script.add_line_to_result("⬜")
-
-                    else:
-                        await script.add_line_to_result("🟥")
-                        await script.error_template(0, "Invalid action | Find all here",
-                                                    link="https://pastebin.com/6C0ry80E")
-
-                        script.errored = True
-
-                await script.send_result_embed()
-
-            except Exception as e:
-                await message.reply("An error occured while generating the overviev.\n"
-                                    "<@762016625096261652> kurwa ruszaj dupę i chodź tu "
-                                    "bo znowu się zjebałem przez to jak żeś okropnie mnie napisał.\n"
-                                    f"`{e}`")
-        del script
+        await proccess_verify_request(script)
 
     elif message.content == "qwerty" and message.author.id == 762016625096261652:
         role_id = 846021698603319336

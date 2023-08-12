@@ -4,7 +4,8 @@ import re
 
 
 class VerifyCode:
-    def __init__(self, ctx, bot):
+    def __init__(self, ctx, bot, code):
+        self.code = code.split("\n")
         self.bot = bot
         self.ctx = ctx
         self.branch: int = 0
@@ -144,16 +145,28 @@ class VerifyCode:
         self.line_already_added_to_result = True
 
     async def send_result_embed(self):
-        for i in self.processed_lines:
-            self.embed_content += f"{i}\n"
-
         if self.errored:
-            embed_errored_code = discord.Embed(title=f"Bugs found: {len(self.error_reasons)}",
+            embed_errored_code = discord.Embed(title=f"Errors found: `{len(self.error_reasons)}`",
                                                description=self.embed_content,
                                                color=0xdd2e44)
 
+            for i in self.processed_lines:
+                self.embed_content += f"{i}\n"
+                if len(self.embed_content) > 3800:
+                    embed_errored_code = discord.Embed(title=f"Errors found: `{len(self.error_reasons)}`",
+                                                       description=self.embed_content,
+                                                       color=0xdd2e44)
+                    embed_errored_code.set_footer(
+                        text=f"Check the error overviev below!")
+                    await self.ctx.channel.send(embed=embed_errored_code)
+                    self.embed_content = ""
+
+            embed_errored_code = discord.Embed(title=f"Bugs found: {len(self.error_reasons)}",
+                                               description=self.embed_content,
+                                               color=0xdd2e44)
             embed_errored_code.set_footer(
                 text=f"Check the error overviev below!")
+            await self.ctx.channel.send(embed=embed_errored_code)
 
             self.embed_content = ""
 
@@ -163,25 +176,33 @@ class VerifyCode:
                 else:
                     self.embed_content += f"### > {line[2]}\n`{line[0]}`🟥` {line[1]} `\n"
 
+                if len(self.embed_content) > 3800:
+                    embed_errored_overviev = discord.Embed(title=None,
+                                                           description=self.embed_content,
+                                                           color=0xdd2e44)
+
+                    embed_errored_overviev.set_footer(text=f"{self.bot.user.name} by @elektryk_andrzej",
+                                                      icon_url=self.bot.user.avatar)
+                    await self.ctx.channel.send(embed=embed_errored_overviev)
+
+                    self.embed_content = ""
             embed_errored_overviev = discord.Embed(title=None,
                                                    description=self.embed_content,
                                                    color=0xdd2e44)
 
             embed_errored_overviev.set_footer(text=f"{self.bot.user.name} by @elektryk_andrzej",
                                               icon_url=self.bot.user.avatar)
-
-            await self.ctx.reply(embed=embed_errored_code, mention_author=False)
             await self.ctx.channel.send(embed=embed_errored_overviev)
 
         else:
-            embed_all_good = discord.Embed(title="All good!",
+            embed_all_good = discord.Embed(title="No errors found!",
                                            description=self.embed_content,
                                            color=0x77b255)
 
             embed_all_good.set_footer(text=f"{self.bot.user.name} by @elektryk_andrzej",
                                       icon_url=self.bot.user.avatar)
 
-            await self.ctx.reply(embed=embed_all_good, mention_author=False)
+            await self.ctx.reply(embed=embed_all_good)
 
     async def action_hint(self) -> bool:
         if not await self.is_required_length(2, None):
@@ -731,7 +752,7 @@ class VerifyCode:
         if not await self.is_required_length(1, 3):
             return False
         if not await self.is_special_variable(1, var_type=None,
-                                              append=self.se_player_vars):
+                                              list_appended=self.se_player_vars):
             return False
         if not await self.is_special_variable(2, var_type=self.se_player_vars):
             return False
@@ -744,7 +765,7 @@ class VerifyCode:
         if not await self.is_required_length(1, None):
             return False
         if not await self.is_special_variable(1, var_type=None,
-                                              append=self.se_variables):
+                                              list_appended=self.se_variables):
             return False
 
         return True
@@ -764,22 +785,24 @@ class VerifyCode:
         return True
 
     async def is_special_variable(self, line_index, *, var_type, required: bool = True,
-                                  append: list = None, star_allowed: bool = False) -> bool:
+                                  list_appended: list = None, star_allowed: bool = False) -> bool:
         if not required:
             if len(self.line_processing_list) - 1 < line_index:
                 return True
 
+        variable = self.line_processing_list[line_index]  # .replace("{", "").replace("}", "")
+
         if var_type is None:
-            append.append(self.line_processing_list[line_index])
+            list_appended.append(variable)
             return True
 
-        elif self.line_processing_list[line_index] in var_type:
+        elif variable in var_type:
             return True
 
-        elif star_allowed and self.line_processing_list[line_index] == "*":
+        elif star_allowed and variable == "*":
             return True
 
-        elif ":" in self.line_processing_list[line_index]:
+        elif ":" in variable:
             return True
 
         else:

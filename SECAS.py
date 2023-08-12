@@ -2,10 +2,9 @@ import discord
 import discord.ext.commands
 from discord.ext import commands
 
-import bot_variables
 # import asyncio
 from DO_NOT_SHIP.TOKEN import TOKEN
-import re
+# import re
 from discord.utils import get
 from CodeVerifier import VerifyCode
 
@@ -18,7 +17,7 @@ async def on_ready():
     await bot.change_presence(
         activity=discord.Activity(
             type=discord.ActivityType.watching,
-            name=f"errorless code B)"),
+            name=f".v / .i"),
         status=discord.Status.online)
 
 
@@ -80,7 +79,7 @@ async def on_message(message):
 
     elif message.content.startswith(".v") or message.content.startswith(".V"):
         print(f"{message.author} requested code verification")
-        script = VerifyCode(message)
+        script = VerifyCode(message, bot)
 
         async with message.channel.typing():
             try:

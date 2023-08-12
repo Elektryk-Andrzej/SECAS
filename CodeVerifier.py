@@ -84,6 +84,9 @@ class VerifyCode:
         for role in self.role_types:
             self.se_player_vars.append(f"{{{role.upper()}}}")
 
+        for room in self.room_types:
+            self.se_player_vars.append(f"{{{room.upper()}}}")
+
     async def error_template(self, position, reason, *, link):
         self.line_processing_list[position] = f"▶ {self.line_processing_list[position]} ◀"
 

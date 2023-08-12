@@ -270,34 +270,58 @@ se_variable = [
     "{LASTRESPAWNTEAM}",
     "{LASTRESPAWNUNIT}",
     "{NEXTWAVE}",
+    "{SHOW}",
+    "{CHAOSTICKETS}",
+    "{NTFTICKETS}",
+    "{RESPAWNEDPLAYERS}",
+    "{TIMESINCELASTWAVE}",
+    "{TIMEUNTILNEXTWAVE}",
+    "{TOTALWAVES}"
+    "{DAYOFMONTH}"
+    "{DAYOFWEEK}"
+    "{DAYOFYEAR}"
+    "{MONTH}"
+    "{TICK}"
+    "{YEAR}"
+    "{KILLS}"
+    "{SCPKILLS}",
 ]
 
 se_player_variable = [
-            "DEBUG_SE_PLAYER_VARIABLE",
-            "{CI}",
-            "{GUARDS}", "{MTFANDGUARDS}", "{MTF}",
-            "{SCPS}",
-            "{SH}", "{UIU}",
-        ]
+    "DEBUG_SE_PLAYER_VARIABLE",
+    "{CI}",
+    "{GUARDS}", "{MTFANDGUARDS}", "{MTF}",
+    "{SCPS}",
+    "{SH}", "{UIU}",
+    "{INTERCOMSPEAKER}",
+    "{SERVERSTAFF}",
+    "{RESPAWNEDPLAYERS}",
+    "{EZ}",
+    "{HCZ}",
+    "{LCZ}",
+    "{POCKET}",
+    "{SURFACE}"
+    "{RESPAWNEDPLAYERS}",
+]
 
 enable_disable_key = [
-            "DROPPING",
-            "DYING",
-            "ESCAPING",
-            "ELEVATORS",
-            "GENERATORS",
-            "HAZARDS",
-            "HURTING",
-            "ITEMPICKUPS",
-            "LOCKERS",
-            "MICROPIKUPS",
-            "NTFANNOUNCEMENT",
-            "PEDESTALS",
-            "RESPAWNS",
-            "SCP330",
-            "SCP914",
-            "SHOOTING",
-            "TESLAS",
-            "WARHEAD",
-            "WORKSTATIONS"
-        ]
+    "DROPPING",
+    "DYING",
+    "ESCAPING",
+    "ELEVATORS",
+    "GENERATORS",
+    "HAZARDS",
+    "HURTING",
+    "ITEMPICKUPS",
+    "LOCKERS",
+    "MICROPIKUPS",
+    "NTFANNOUNCEMENT",
+    "PEDESTALS",
+    "RESPAWNS",
+    "SCP330",
+    "SCP914",
+    "SHOOTING",
+    "TESLAS",
+    "WARHEAD",
+    "WORKSTATIONS"
+]

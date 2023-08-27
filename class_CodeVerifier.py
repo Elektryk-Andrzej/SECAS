@@ -1,9 +1,9 @@
-import bot_variables
+import variables
 import discord
 import re
 
 
-class VerifyCode:
+class CodeVerifier:
     def __init__(self, ctx, bot, code):
         self.code = code.split("\n")
         self.bot = bot
@@ -62,7 +62,8 @@ class VerifyCode:
             "SAVEPLAYERVARIABLE": self.action_saveplayervariable,
             "SAVEVARIABLE": self.action_savevariable,
             "WAITSEC": self.action_waitsec,
-            "WAITUNTIL": self.action_waituntil
+            "WAITUNTIL": self.action_waituntil,
+            "RESKIN": self.action_reskin
         }
         self.line_processing_list: list = []
         self.line_processing_str: str = ""
@@ -73,20 +74,45 @@ class VerifyCode:
         self.line_processing_index: int = 0
         self.labels = ["NEXT", "START"]
         self.line_already_added_to_result: bool = False
-        self.room_types = bot_variables.room_type
-        self.item_types = bot_variables.item_type
-        self.effect_types = bot_variables.effect_type
-        self.role_types = bot_variables.role_type
-        self.door_types = bot_variables.door_type
-        self.se_variables = bot_variables.se_variable
-        self.se_player_vars = bot_variables.se_player_variable
-        self.enable_disable_keys = bot_variables.enable_disable_key
+        self.room_types = variables.room_type
+        self.item_types = variables.item_type
+        self.effect_types = variables.effect_type
+        self.role_types = variables.role_type
+        self.door_types = variables.door_type
+        self.se_variables = variables.se_variable
+        self.se_player_vars = variables.se_player_variable
+        self.enable_disable_keys = variables.enable_disable_key
 
         for role in self.role_types:
-            self.se_player_vars.append(f"{{{role.upper()}}}")
+            self.se_player_vars.append(role.upper())
 
         for room in self.room_types:
-            self.se_player_vars.append(f"{{{room.upper()}}}")
+            self.se_player_vars.append(room.upper())
+
+    '''class ErrorMenu(discord.ui.View):
+        def __init__(self):
+            super().__init__()
+            self.answered = False
+        @discord.ui.select(
+            placeholder="Found a bug? Report it here!",
+            options=[
+                discord.SelectOption(label="GENERAL ERROR", value="general"),
+                discord.SelectOption(label="VARIABLE ERROR", value="variable"),
+                discord.SelectOption(label="LENGTH ERROR", value="length"),
+                discord.SelectOption(label="ACTION ERROR", value="action"),
+            ]
+        )
+        async def select_error(self, interaction: discord.Interaction,
+                               select_item: discord.ui.Select):
+            answer = select_item.values
+
+            if not self.answered:
+                # noinspection PyUnresolvedReferences
+                await interaction.response.send_message("Thank you for reporting the bug")
+                self.answered = True
+            else:
+                # noinspection PyUnresolvedReferences
+                await interaction.response.send_message(f"Successfully changed")'''
 
     async def error_template(self, position, reason, *, link):
         self.line_processing_list[position] = f"▶ {self.line_processing_list[position]} ◀"
@@ -144,30 +170,29 @@ class VerifyCode:
 
         self.line_already_added_to_result = True
 
+    @staticmethod
+    async def create_embed(title, description, color) -> discord.Embed:
+        return discord.Embed(title=title,
+                             description=description,
+                             color=color)
+
     async def send_result_embed(self):
         if self.errored:
-            embed_errored_code = discord.Embed(title=f"Errors found: `{len(self.error_reasons)}`",
-                                               description=self.embed_content,
-                                               color=0xdd2e44)
+            embed_number_errors = discord.Embed(title=f"Errors found: `{len(self.error_reasons)}`",
+                                                description=None,
+                                                color=0xdd2e44)
+            await self.ctx.channel.send(embed=embed_number_errors)
 
-            for i in self.processed_lines:
-                self.embed_content += f"{i}\n"
-                if len(self.embed_content) > 3800:
-                    embed_errored_code = discord.Embed(title=f"Errors found: `{len(self.error_reasons)}`",
-                                                       description=self.embed_content,
-                                                       color=0xdd2e44)
-                    embed_errored_code.set_footer(
-                        text=f"Check the error overviev below!")
-                    await self.ctx.channel.send(embed=embed_errored_code)
+            for index, line in enumerate(self.processed_lines):
+                self.embed_content += f"{line}\n"
+
+                if len(self.embed_content) > 2000:
+                    await self.ctx.channel.send(embed=await self.create_embed(
+                        None, self.embed_content, 0xdd2e44))
                     self.embed_content = ""
 
-            embed_errored_code = discord.Embed(title=f"Bugs found: {len(self.error_reasons)}",
-                                               description=self.embed_content,
-                                               color=0xdd2e44)
-            embed_errored_code.set_footer(
-                text=f"Check the error overviev below!")
-            await self.ctx.channel.send(embed=embed_errored_code)
-
+            await self.ctx.channel.send(embed=await self.create_embed(
+                None, self.embed_content, 0xdd2e44))
             self.embed_content = ""
 
             for line in self.error_reasons:
@@ -176,33 +201,30 @@ class VerifyCode:
                 else:
                     self.embed_content += f"### > {line[2]}\n`{line[0]}`🟥` {line[1]} `\n"
 
-                if len(self.embed_content) > 3800:
-                    embed_errored_overviev = discord.Embed(title=None,
-                                                           description=self.embed_content,
-                                                           color=0xdd2e44)
+                if len(self.embed_content) > 2000:
+                    final_embed = discord.Embed(title=None,
+                                                description=self.embed_content,
+                                                color=0xdd2e44)
 
-                    embed_errored_overviev.set_footer(text=f"{self.bot.user.name} by @elektryk_andrzej",
-                                                      icon_url=self.bot.user.avatar)
-                    await self.ctx.channel.send(embed=embed_errored_overviev)
+                    final_embed.set_footer(text=f"{self.bot.user.name} by @elektryk_andrzej",
+                                           icon_url=self.bot.user.avatar)
+                    await self.ctx.channel.send(embed=final_embed)
 
                     self.embed_content = ""
-            embed_errored_overviev = discord.Embed(title=None,
-                                                   description=self.embed_content,
-                                                   color=0xdd2e44)
 
-            embed_errored_overviev.set_footer(text=f"{self.bot.user.name} by @elektryk_andrzej",
-                                              icon_url=self.bot.user.avatar)
-            await self.ctx.channel.send(embed=embed_errored_overviev)
+            final_embed = discord.Embed(title=None,
+                                        description=self.embed_content,
+                                        color=0xdd2e44)
 
         else:
-            embed_all_good = discord.Embed(title="No errors found!",
-                                           description=self.embed_content,
-                                           color=0x77b255)
+            final_embed = discord.Embed(title="No errors found!",
+                                        description=self.embed_content,
+                                        color=0x77b255)
 
-            embed_all_good.set_footer(text=f"{self.bot.user.name} by @elektryk_andrzej",
-                                      icon_url=self.bot.user.avatar)
+        final_embed.set_footer(text=f"{self.bot.user.name} by @elektryk_andrzej",
+                               icon_url=self.bot.user.avatar)
 
-            await self.ctx.reply(embed=embed_all_good)
+        await self.ctx.channel.send(embed=final_embed)
 
     async def action_hint(self) -> bool:
         if not await self.is_required_length(2, None):
@@ -215,7 +237,8 @@ class VerifyCode:
     async def action_hintplayer(self) -> bool:
         if not await self.is_required_length(3, None):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
+        if not await self.is_special_variable(1, var_type=self.se_player_vars,
+                                              star_allowed=True):
             return False
         if not await self.is_float(2):
             return False
@@ -225,7 +248,8 @@ class VerifyCode:
     async def action_countdown(self) -> bool:
         if not await self.is_required_length(3, None):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
+        if not await self.is_special_variable(1, var_type=self.se_player_vars,
+                                              star_allowed=True):
             return False
         if not await self.is_int(2):
             return False
@@ -235,7 +259,8 @@ class VerifyCode:
     async def action_broadcastplayer(self) -> bool:
         if not await self.is_required_length(3, None):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
+        if not await self.is_special_variable(1, var_type=self.se_player_vars,
+                                              star_allowed=True):
             return False
         if not await self.is_float(2):
             return False
@@ -279,7 +304,7 @@ class VerifyCode:
     async def action_removeitem(self) -> bool:
         if not await self.is_required_length(2, 3):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars):
+        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
             return False
         if not await self.is_special_variable(2, var_type=self.item_types):
             return False
@@ -291,7 +316,7 @@ class VerifyCode:
     async def action_give(self) -> bool:
         if not await self.is_required_length(2, None):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars):
+        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
             return False
         if not await self.is_special_variable(2, var_type=self.item_types):
             return False
@@ -303,7 +328,7 @@ class VerifyCode:
     async def action_lightcolor(self) -> bool:
         if not await self.is_required_length(4, 4):
             return False
-        if not await self.is_special_variable(1, var_type=self.room_types):
+        if not await self.is_special_variable(1, var_type=self.room_types, star_allowed=True):
             return False
         for index in range(2, 5):
             if not await self.is_int(index, min_value=0, max_value=255):
@@ -314,14 +339,14 @@ class VerifyCode:
     async def action_resetlightcolor(self) -> bool:
         if not await self.is_required_length(1, 1):
             return False
-        if not await self.is_special_variable(1, var_type=self.room_types):
+        if not await self.is_special_variable(1, var_type=self.room_types, star_allowed=True):
             return False
         return True
 
     async def action_lightsoff(self) -> bool:
         if not await self.is_required_length(2, None):
             return False
-        if not await self.is_special_variable(1, var_type=self.room_types):
+        if not await self.is_special_variable(1, var_type=self.room_types, star_allowed=True):
             return False
         if not await self.is_float(2, math_supported=True):
             return False
@@ -396,7 +421,7 @@ class VerifyCode:
         elif mode_selected == "PLAYERS":
             if not await self.is_required_length(2, 2):
                 return False
-            if not await self.is_special_variable(2, var_type=self.se_player_vars):
+            if not await self.is_special_variable(2, var_type=self.se_player_vars, star_allowed=True):
                 return False
 
         else:
@@ -452,7 +477,7 @@ class VerifyCode:
             await self.error_template(1, "Invalid mode | "
                                       "SET/CLEAR", link=None)
         if not await self.is_special_variable(2, var_type=self.se_player_vars,
-                                              required=False):
+                                              required=False, star_allowed=True):
             return False
 
         return True
@@ -460,7 +485,7 @@ class VerifyCode:
     async def action_damage(self) -> bool:
         if not await self.is_required_length(2, None):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars):
+        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
             return False
         if not await self.is_float(2, required=False):
             return False
@@ -477,7 +502,7 @@ class VerifyCode:
             await self.error_template(1, "Invalid mode | "
                                          "GIVE/REMOVE", link=None)
             return False
-        if not await self.is_special_variable(2, var_type=self.se_player_vars):
+        if not await self.is_special_variable(2, var_type=self.se_player_vars, star_allowed=True):
             return False
         if not await self.is_special_variable(3, var_type=self.effect_types):
             return False
@@ -498,7 +523,7 @@ class VerifyCode:
             await self.error_template(1, "Invalid mode | "
                                          "SET/LOCK", link=None)
             return False
-        if not await self.is_special_variable(2, var_type=self.se_player_vars):
+        if not await self.is_special_variable(2, var_type=self.se_player_vars, star_allowed=True):
             return False
         if range_selected not in ranges:
             await self.error_template(3, "Invalid range | "
@@ -510,7 +535,7 @@ class VerifyCode:
     async def action_kill(self) -> bool:
         if not await self.is_required_length(1, None):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars):
+        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
             return False
 
         return True
@@ -518,7 +543,7 @@ class VerifyCode:
     async def action_ahp(self) -> bool:
         if not await self.is_required_length(2, 2):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars):
+        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
             return False
         if not self.is_float(2, math_supported=True):
             return False
@@ -528,7 +553,7 @@ class VerifyCode:
     async def action_maxhp(self) -> bool:
         if not await self.is_required_length(2, 2):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars):
+        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
             return False
         if not await self.is_float(2, math_supported=True):
             return False
@@ -538,7 +563,7 @@ class VerifyCode:
     async def action_hp(self) -> bool:
         if not await self.is_required_length(2, 2):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars):
+        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
             return False
         if not await self.is_float(2, math_supported=True):
             return False
@@ -548,7 +573,7 @@ class VerifyCode:
     async def action_tpdoor(self) -> bool:
         if not await self.is_required_length(2, 2):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars):
+        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
             return False
         if not await self.is_special_variable(2, var_type=self.door_types):
             return False
@@ -558,7 +583,7 @@ class VerifyCode:
     async def action_tproom(self) -> bool:
         if not await self.is_required_length(2, 2):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars):
+        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
             return False
         if not await self.is_special_variable(2, var_type=self.room_types):
             return False
@@ -568,7 +593,7 @@ class VerifyCode:
     async def action_tpx(self) -> bool:
         if not await self.is_required_length(4, 4):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars):
+        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
             return False
 
         for i in range(2, 5):
@@ -580,7 +605,7 @@ class VerifyCode:
     async def action_size(self) -> bool:
         if not await self.is_required_length(4, 5):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars):
+        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
             return False
 
         for i in range(2, 5):
@@ -603,7 +628,7 @@ class VerifyCode:
             await self.error_template(1, "Invalid mode | "
                                          "GIVE/REMOVE", link=None)
             return False
-        if not await self.is_special_variable(2, var_type=self.se_player_vars):
+        if not await self.is_special_variable(2, var_type=self.se_player_vars, star_allowed=True):
             return False
         if not await self.is_special_variable(3, var_type=self.effect_types):
             return False
@@ -617,7 +642,7 @@ class VerifyCode:
     async def action_setrole(self) -> bool:
         if not await self.is_required_length(2, None):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars):
+        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
             return False
         if not await self.is_special_variable(2, var_type=self.role_types):
             return False
@@ -709,7 +734,7 @@ class VerifyCode:
     async def action_infectrule(self) -> bool:
         if not await self.is_required_length(2, 3):
             return False
-        if not await self.is_special_variable(1, var_type=self.role_types):
+        if not await self.is_special_variable(1, var_type=self.role_types, star_allowed=True):
             return False
         if not await self.is_special_variable(2, var_type=self.role_types):
             return False
@@ -754,7 +779,8 @@ class VerifyCode:
         if not await self.is_special_variable(1, var_type=None,
                                               list_appended=self.se_player_vars):
             return False
-        if not await self.is_special_variable(2, var_type=self.se_player_vars):
+        if not await self.is_special_variable(2, var_type=self.se_player_vars,
+                                              star_allowed=True):
             return False
         if not await self.is_int(3, required=False):
             return False
@@ -784,62 +810,85 @@ class VerifyCode:
 
         return True
 
+    async def action_reskin(self) -> bool:
+        if not await self.is_required_length(2, 2):
+            return False
+        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
+            return False
+        if not await self.is_special_variable(2, var_type=self.role_types):
+            return False
+
+        return True
+
     async def is_special_variable(self, line_index, *, var_type, required: bool = True,
                                   list_appended: list = None, star_allowed: bool = False) -> bool:
+        variable = self.line_processing_list[line_index]
+
         if not required:
             if len(self.line_processing_list) - 1 < line_index:
                 return True
-
-        variable = self.line_processing_list[line_index]  # .replace("{", "").replace("}", "")
 
         if var_type is None:
             list_appended.append(variable)
             return True
 
-        elif variable in var_type:
-            return True
+        if var_type[0] == "DEBUG_ROOM_TYPE":
+            reason = "Invalid room variable | Find all here"
+            link = "https://pastebin.com/k38VrRin"
+            brackets_required = False
 
-        elif star_allowed and variable == "*":
-            return True
+        elif var_type[0] == "DEBUG_ITEM_TYPE":
+            reason = "Invalid item variable | Find all here"
+            link = "https://pastebin.com/68X43pJU"
+            brackets_required = False
 
-        elif ":" in variable:
-            return True
+        elif var_type[0] == "DEBUG_EFFECT_TYPE":
+            reason = "Invalid effect variable | Find all here"
+            link = "https://pastebin.com/bmXKEjTz"
+            brackets_required = False
 
+        elif var_type[0] == "DEBUG_ROLE_TYPE":
+            reason = "Invalid role variable | Find all here"
+            link = "https://pastebin.com/WHe38hQj"
+            brackets_required = False
+
+        elif var_type[0] == "DEGUG_DOOR_TYPE":
+            reason = "Invalid door variable | Find all here"
+            link = "https://pastebin.com/Z5LJ2umC"
+            brackets_required = False
+
+        elif var_type[0] == "DEBUG_SE_VARIABLE":
+            reason = "Invalid `SE` variable | Find all here"
+            link = "https://pastebin.com/ktwSBjJZ"
+            brackets_required = True
+
+        elif var_type[0] == "DEBUG_SE_PLAYER_VARIABLE":
+            reason = "Invalid `SE` player variable | Find all here"
+            link = "https://pastebin.com/5eUbbL5L"
+            brackets_required = True
         else:
-            if var_type[0] == "DEBUG_ROOM_TYPE":
-                reason = "Invalid room variable | Find all here"
-                link = "https://pastebin.com/k38VrRin"
+            reason = "Unknown error, variable check failed"
+            link = None
+            brackets_required = False
 
-            elif var_type[0] == "DEBUG_ITEM_TYPE":
-                reason = "Invalid item variable | Find all here"
-                link = "https://pastebin.com/68X43pJU"
+        if star_allowed and variable == "*":
+            return True
 
-            elif var_type[0] == "DEBUG_EFFECT_TYPE":
-                reason = "Invalid effect variable | Find all here"
-                link = "https://pastebin.com/bmXKEjTz"
-
-            elif var_type[0] == "DEBUG_ROLE_TYPE":
-                reason = "Invalid role variable | Find all here"
-                link = "https://pastebin.com/WHe38hQj"
-
-            elif var_type[0] == "DEGUG_DOOR_TYPE":
-                reason = "Invalid door variable | Find all here"
-                link = "https://pastebin.com/Z5LJ2umC"
-
-            elif var_type[0] == "DEBUG_SE_VARIABLE":
-                reason = "Invalid `SE` variable | Find all here"
-                link = "https://pastebin.com/ktwSBjJZ"
-
-            elif var_type[0] == "DEBUG_SE_PLAYER_VARIABLE":
-                reason = "Invalid `SE` player variable | Find all here"
-                link = "https://pastebin.com/5eUbbL5L"
-
-            else:
-                reason = "UNKNOWN ERROR"
-                link = None
-
-            await self.error_template(line_index, reason, link=link)
+        if brackets_required and "{" in variable and "}" in variable:
+            variable = variable.replace("{", "").replace("}", "")
+        elif brackets_required:
+            await self.error_template(line_index, "`{}` required", link=None)
             return False
+
+        if variable in var_type:
+            return True
+
+        if ":" in variable:
+            await self.add_line_to_result("🔳")
+            return True
+
+        await self.error_template(line_index, reason, link=link)
+        return False
 
     async def is_bool(self, position, *, required: bool = True) -> bool:
         if not required:

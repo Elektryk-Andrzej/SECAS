@@ -4,12 +4,12 @@ from discord.ext import commands
 
 from DO_NOT_SHIP.TOKEN import TOKEN
 from discord.utils import get
-from CodeVerifier import VerifyCode
+from class_CodeVerifier import CodeVerifier
 
-bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
+BOT = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
 
-async def proccess_verify_request(script):
+async def proccess_verify_request(script, count_first_line: bool):
     async with (script.ctx.channel.typing()):
         try:
             # register all labels
@@ -33,12 +33,8 @@ async def proccess_verify_request(script):
                 script.line_already_added_to_result = False
 
                 # delete .v from the first line
-                if index == 0 and len(script.line_processing_list) > 1 and\
-                        script.line_processing_list[0].startswith("."):
-
-                    script.line_processing_str = script.line_processing_str.strip(
-                        f"{script.line_processing_list[0]} ")
-                    script.line_processing_list.pop(0)
+                if index == 0 and not count_first_line:
+                    continue
 
                 '''for position, argument in enumerate(script.line_processing_list):
                     if argument == "":
@@ -57,17 +53,17 @@ async def proccess_verify_request(script):
                         await script.add_line_to_result("🟥")
                         script.errored = True
 
-                # = comments, so change color for em
+                # comments have blue
                 elif "#" in script.line_processing_list[0]:
                     await script.add_line_to_result("🟦")
 
-                # blank space should be black
+                # blank spaces have black
                 elif all(znak.isspace() for znak in script.line_processing_list) or \
                         script.line_processing_list == ['']:
                     await script.add_line_to_result("⬛")
 
                 # labels have purple
-                elif ":" in script.line_processing_list[-1]:
+                elif ":" in script.line_processing_list[-1] and len(script.line_processing_list) == 1:
                     await script.add_line_to_result("🟪")
 
                 # flags have white
@@ -88,22 +84,21 @@ async def proccess_verify_request(script):
             await script.ctx.reply("An error occured while generating the overviev.\n"
                                    "Please report it to <@762016625096261652>, thank you.\n"
                                    f"`{e}`")
-    del script
 
 
-@bot.event
+@BOT.event
 async def on_ready():
-    print(f"Zalogowano jako {bot.user}")
-    await bot.change_presence(
+    print(f"Zalogowano jako {BOT.user}")
+    await BOT.change_presence(
         activity=discord.Activity(
             type=discord.ActivityType.watching,
             name=f".v / .i"),
         status=discord.Status.online)
 
 
-@bot.event
+@BOT.event
 async def on_message(message):
-    if message.author.id == bot.user.id:
+    if message.author.id == BOT.user.id:
         return
 
     if message.content.startswith(".i") or message.content.startswith(".I"):
@@ -113,15 +108,14 @@ async def on_message(message):
                               color=0xe84d97)
 
         embed.add_field(
-            name=f"What is {bot.user.name}?",
+            name=f"What is {BOT.user.name}?",
             value="**Scripted Events Code Analysis System** "
-                  "is a bot that allows you to easily check if your code has been constructed propperly.\n"
-                  f"If a bug is found, {bot.user.name} will specify the place and the reason of the bug, helping "
-                  f"you with fixing the error.\n",
+                  "is a tool made to check if your SE code doesn't contain any errors."
+                  "If an error is found, SECAS will specify where and why it is.",
             inline=False
         )
         embed.add_field(
-            name=f"How to use {bot.user.name}?",
+            name=f"How to use {BOT.user.name}?",
             value="It's very simple! Just write `.v` and put all of your code below. E.g.\n"
                   "```\n"
                   ".v\n"
@@ -129,20 +123,12 @@ async def on_message(message):
                   "HINTPLAYER {CLASSD} 6 You have 45 seconds of life left!\n"
                   "WAITSEC 45\n"
                   "KILL {CLASSD} Exploded```\n"
-                  "It also supports txt files, for when you reach the character limit!",
+                  "It also supports txt files, for when you reach the discord character limit!",
             inline=False
         )
 
         embed.add_field(
-            name=f"What {bot.user.name} isn't capable of?",
-            value=f"{bot.user.name} isn't capable of finding errors that are **logic** and **loop** related.\n"
-                  f"If your code is still not working after verifying it with {bot.user.name}, explain your issue in "
-                  f"<#1072723950456541245> and someone will help you fix it.",
-            inline=False
-        )
-
-        embed.add_field(
-            name=f"What should I do when I encounter a {bot.user.name} bug?",
+            name=f"What should I do when I encounter a {BOT.user.name} bug?",
             value=f"Just ping <@762016625096261652> and explain the bug. \n"
                   f"If you do that enough times, as special thanks you will be granted a place in this embed "
                   f"as a contributor!",
@@ -150,8 +136,8 @@ async def on_message(message):
         )
 
         embed.add_field(
-            name=f"{bot.user.name} project contributors!",
-            value=f"`elektryk_andrzej` - Developer\n"
+            name=f"{BOT.user.name} project contributors!",
+            value=f"`elektryk_andrzej` - Lead developer\n"
                   f"`saskyc` - Betatester",
             inline=False
         )
@@ -164,18 +150,18 @@ async def on_message(message):
         attachment = message.attachments[0]
         file = await attachment.read()
         file_content = file.decode('utf-8')
-        script = VerifyCode(message, bot, file_content)
+        script = CodeVerifier(message, BOT, file_content)
 
-        await proccess_verify_request(script)
+        await proccess_verify_request(script, True)
 
     elif message.content.startswith(".v") or message.content.startswith(".V"):
         print(f"{message.author} requested code verification")
-        script = VerifyCode(message, bot, message.content)
+        script = CodeVerifier(message, BOT, message.content)
 
-        await proccess_verify_request(script)
+        await proccess_verify_request(script, False)
 
     elif message.content == "qwerty" and message.author.id == 762016625096261652:
-        role_id = 846021698603319336
+        role_id = 1138508416269156402
         for member in message.guild.members:
             for role in member.roles:
                 if role.id == role_id:
@@ -183,7 +169,18 @@ async def on_message(message):
 
                     print(f"{member.name} posiada rolę {role}")
 
-                    await member.send(f"Hi! I see that you have a role `{role.name}` in the {message.guild.name}!")
+                    try:
+                        await member.send(f"||You have recieved this information, becasue you have a role `{role}` on "
+                                          f"`{message.guild.name}`||\n>>> "
+                            "Hi, I'm SECAS! I'm a bot that aims to assist with creation & debugging of your own "
+                            "Scripted Events' scripts. To get started, use `.v`, or use `.i` for more info.\n"
+                            "Happy scripting!"
+                            )
 
 
-bot.run(TOKEN)
+                        print(f"Wysłano dla {member.name}")
+                    except:
+                        print(f"Nie wysłano dla {member.name}")
+
+if __name__ == "__main__":
+    BOT.run(TOKEN)

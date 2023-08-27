@@ -829,7 +829,7 @@ class CodeVerifier:
                 return True
 
         if var_type is None:
-            list_appended.append(variable)
+            list_appended.append(variable.replace("{", "").replace("}", ""))
             return True
 
         if var_type[0] == "DEBUG_ROOM_TYPE":

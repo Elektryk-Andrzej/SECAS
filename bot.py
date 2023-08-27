@@ -160,7 +160,7 @@ async def on_message(message):
 
         await proccess_verify_request(script, False)
 
-    elif message.content == "qwerty" and message.author.id == 762016625096261652:
+    '''elif message.content == "qwerty" and message.author.id == 762016625096261652:
         role_id = 1138508416269156402
         for member in message.guild.members:
             for role in member.roles:
@@ -181,6 +181,6 @@ async def on_message(message):
                         print(f"Wysłano dla {member.name}")
                     except:
                         print(f"Nie wysłano dla {member.name}")
-
+'''
 if __name__ == "__main__":
     BOT.run(TOKEN)

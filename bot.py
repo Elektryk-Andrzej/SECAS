@@ -145,7 +145,7 @@ async def on_message(message):
         return
 
     elif message.attachments and message.attachments[0].filename.endswith('.txt')\
-            and message.content.startswith(".v") or message.content.startswith(".V"):
+            and message.content.upper().startswith(".V"):
 
         attachment = message.attachments[0]
         file = await attachment.read()
@@ -154,7 +154,7 @@ async def on_message(message):
 
         await proccess_verify_request(script, True)
 
-    elif message.content.startswith(".v") or message.content.startswith(".V"):
+    elif message.content.upper().startswith(".V"):
         print(f"{message.author} requested code verification")
         script = CodeVerifier(message, BOT, message.content)
 

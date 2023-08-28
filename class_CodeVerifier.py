@@ -913,15 +913,21 @@ class CodeVerifier:
 
             if iterator in self.labels:
                 return True
-            elif int(iterator) <= len(self.line_processing_list) and not int(iterator) < 1:
-                return True
+            elif int(iterator):
+                reason = f"Don't use line numbers, use labels instead!!!"
+                link = "https://pastebin.com/Wj97g1JX"
+
+                await self.error_template(position, reason, link=link)
+                return False
 
         except:
-            reason = f"Invalid label/line number | Redirecting to nowhere"
-            link = "https://pastebin.com/Wj97g1JX"
+            pass
 
-            await self.error_template(position, reason, link=link)
-            return False
+        reason = f"Invalid label | Redirecting to nowhere"
+        link = "https://pastebin.com/Wj97g1JX"
+
+        await self.error_template(position, reason, link=link)
+        return False
 
     async def is_valid_math_operation(self, line_index: int) -> bool:
         open_brackets = 0

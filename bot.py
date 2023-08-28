@@ -160,27 +160,5 @@ async def on_message(message):
 
         await proccess_verify_request(script, False)
 
-    '''elif message.content == "qwerty" and message.author.id == 762016625096261652:
-        role_id = 1138508416269156402
-        for member in message.guild.members:
-            for role in member.roles:
-                if role.id == role_id:
-                    role = get(message.guild.roles, id=role_id)
-
-                    print(f"{member.name} posiada rolę {role}")
-
-                    try:
-                        await member.send(f"||You have recieved this information, becasue you have a role `{role}` on "
-                                          f"`{message.guild.name}`||\n>>> "
-                            "Hi, I'm SECAS! I'm a bot that aims to assist with creation & debugging of your own "
-                            "Scripted Events' scripts. To get started, use `.v`, or use `.i` for more info.\n"
-                            "Happy scripting!"
-                            )
-
-
-                        print(f"Wysłano dla {member.name}")
-                    except:
-                        print(f"Nie wysłano dla {member.name}")
-'''
 if __name__ == "__main__":
     BOT.run(TOKEN)

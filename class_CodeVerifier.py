@@ -114,6 +114,11 @@ class CodeVerifier:
                 # noinspection PyUnresolvedReferences
                 await interaction.response.send_message(f"Successfully changed")'''
 
+    @staticmethod
+    async def log_to_file(text):
+        with open("logs.txt", 'a') as file:
+            file.write(f"{text}\n")
+
     async def error_template(self, position, reason, *, link):
         self.line_processing_list[position] = f"▶ {self.line_processing_list[position]} ◀"
 

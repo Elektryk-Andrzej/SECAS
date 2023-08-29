@@ -182,6 +182,20 @@ class CodeVerifier:
                              color=color)
 
     async def send_result_embed(self):
+        class CallSupport(discord.ui.View):
+            def __init__(self, ctx):
+                super().__init__()
+                self.ctx = ctx
+
+            @discord.ui.button(
+                label="Having trouble? Call support!",
+                style=discord.ButtonStyle.blurple
+            )
+            async def button_clicked(self, interaction: discord.Interaction, button: discord.Button):
+                # noinspection PyUnresolvedReferences
+                await interaction.response.send_message("Message sent!", ephemeral=True)
+                await self.ctx.reply(f"{self.ctx.author.display_name} requested help\n||<@&1138508416269156402>||")
+
         if self.errored:
             embed_number_errors = discord.Embed(title=f"Errors found: `{len(self.error_reasons)}`",
                                                 description=None,
@@ -229,7 +243,7 @@ class CodeVerifier:
         final_embed.set_footer(text=f"{self.bot.user.name} by @elektryk_andrzej",
                                icon_url=self.bot.user.avatar)
 
-        await self.ctx.channel.send(embed=final_embed)
+        await self.ctx.channel.send(embed=final_embed, view=CallSupport(ctx=self.ctx))
 
     async def action_hint(self) -> bool:
         if not await self.is_required_length(2, None):

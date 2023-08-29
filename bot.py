@@ -16,9 +16,8 @@ async def proccess_verify_request(script, count_first_line: bool):
             for index, line in enumerate(script.code):
                 script.line_processing_list = line.split(" ")
                 script.line_processing_list[-1].strip("\n")
-                if index == 0 and len(script.line_processing_list) > 1 and\
+                if index == 0 and len(script.line_processing_list) > 1 and \
                         script.line_processing_list[0].startswith("."):
-
                     script.line_processing_list.pop(0)
 
                 if ":" in (label := script.line_processing_list[-1]):
@@ -86,6 +85,74 @@ async def proccess_verify_request(script, count_first_line: bool):
                                    f"`{e}`")
 
 
+async def info_embed(message):
+    # noinspection PyUnresolvedReferences
+    class SelectMenu(discord.ui.View):
+        def __init__(self, message):
+            super().__init__()
+            self.message = message
+            self.embed = None
+
+        @discord.ui.select(
+            placeholder="Select what you want to learn",
+            options=[
+                discord.SelectOption(label="What is SECAS", value="description"),
+                discord.SelectOption(label="How to use SECAS", value="usage"),
+                discord.SelectOption(label="Bug reporting", value="bugs"),
+                discord.SelectOption(label="Contributions", value="contributors"),
+            ]
+        )
+        async def select_error(self, interaction: discord.Interaction,
+                               select_item: discord.ui.Select):
+
+            await interaction.response.defer()
+            answer = select_item.values
+
+            if answer[0] == "description":
+                await self.embed.edit(embed=discord.Embed(title=f"What is {BOT.user.name}?", description=
+                "**Scripted Events Code Analysis System**"
+                "is a tool made to check if your SE code doesn't contain any errors. "
+                "If an error is found, SECAS will specify where and why it is."))
+
+            elif answer[0] == "usage":
+                await self.embed.edit(embed=discord.Embed(title=f"How to use {BOT.user.name}?", description=
+                    "It's very simple! Just write `.v` and put all of your code below. E.g.\n"
+                    "```\n"
+                    ".v\n"
+                    "SETROLE * ClassD\n"
+                    "HINTPLAYER {CLASSD} 6 You have 45 seconds of life left!\n"
+                    "WAITSEC 45\n"
+                    "KILL {CLASSD} Exploded```\n"
+                    "It also supports txt files, for when you reach the discord character limit!\n"
+                    "If you upload a .txt file, the rest of the message will be ignored."))
+
+            elif answer[0] == "bugs":
+                await self.embed.edit(embed=discord.Embed(
+                    title=f"What should I do when I encounter a {BOT.user.name} bug?",
+                    description=
+                    f"Just ping <@762016625096261652> and explain the bug. \n"
+                    f"If you do that enough times, as special thanks you will be granted a place in this embed "
+                    f"as a contributor!"))
+
+            elif answer[0] == "contributors":
+                await self.embed.edit(embed=discord.Embed(
+                    title=f"{BOT.user.name} project contributors!",
+                    description=
+                    f"`elektryk_andrzej` - Lead developer\n"
+                    f"`saskyc` - Betatester"))
+
+            else:
+                return
+
+        async def send_initial_embed(self):
+            self.embed = await self.message.reply(
+                embed=discord.Embed(
+                    title=f"{BOT.user.display_name} HELP MENU"), mention_author=False)
+
+    select_menu = SelectMenu(message)
+    await message.channel.send(embed=await select_menu.send_initial_embed(), view=select_menu)
+
+
 @BOT.event
 async def on_ready():
     print(f"Zalogowano jako {BOT.user}")
@@ -101,50 +168,11 @@ async def on_message(message):
     if message.author.id == BOT.user.id:
         return
 
-    if message.content.startswith(".i") or message.content.startswith(".I"):
-        print(f"{message.author} requested info")
-        embed = discord.Embed(title=None,
-                              description=None,
-                              color=0xe84d97)
-
-        embed.add_field(
-            name=f"What is {BOT.user.name}?",
-            value="**Scripted Events Code Analysis System** "
-                  "is a tool made to check if your SE code doesn't contain any errors."
-                  "If an error is found, SECAS will specify where and why it is.",
-            inline=False
-        )
-        embed.add_field(
-            name=f"How to use {BOT.user.name}?",
-            value="It's very simple! Just write `.v` and put all of your code below. E.g.\n"
-                  "```\n"
-                  ".v\n"
-                  "SETROLE * ClassD\n"
-                  "HINTPLAYER {CLASSD} 6 You have 45 seconds of life left!\n"
-                  "WAITSEC 45\n"
-                  "KILL {CLASSD} Exploded```\n"
-                  "It also supports txt files, for when you reach the discord character limit!",
-            inline=False
-        )
-
-        embed.add_field(
-            name=f"What should I do when I encounter a {BOT.user.name} bug?",
-            value=f"Just ping <@762016625096261652> and explain the bug. \n"
-                  f"If you do that enough times, as special thanks you will be granted a place in this embed "
-                  f"as a contributor!",
-            inline=False
-        )
-
-        embed.add_field(
-            name=f"{BOT.user.name} project contributors!",
-            value=f"`elektryk_andrzej` - Lead developer\n"
-                  f"`saskyc` - Betatester",
-            inline=False
-        )
-        await message.reply(embed=embed, mention_author=False)
+    if message.content.startswith(".i") or message.content.startswith(".I") or BOT.user.mentioned_in(message):
+        await info_embed(message)
         return
 
-    elif message.attachments and message.attachments[0].filename.endswith('.txt')\
+    elif message.attachments and message.attachments[0].filename.endswith('.txt') \
             and message.content.upper().startswith(".V"):
 
         attachment = message.attachments[0]
@@ -159,6 +187,7 @@ async def on_message(message):
         script = CodeVerifier(message, BOT, message.content)
 
         await proccess_verify_request(script, False)
+
 
 if __name__ == "__main__":
     BOT.run(TOKEN)

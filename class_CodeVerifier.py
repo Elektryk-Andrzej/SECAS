@@ -89,31 +89,6 @@ class CodeVerifier:
         for room in self.room_types:
             self.se_player_vars.append(room.upper())
 
-    '''class ErrorMenu(discord.ui.View):
-        def __init__(self):
-            super().__init__()
-            self.answered = False
-        @discord.ui.select(
-            placeholder="Found a bug? Report it here!",
-            options=[
-                discord.SelectOption(label="GENERAL ERROR", value="general"),
-                discord.SelectOption(label="VARIABLE ERROR", value="variable"),
-                discord.SelectOption(label="LENGTH ERROR", value="length"),
-                discord.SelectOption(label="ACTION ERROR", value="action"),
-            ]
-        )
-        async def select_error(self, interaction: discord.Interaction,
-                               select_item: discord.ui.Select):
-            answer = select_item.values
-
-            if not self.answered:
-                # noinspection PyUnresolvedReferences
-                await interaction.response.send_message("Thank you for reporting the bug")
-                self.answered = True
-            else:
-                # noinspection PyUnresolvedReferences
-                await interaction.response.send_message(f"Successfully changed")'''
-
     @staticmethod
     async def log_to_file(text):
         with open("logs.txt", 'a') as file:

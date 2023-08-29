@@ -89,6 +89,9 @@ class CodeVerifier:
         for room in self.room_types:
             self.se_player_vars.append(room.upper())
 
+    async def no_code(self):
+        await self.ctx.reply("No code to check! First line is always ignored.")
+
     @staticmethod
     async def log_to_file(text):
         with open("logs.txt", 'a') as file:

@@ -3,14 +3,16 @@ import discord.ext.commands
 from discord.ext import commands
 
 from DO_NOT_SHIP.TOKEN import TOKEN
-from discord.utils import get
+#from discord.utils import get
 from class_CodeVerifier import CodeVerifier
+#from class_Flowchart import Flowchart
 
 BOT = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
 
 async def proccess_verify_request(script, count_first_line: bool):
     async with (script.ctx.channel.typing()):
+        lines_done = 0
         try:
             # register all labels
             for index, line in enumerate(script.code):
@@ -25,6 +27,7 @@ async def proccess_verify_request(script, count_first_line: bool):
 
             # for all lines to be verified
             for index, line in enumerate(script.code):
+                lines_done += 1
                 script.line_processing_index = index
                 script.line_processing_str = line.strip("\n")
                 script.line_processing_list = line.split(" ")
@@ -77,12 +80,44 @@ async def proccess_verify_request(script, count_first_line: bool):
 
                     script.errored = True
 
-            await script.send_result_embed()
+            if lines_done == 1:
+                await script.no_code()
+            else:
+                await script.send_result_embed()
 
         except Exception as e:
             await script.ctx.reply("An error occured while generating the overviev.\n"
                                    "Please report it to <@762016625096261652>, thank you.\n"
                                    f"`{e}`")
+
+
+'''async def proccess_flowchart_request(script, count_first_line: bool):
+    async with (script.ctx.channel.typing()):
+        try:
+            # register all labels
+            for index, line in enumerate(script.code):
+                script.line_processing_list = line.split(" ")
+                script.line_processing_list[-1].strip("\n")
+                if index == 0 and len(script.line_processing_list) > 1 and \
+                        script.line_processing_list[0].startswith("."):
+                    script.line_processing_list.pop(0)
+
+                if ":" in (label := script.line_processing_list[-1]):
+                    script.labels.append(label.strip(":"))
+
+            # for all lines to be verified
+            for index, line in enumerate(script.code):
+                script.line_processing_index = index
+                script.line_processing_str = line.strip("\n")
+                script.line_processing_list = line.split(" ")
+                script.line_processing_list[-1].strip("\n")
+                script.line_already_added_to_result = False
+
+                # delete .v from the first line
+                if index == 0 and not count_first_line:
+                    continue
+        finally:
+            pass'''
 
 
 async def info_embed(message):
@@ -188,6 +223,8 @@ async def on_message(message):
 
         await proccess_verify_request(script, False)
 
-
+    '''elif message.content.upper().startswith(".F"):
+        await Flowchart(message, BOT, message.content).initalize()
+'''
 if __name__ == "__main__":
     BOT.run(TOKEN)

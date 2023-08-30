@@ -22,6 +22,7 @@ class CodeVerifier:
             "REMOVEITEM": self.action_removeitem,
             "GIVE": self.action_give,
             "LIGHTCOLOR": self.action_lightcolor,
+            "RESETLIGHTCOLOR": self.action_resetlightcolor,
             "LIGHTSOFF": self.action_lightsoff,
             "GOTO": self.action_goto,
             "GOTOIF": self.action_gotoif,
@@ -305,7 +306,7 @@ class CodeVerifier:
             return False
         if not await self.is_special_variable(2, var_type=self.item_types):
             return False
-        if not await self.is_int(3, math_supported=True):
+        if not await self.is_int(3, math_supported=True, required=False):
             return False
 
         return True

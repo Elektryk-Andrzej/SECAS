@@ -13,82 +13,82 @@ BOT = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 async def proccess_verify_request(script, count_first_line: bool):
     async with (script.ctx.channel.typing()):
         lines_done = 0
-        try:
-            # register all labels
-            for index, line in enumerate(script.code):
-                script.line_processing_list = line.split(" ")
-                script.line_processing_list[-1].strip("\n")
-                if index == 0 and len(script.line_processing_list) > 1 and \
-                        script.line_processing_list[0].startswith("."):
-                    script.line_processing_list.pop(0)
+        '''try:'''
+        # register all labels
+        for index, line in enumerate(script.code):
+            script.line_processing_list = line.split(" ")
+            script.line_processing_list[-1].strip("\n")
+            if index == 0 and len(script.line_processing_list) > 1 and \
+                    script.line_processing_list[0].startswith("."):
+                script.line_processing_list.pop(0)
 
-                if ":" in (label := script.line_processing_list[-1]):
-                    script.labels.append(label.strip(":"))
+            if ":" in (label := script.line_processing_list[-1]):
+                script.labels.append(label.strip(":"))
 
-            # for all lines to be verified
-            for index, line in enumerate(script.code):
-                lines_done += 1
-                script.line_processing_index = index
-                script.line_processing_str = line.strip("\n")
-                script.line_processing_list = line.split(" ")
-                script.line_processing_list[-1].strip("\n")
-                script.line_already_added_to_result = False
+        # for all lines to be verified
+        for index, line in enumerate(script.code):
+            lines_done += 1
+            script.line_processing_index = index
+            script.line_processing_str = line.strip("\n")
+            script.line_processing_list = line.split(" ")
+            script.line_processing_list[-1].strip("\n")
+            script.line_already_added_to_result = False
 
-                # delete .v from the first line
-                if index == 0 and not count_first_line:
-                    continue
+            # delete .v from the first line
+            if index == 0 and not count_first_line:
+                continue
 
-                '''for position, argument in enumerate(script.line_processing_list):
-                    if argument == "":
-                        await script.add_line_to_result("🟥")
-                        await script.error_template(position, "Invalid space character | Delete it",
-                                                    link=None)
-                        script.errored = True'''
+            '''for position, argument in enumerate(script.line_processing_list):
+                if argument == "":
+                    await script.add_line_to_result("🟥")
+                    await script.error_template(position, "Invalid space character | Delete it",
+                                                link=None)
+                    script.errored = True'''
 
-                # run check for action if exists
-                if (action_name := script.line_processing_list[0]) in script.actions:
-                    action_done = await script.actions[action_name]()
+            # run check for action if exists
+            if (action_name := script.line_processing_list[0]) in script.actions:
+                action_done = await script.actions[action_name]()
 
-                    if action_done:
-                        await script.add_line_to_result("🟩")
-                    else:
-                        await script.add_line_to_result("🟥")
-                        script.errored = True
-
-                # comments have blue
-                elif "#" in script.line_processing_list[0]:
-                    await script.add_line_to_result("🟦")
-
-                # blank spaces have black
-                elif all(znak.isspace() for znak in script.line_processing_list) or \
-                        script.line_processing_list == ['']:
-                    await script.add_line_to_result("⬛")
-
-                # labels have purple
-                elif ":" in script.line_processing_list[-1] and len(script.line_processing_list) == 1:
-                    await script.add_line_to_result("🟪")
-
-                # flags have white
-                elif "!--" in script.line_processing_list[0]:
-                    await script.add_line_to_result("⬜")
-
-                # if nothing matches, then error
+                if action_done:
+                    await script.add_line_to_result("🟩")
                 else:
                     await script.add_line_to_result("🟥")
-                    await script.error_template(0, "Invalid action | Find all here",
-                                                link="https://pastebin.com/6C0ry80E")
-
                     script.errored = True
 
-            if lines_done == 1:
-                await script.no_code()
-            else:
-                await script.send_result_embed()
+            # comments have blue
+            elif "#" in script.line_processing_list[0]:
+                await script.add_line_to_result("🟦")
 
-        except Exception as e:
+            # blank spaces have black
+            elif all(znak.isspace() for znak in script.line_processing_list) or \
+                    script.line_processing_list == ['']:
+                await script.add_line_to_result("⬛")
+
+            # labels have purple
+            elif ":" in script.line_processing_list[-1] and len(script.line_processing_list) == 1:
+                await script.add_line_to_result("🟪")
+
+            # flags have white
+            elif "!--" in script.line_processing_list[0]:
+                await script.add_line_to_result("⬜")
+
+            # if nothing matches, then error
+            else:
+                await script.add_line_to_result("🟥")
+                await script.error_template(0, "Invalid action | Find all here",
+                                            link="https://pastebin.com/6C0ry80E")
+
+                script.errored = True
+
+        if lines_done == 1:
+            await script.no_code()
+        else:
+            await script.send_result_embed()
+
+        '''except Exception as e:
             await script.ctx.reply("An error occured while generating the overviev.\n"
                                    "Please report it to <@762016625096261652>, thank you.\n"
-                                   f"`{e}`")
+                                   f"`{e}`")'''
 
 
 '''async def proccess_flowchart_request(script, count_first_line: bool):

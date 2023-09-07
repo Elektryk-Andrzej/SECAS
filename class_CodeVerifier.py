@@ -1,14 +1,14 @@
 import variables
 import discord
-import re
+# import re
+from log_func import log_func
 
-
+@log_func
 class CodeVerifier:
     def __init__(self, ctx, bot, code):
         self.code = code.split("\n")
         self.bot = bot
         self.ctx = ctx
-        self.branch: int = 0
         self.actions: dict = {
             "HINT": self.action_hint,
             "HINTPLAYER": self.action_hintplayer,
@@ -60,11 +60,15 @@ class CodeVerifier:
             "SPAWNRULE": self.action_spawnrule,
             "DELVARIABLE": self.action_delvariable,
             "DELPLAYERVARIABLE": self.action_delplayervariable,
-            "SAVEPLAYERVARIABLE": self.action_saveplayervariable,
-            "SAVEVARIABLE": self.action_savevariable,
+            "SAVEPLAYERS": self.action_saveplayers,
+            "SAVE": self.action_save,
             "WAITSEC": self.action_waitsec,
             "WAITUNTIL": self.action_waituntil,
-            "RESKIN": self.action_reskin
+            "RESKIN": self.action_reskin,
+            "ADVSETROLE": self.action_advsetrole,
+            "ADVAHP": self.action_advahp,
+            "HTTPGET": self.action_httpget,
+            "HTTPPOST": self.action_httppost,
         }
         self.line_processing_list: list = []
         self.line_processing_str: str = ""
@@ -80,30 +84,29 @@ class CodeVerifier:
         self.effect_types = variables.effect_type
         self.role_types = variables.role_type
         self.door_types = variables.door_type
-        self.se_variables = variables.se_variable
-        self.se_player_vars = variables.se_player_variable
+        self.se_variables = variables.se_variables
         self.enable_disable_keys = variables.enable_disable_key
+        self.custom_variables: list[list] = []
 
         for role in self.role_types:
-            self.se_player_vars.append(role.upper())
+            self.se_variables.append([role.upper(), int, True])
 
         for room in self.room_types:
-            self.se_player_vars.append(room.upper())
+            self.se_variables.append([room.upper(), int, True])
 
     async def no_code(self):
         await self.ctx.reply("No code to check! First line is always ignored.")
 
-    @staticmethod
-    async def log_to_file(text):
-        with open("logs.txt", 'a') as file:
-            file.write(f"{text}\n")
-
-    async def error_template(self, position, reason, *, link):
+    @log_func
+    async def error_template(self, position, reason):
         self.line_processing_list[position] = f"▶ {self.line_processing_list[position]} ◀"
 
         error_with_arrows = ' '.join(self.line_processing_list)
-        self.error_reasons.append([self.line_processing_index, error_with_arrows, reason, link])
+        to_append = [self.line_processing_index, error_with_arrows, reason]
 
+        self.error_reasons.append(to_append)
+
+    @log_func
     async def invalid_min_length(self, number_missing: int):
         reason = f"Missing arguments | {number_missing}"
 
@@ -112,9 +115,12 @@ class CodeVerifier:
         for _ in range(number_missing):
             missing_arguments += "___ "
 
-        self.error_reasons.append([self.line_processing_index,
-                                   f"{self.line_processing_str} ▶ {missing_arguments}◀", reason])
+        to_append = [self.line_processing_index,
+                     f"{self.line_processing_str} ▶ {missing_arguments}◀", reason]
 
+        self.error_reasons.append(to_append)
+
+    @log_func
     async def invalid_max_length(self, past_max_length: int):
         reason = f"Unexpected arguments | {past_max_length}"
 
@@ -125,41 +131,50 @@ class CodeVerifier:
 
         error_with_arrows = ' '.join(self.line_processing_list)
 
-        self.error_reasons.append([self.line_processing_index, error_with_arrows, reason, None])
+        to_append = [self.line_processing_index, error_with_arrows, reason, None]
 
-    async def invalid_number(self, position, math_supported: bool = False, number_type: str = "int"):
-        reason = f"Invalid {number_type} number | M&VS - {math_supported}"
-        link = "https://pastebin.com/88NLbZEw"
+        self.error_reasons.append(to_append)
 
-        if math_supported:
+    @log_func
+    async def invalid_number(self, position: int, number_type: type):
+        reason = f"Invalid {number_type} number"
+
+        '''if math_supported:
             self.line_processing_list[position] = f"▶ {self.line_processing_list[position]}"
             self.line_processing_list[-1] = f"{self.line_processing_list[-1]} ◀"
 
-        else:
-            self.line_processing_list[position] = f"▶ {self.line_processing_list[position]} ◀"
+        else:'''
+
+        self.line_processing_list[position] = f"▶ {self.line_processing_list[position]} ◀"
 
         error_with_arrows = ' '.join(self.line_processing_list)
-        self.error_reasons.append([self.line_processing_index, error_with_arrows, reason, link])
+        to_append = [self.line_processing_index, error_with_arrows, reason]
 
+        self.error_reasons.append(to_append)
+
+    @log_func
     async def add_line_to_result(self, emoji: str = "⁉"):
         if self.line_already_added_to_result:
             return
 
         if emoji == "⬛":
-            self.processed_lines.append(f"`{len(self.processed_lines) + 1}`{emoji}")
+            to_append = f"`{len(self.processed_lines) + 1}`{emoji}"
+            self.processed_lines.append(to_append)
 
         else:
-            self.processed_lines.append(f"`{len(self.processed_lines) + 1}`{emoji}"
-                                        f"` {self.line_processing_str} `")
+            to_append = f"`{len(self.processed_lines) + 1}`{emoji}` {self.line_processing_str} `"
+            self.processed_lines.append(to_append)
 
         self.line_already_added_to_result = True
 
     @staticmethod
+    @log_func
     async def create_embed(title, description, color) -> discord.Embed:
         return discord.Embed(title=title,
                              description=description,
                              color=color)
 
+    @log_func
     async def send_result_embed(self):
         class CallSupport(discord.ui.View):
             def __init__(self, ctx):
@@ -194,10 +209,7 @@ class CodeVerifier:
             self.embed_content = ""
 
             for line in self.error_reasons:
-                if len(line) > 3 and line[3] is not None:
-                    self.embed_content += f"### > [{line[2]}]({line[3]}) \n`{line[0]}`🟥` {line[1]}`\n"
-                else:
-                    self.embed_content += f"### > {line[2]}\n`{line[0]}`🟥` {line[1]} `\n"
+                self.embed_content += f"### > {line[2]}\n`{line[0]}`🟥` {line[1]} `\n"
 
                 if len(self.embed_content) > 2000:
                     final_embed = discord.Embed(title=None,
@@ -224,109 +236,125 @@ class CodeVerifier:
 
         await self.ctx.channel.send(embed=final_embed, view=CallSupport(ctx=self.ctx))
 
+    @log_func
     async def action_hint(self) -> bool:
-        if not await self.is_required_length(2, None):
+        if not await self.is_action_required_length(2, None):
             return False
+
         if not await self.is_float(1):
             return False
 
         return True
 
+    @log_func
     async def action_hintplayer(self) -> bool:
-        if not await self.is_required_length(3, None):
+        if not await self.is_action_required_length(3, None):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars,
-                                              star_allowed=True):
+
+        if not await self.is_variable(1, var_type=self.se_variables,
+                                      star_allowed=True):
             return False
+
         if not await self.is_float(2):
             return False
 
         return True
 
+    @log_func
     async def action_countdown(self) -> bool:
-        if not await self.is_required_length(3, None):
+        if not await self.is_action_required_length(3, None):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars,
-                                              star_allowed=True):
+        if not await self.is_variable(1, var_type=self.se_variables,
+                                      star_allowed=True):
             return False
         if not await self.is_int(2):
             return False
 
         return True
 
+    @log_func
     async def action_broadcastplayer(self) -> bool:
-        if not await self.is_required_length(3, None):
+        if not await self.is_action_required_length(3, None):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars,
-                                              star_allowed=True):
+        if not await self.is_variable(1, var_type=self.se_variables,
+                                      star_allowed=True):
             return False
         if not await self.is_float(2):
             return False
 
         return True
 
+    @log_func
     async def action_broadcast(self) -> bool:
-        if not await self.is_required_length(2, None):
+        if not await self.is_action_required_length(2, None):
             return False
+
         if not await self.is_float(1):
             return False
 
         return True
 
+    @log_func
     async def action_clearcassie(self) -> bool:
-        if not await self.is_required_length(0, 0):
+        if not await self.is_action_required_length(0, 0):
             return False
 
         return True
 
+    @log_func
     async def action_silentcassie(self) -> bool:
-        if not await self.is_required_length(1, None):
+        if not await self.is_action_required_length(1, None):
             return False
 
         return True
 
+    @log_func
     async def action_cassie(self) -> bool:
-        if not await self.is_required_length(1, None):
+        if not await self.is_action_required_length(1, None):
             return False
 
         return True
 
+    @log_func
     async def action_clearinventory(self) -> bool:
-        if not await self.is_required_length(1, 1):
+        if not await self.is_action_required_length(1, 1):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
+        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
             return False
 
         return True
 
+    @log_func
     async def action_removeitem(self) -> bool:
-        if not await self.is_required_length(2, 3):
+        if not await self.is_action_required_length(2, 3):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
+        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
             return False
-        if not await self.is_special_variable(2, var_type=self.item_types):
+        if not await self.is_variable(2, var_type=self.item_types):
             return False
-        if not await self.is_int(3, math_supported=True, required=False):
+        if not await self.is_int(3, required=False):
             return False
 
         return True
 
+    @log_func
     async def action_give(self) -> bool:
-        if not await self.is_required_length(2, None):
+        if not await self.is_action_required_length(2, 3):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
+        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
             return False
-        if not await self.is_special_variable(2, var_type=self.item_types):
+        if not await self.is_variable(2, var_type=self.item_types):
             return False
-        if not await self.is_int(3, required=False, math_supported=True):
+        if not await self.is_int(3, required=False):
             return False
 
         return True
 
+    @log_func
     async def action_lightcolor(self) -> bool:
-        if not await self.is_required_length(4, 4):
+        if not await self.is_action_required_length(4, 4):
             return False
-        if not await self.is_special_variable(1, var_type=self.room_types, star_allowed=True):
+        if not await self.is_variable(1, var_type=self.room_types, star_allowed=True):
             return False
         for index in range(2, 5):
             if not await self.is_int(index, min_value=0, max_value=255):
@@ -334,183 +362,204 @@ class CodeVerifier:
 
         return True
 
+    @log_func
     async def action_resetlightcolor(self) -> bool:
-        if not await self.is_required_length(1, 1):
+        if not await self.is_action_required_length(1, 1):
             return False
-        if not await self.is_special_variable(1, var_type=self.room_types, star_allowed=True):
+        if not await self.is_variable(1, var_type=self.room_types, star_allowed=True):
             return False
         return True
 
+    @log_func
     async def action_lightsoff(self) -> bool:
-        if not await self.is_required_length(2, None):
+        if not await self.is_action_required_length(2, 2):
             return False
-        if not await self.is_special_variable(1, var_type=self.room_types, star_allowed=True):
+        if not await self.is_variable(1, var_type=self.room_types, star_allowed=True):
             return False
-        if not await self.is_float(2, math_supported=True):
+        if not await self.is_float(2):
             return False
 
         return True
 
+    @log_func
     async def action_goto(self) -> bool:
-        if not await self.is_required_length(1, 1):
+        if not await self.is_action_required_length(1, 1):
             return False
-        if not await self.is_iterator(1):
+        if not await self.is_label(1):
             return False
 
         return True
 
+    @log_func
     async def action_gotoif(self) -> bool:
-        if not await self.is_required_length(3, None):
+        if not await self.is_action_required_length(3, None):
             return False
-        if not await self.is_iterator(1):
+        if not await self.is_label(1):
             return False
-        if not await self.is_iterator(2):
+        if not await self.is_label(2):
             return False
 
         return True
 
+    @log_func
     async def action_if(self) -> bool:
-        if not await self.is_required_length(1, None):
+        if not await self.is_action_required_length(1, None):
             return False
 
         return True
 
+    @log_func
     async def action_stop(self) -> bool:
-        if not await self.is_required_length(0, 0):
+        if not await self.is_action_required_length(0, 0):
             return False
 
         return True
 
+    @log_func
     async def action_stopif(self) -> bool:
-        if not await self.is_required_length(1, None):
+        if not await self.is_action_required_length(1, None):
             return False
 
         return True
 
+    @log_func
     async def action_door(self) -> bool:
-        if not await self.is_required_length(2, None):
+        if not await self.is_action_required_length(2, 2):
             return False
 
         modes = ("LOCK", "UNLOCK", "OPEN", "CLOSE", "DESTROY")
         mode_selected = self.line_processing_list[1]
 
+        if not await self.is_variable(1, var_type=self.door_types, star_allowed=True):
+            return False
+
         if mode_selected not in modes:
             await self.error_template(2, "Invalid mode | "
-                                         "LOCK/UNLOCK/OPEN/CLOSE/DESTROY", link=None)
-            return False
-        if not await self.is_float(3, math_supported=True, required=False):
+                                         "LOCK/UNLOCK/OPEN/CLOSE/DESTROY")
             return False
 
         return True
 
+    @log_func
     async def action_tesla(self) -> bool:
         mode_selected = self.line_processing_list[1]
 
         if mode_selected == "ENABLE" or mode_selected == "DISABLE":
-            if not await self.is_required_length(1, 1):
+            if not await self.is_action_required_length(1, 1):
                 return False
 
         elif mode_selected == "ROLETYPE":
-            if not await self.is_required_length(2, 2):
+            if not await self.is_action_required_length(2, 2):
                 return False
-            if not await self.is_special_variable(2, var_type=self.role_types):
+            if not await self.is_variable(2, var_type=self.role_types):
                 return False
 
         elif mode_selected == "PLAYERS":
-            if not await self.is_required_length(2, 2):
+            if not await self.is_action_required_length(2, 2):
                 return False
-            if not await self.is_special_variable(2, var_type=self.se_player_vars, star_allowed=True):
+            if not await self.is_variable(2, var_type=self.se_variables, star_allowed=True):
                 return False
 
         else:
             await self.error_template(1, "Invalid mode | "
-                                         "PLAYERS/ROLETYPE/DISABLE/ENABLE", link=None)
+                                         "PLAYERS/ROLETYPE/DISABLE/ENABLE")
             return False
         return True
 
+    @log_func
     async def action_warhead(self) -> bool:
         modes = ("START", "STOP", "LOCK", "UNLOCK", "DETONATE", "BLASTDOORS")
         mode_selected = self.line_processing_list[1]
 
-        if not await self.is_required_length(1, 1):
+        if not await self.is_action_required_length(1, 1):
             return False
         if mode_selected not in modes:
             await self.error_template(1, "Invalid mode | "
-                                         "START/STOP/LOCK/UNLOCK/DETONATE/BLASTDOORS", link=None)
+                                         "START/STOP/LOCK/UNLOCK/DETONATE/BLASTDOORS")
             return False
 
         return True
 
+    @log_func
     async def action_executescript(self) -> bool:
-        if not await self.is_required_length(1, 1):
+        if not await self.is_action_required_length(1, 1):
             return False
 
         return True
 
+    @log_func
     async def action_help(self) -> bool:
-        if not await self.is_required_length(1, None):
+        if not await self.is_action_required_length(1, None):
             return False
 
         return True
 
+    @log_func
     async def action_command(self) -> bool:
-        if not await self.is_required_length(1, None):
+        if not await self.is_action_required_length(1, None):
             return False
 
         return True
 
+    @log_func
     async def action_log(self) -> bool:
-        if not await self.is_required_length(1, None):
+        if not await self.is_action_required_length(1, None):
             return False
 
         return True
 
+    @log_func
     async def action_custominfo(self) -> bool:
         modes = ("SET", "CLEAR")
         mode_selected = self.line_processing_list[1]
 
-        if not await self.is_required_length(1, None):
+        if not await self.is_action_required_length(1, None):
             return False
+
         if mode_selected not in modes:
             await self.error_template(1, "Invalid mode | "
-                                      "SET/CLEAR", link=None)
-        if not await self.is_special_variable(2, var_type=self.se_player_vars,
-                                              required=False, star_allowed=True):
+                                      "SET/CLEAR")
+            return False
+        if not await self.is_variable(2, var_type=self.se_variables,
+                                      required=False, star_allowed=True):
             return False
 
         return True
 
+    @log_func
     async def action_damage(self) -> bool:
-        if not await self.is_required_length(2, None):
+        if not await self.is_action_required_length(2, 3):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
+        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
             return False
         if not await self.is_float(2, required=False):
             return False
 
         return True
 
+    @log_func
     async def action_effectperm(self) -> bool:
         modes = ("SET", "CLEAR")
         mode_selected = self.line_processing_list[1]
 
-        if not await self.is_required_length(3, 4):
+        if not await self.is_action_required_length(3, 4):
             return False
         if mode_selected not in modes:
             await self.error_template(1, "Invalid mode | "
-                                         "GIVE/REMOVE", link=None)
+                                         "GIVE/REMOVE")
             return False
-        if not await self.is_special_variable(2, var_type=self.se_player_vars, star_allowed=True):
+        if not await self.is_variable(2, var_type=self.se_variables, star_allowed=True):
             return False
-        if not await self.is_special_variable(3, var_type=self.effect_types):
+        if not await self.is_variable(3, var_type=self.effect_types):
             return False
         if not await self.is_float(4, required=False):
             return False
 
         return True
 
+    @log_func
     async def action_radiorange(self) -> bool:
-        if not await self.is_required_length(3, 3):
+        if not await self.is_action_required_length(3, 3):
             return False
 
         modes = ("SET", "LOCK")
@@ -519,79 +568,99 @@ class CodeVerifier:
         range_selected = self.line_processing_list[3]
         if mode_selected in modes:
             await self.error_template(1, "Invalid mode | "
-                                         "SET/LOCK", link=None)
+                                         "SET/LOCK")
             return False
-        if not await self.is_special_variable(2, var_type=self.se_player_vars, star_allowed=True):
+        if not await self.is_variable(2, var_type=self.se_variables, star_allowed=True):
             return False
+
         if range_selected not in ranges:
             await self.error_template(3, "Invalid range | "
-                                         "Short/Medium/Long/Ultra", link=None)
+                                         "Short/Medium/Long/Ultra")
             return False
 
         return True
 
+    @log_func
     async def action_kill(self) -> bool:
-        if not await self.is_required_length(1, None):
+        if not await self.is_action_required_length(1, None):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
+
+        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
             return False
 
         return True
 
+    @log_func
     async def action_ahp(self) -> bool:
-        if not await self.is_required_length(2, 2):
+        if not await self.is_action_required_length(2, 2):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
+
+        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
             return False
-        if not self.is_float(2, math_supported=True):
+
+        if not self.is_float(2):
             return False
 
         return True
 
+    @log_func
     async def action_maxhp(self) -> bool:
-        if not await self.is_required_length(2, 2):
+        if not await self.is_action_required_length(2, 2):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
+
+        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
             return False
-        if not await self.is_float(2, math_supported=True):
+
+        if not await self.is_float(2):
             return False
 
         return True
 
+    @log_func
     async def action_hp(self) -> bool:
-        if not await self.is_required_length(2, 2):
+        if not await self.is_action_required_length(2, 2):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
+
+        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
             return False
-        if not await self.is_float(2, math_supported=True):
+
+        if not await self.is_float(2):
             return False
 
         return True
 
+    @log_func
     async def action_tpdoor(self) -> bool:
-        if not await self.is_required_length(2, 2):
+        if not await self.is_action_required_length(2, 2):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
+
+        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
             return False
-        if not await self.is_special_variable(2, var_type=self.door_types):
+
+        if not await self.is_variable(2, var_type=self.door_types):
             return False
 
         return True
 
+    @log_func
     async def action_tproom(self) -> bool:
-        if not await self.is_required_length(2, 2):
+        if not await self.is_action_required_length(2, 2):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
+
+        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
             return False
-        if not await self.is_special_variable(2, var_type=self.room_types):
+
+        if not await self.is_variable(2, var_type=self.room_types):
             return False
 
         return True
 
+    @log_func
     async def action_tpx(self) -> bool:
-        if not await self.is_required_length(4, 4):
+        if not await self.is_action_required_length(4, 4):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
+
+        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
             return False
 
         for i in range(2, 5):
@@ -600,10 +669,12 @@ class CodeVerifier:
 
         return True
 
+    @log_func
     async def action_size(self) -> bool:
-        if not await self.is_required_length(4, 5):
+        if not await self.is_action_required_length(4, 5):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
+
+        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
             return False
 
         for i in range(2, 5):
@@ -615,8 +686,9 @@ class CodeVerifier:
 
         return True
 
+    @log_func
     async def action_effect(self) -> bool:
-        if not await self.is_required_length(3, None):
+        if not await self.is_action_required_length(3, 5):
             return False
 
         modes = ("GIVE", "REMOVE")
@@ -624,33 +696,64 @@ class CodeVerifier:
 
         if mode_selected not in modes:
             await self.error_template(1, "Invalid mode | "
-                                         "GIVE/REMOVE", link=None)
+                                         "GIVE/REMOVE")
             return False
-        if not await self.is_special_variable(2, var_type=self.se_player_vars, star_allowed=True):
+
+        if not await self.is_variable(2, var_type=self.se_variables, star_allowed=True):
             return False
-        if not await self.is_special_variable(3, var_type=self.effect_types):
+
+        if not await self.is_variable(3, var_type=self.effect_types):
             return False
+
         if not await self.is_int(4, required=False, min_value=0, max_value=255):
             return False
-        if not await self.is_int(5, required=False, math_supported=True):
+
+        if not await self.is_int(5, required=False):
             return False
 
         return True
 
+    @log_func
     async def action_setrole(self) -> bool:
-        if not await self.is_required_length(2, None):
+        if not await self.is_action_required_length(2, 3):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
+
+        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
             return False
-        if not await self.is_special_variable(2, var_type=self.role_types):
+
+        if not await self.is_variable(2, var_type=self.role_types):
             return False
-        if not await self.is_int(3, math_supported=True, required=False):
+
+        if not await self.is_int(3, required=False):
             return False
 
         return True
 
+    @log_func
+    async def action_advsetrole(self) -> bool:
+        if not await self.is_action_required_length(2, 5):
+            return False
+
+        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
+            return False
+
+        if not await self.is_variable(2, var_type=self.role_types):
+            return False
+
+        if not await self.is_bool(3, required=False):
+            return False
+
+        if not await self.is_bool(4, required=False):
+            return False
+
+        if not await self.is_int(5, required=False):
+            return False
+
+        return True
+
+    @log_func
     async def action_ticket(self) -> bool:
-        if not await self.is_required_length(3, 3):
+        if not await self.is_action_required_length(3, 3):
             return False
 
         modes = ("ADD", "REMOVE", "SET")
@@ -658,28 +761,30 @@ class CodeVerifier:
 
         if mode_selected not in modes:
             await self.error_template(1, "Invalid mode | "
-                                         "ADD/REMOVE/SET", link=None)
+                                         "ADD/REMOVE/SET")
 
         teams = ("ChaosInsurgency", "NineTailedFox")
         team_selected = self.line_processing_list[2]
 
         if team_selected not in teams:
             await self.error_template(2, "Invalid team | "
-                                         "ChaosInsurgency/NineTailedFox", link=None)
+                                         "ChaosInsurgency/NineTailedFox")
 
         if not await self.is_int(3):
             return False
 
         return True
 
+    @log_func
     async def action_start(self) -> bool:
-        if not await self.is_required_length(min_len=0, max_len=0):
+        if not await self.is_action_required_length(min_len=0, max_len=0):
             return False
 
         return True
 
+    @log_func
     async def action_decontaminate(self) -> bool:
-        if not await self.is_required_length(0, 1):
+        if not await self.is_action_required_length(0, 1):
             return False
 
         if len(self.line_processing_list) - 1 == 0:
@@ -690,183 +795,278 @@ class CodeVerifier:
 
         if mode_selected not in modes:
             await self.error_template(1, "Invalid mode | "
-                                         "ENABLE/DISABLE/FORCE", link=None)
+                                         "ENABLE/DISABLE/FORCE")
             return False
 
         return True
 
+    @log_func
     async def action_roundlock(self) -> bool:
-        if not await self.is_required_length(1, 1):
+        if not await self.is_action_required_length(1, 1):
             return False
         if not await self.is_bool(1):
             return False
 
         return True
 
+    @log_func
     async def action_enable(self) -> bool:
-        if not await self.is_required_length(1, 1):
+        if not await self.is_action_required_length(1, 1):
             return False
 
         mode_selected = self.line_processing_list[1]
 
         if mode_selected not in self.enable_disable_keys:
-            await self.error_template(1, "Invalid key | Find all here",
-                                      link="https://pastebin.com/iVcr4jAC")
+            await self.error_template(1, "Invalid key")
             return False
 
         return True
 
+    @log_func
     async def action_disable(self) -> bool:
-        if not await self.is_required_length(1, 1):
+        if not await self.is_action_required_length(1, 1):
             return False
 
         mode_selected = self.line_processing_list[1]
 
         if mode_selected not in self.enable_disable_keys:
-            await self.error_template(1, "Invalid key | Find all here",
-                                      link="https://pastebin.com/iVcr4jAC")
+            await self.error_template(1, "Invalid key")
             return False
 
         return True
 
+    @log_func
     async def action_infectrule(self) -> bool:
-        if not await self.is_required_length(2, 3):
+        if not await self.is_action_required_length(2, 3):
             return False
-        if not await self.is_special_variable(1, var_type=self.role_types, star_allowed=True):
+        if not await self.is_variable(1, var_type=self.role_types, star_allowed=True):
             return False
-        if not await self.is_special_variable(2, var_type=self.role_types):
+        if not await self.is_variable(2, var_type=self.role_types):
             return False
         if not await self.is_bool(3, required=False):
             return False
 
         return True
 
+    @log_func
     async def action_spawnrule(self) -> bool:
-        if not await self.is_required_length(1, None):
+        if not await self.is_action_required_length(1, 2):
             return False
-        if not await self.is_special_variable(1, var_type=self.role_types):
+        if not await self.is_variable(1, var_type=self.role_types):
             return False
-        if not await self.is_int(2, required=False, math_supported=True):
+        if not await self.is_int(2, required=False):
             return False
 
         return True
 
+    @log_func
     async def action_delvariable(self) -> bool:
-        if not await self.is_required_length(1, 1):
+        if not await self.is_action_required_length(1, 1):
             return False
+
         if self.line_processing_list[1] not in self.se_variables:
             await self.error_template(1, "Invalid variable | "
-                                         "Variable doesn't exist", link=None)
+                                         "Variable doesn't exist")
             return False
 
         return True
 
+    @log_func
     async def action_delplayervariable(self) -> bool:
-        if not await self.is_required_length(1, 1):
+        if not await self.is_action_required_length(1, 1):
             return False
-        if self.line_processing_list[1] not in self.se_player_vars:
+
+        if self.line_processing_list[1] not in self.se_variables:
             await self.error_template(1, "Invalid player variable | "
-                                         "Variable doesn't exist", link=None)
+                                         "Variable doesn't exist")
             return False
 
         return True
 
-    async def action_saveplayervariable(self) -> bool:
-        if not await self.is_required_length(1, 3):
+    @log_func
+    async def action_saveplayers(self) -> bool:
+        if not await self.is_action_required_length(2, 3):
             return False
-        if not await self.is_special_variable(1, var_type=None,
-                                              list_appended=self.se_player_vars):
+
+        if not await self.register_variable(2, 3, player_var=True):
             return False
-        if not await self.is_special_variable(2, var_type=self.se_player_vars,
-                                              star_allowed=True):
+
+        if not await self.is_variable(2, var_type=self.se_variables,
+                                      star_allowed=True):
             return False
+
         if not await self.is_int(3, required=False):
             return False
 
         return True
 
-    async def action_savevariable(self) -> bool:
-        if not await self.is_required_length(1, None):
+    @log_func
+    async def action_save(self) -> bool:
+        if not await self.is_action_required_length(1, None):
             return False
-        if not await self.is_special_variable(1, var_type=None,
-                                              list_appended=self.se_variables):
+        if not await self.register_variable(1, 2,
+                                            everything_in_range=True, player_var=False):
             return False
 
         return True
 
+    @log_func
     async def action_waitsec(self) -> bool:
-        if not await self.is_required_length(1, None):
+        if not await self.is_action_required_length(1, None):
             return False
         if not await self.is_float(1, math_supported=True):
             return False
 
         return True
 
+    @log_func
     async def action_waituntil(self) -> bool:
-        if not await self.is_required_length(1, None):
+        if not await self.is_action_required_length(1, None):
             return False
 
         return True
 
+    @log_func
+    async def action_advahp(self) -> bool:
+        if not await self.is_action_required_length(2, 7):
+            return False
+
+        if not await self.is_variable(1, var_type=self.se_variables):
+            return False
+
+        if not await self.is_float(2):
+            return False
+
+        if not await self.is_float(3, required=False):
+            return False
+
+        if not await self.is_float(4, required=False):
+            return False
+
+        if not await self.is_float(5, required=False):
+            return False
+
+        if not await self.is_float(6, required=False):
+            return False
+
+        if not await self.is_bool(7, required=False):
+            return False
+
+        return True
+
+    @log_func
     async def action_reskin(self) -> bool:
-        if not await self.is_required_length(2, 2):
+        if not await self.is_action_required_length(2, 2):
             return False
-        if not await self.is_special_variable(1, var_type=self.se_player_vars, star_allowed=True):
+
+        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
             return False
-        if not await self.is_special_variable(2, var_type=self.role_types):
+
+        if not await self.is_variable(2, var_type=self.role_types):
             return False
 
         return True
 
-    async def is_special_variable(self, line_index, *, var_type, required: bool = True,
-                                  list_appended: list = None, star_allowed: bool = False) -> bool:
-        variable = self.line_processing_list[line_index]
+    @log_func
+    async def action_httpget(self) -> bool:
+        if not await self.is_action_required_length(1, 1):
+            return False
 
+        return True
+
+    @log_func
+    async def action_httppost(self) -> bool:
+        if not await self.is_action_required_length(2, 2):
+            return False
+
+        return True
+
+    @log_func
+    async def register_variable(self, name_index: int, value_index: int, *,
+                                player_var: bool, everything_in_range: bool = False):
+
+        variable_name = self.line_processing_list[name_index]
+        variable_value = ""
+
+        if everything_in_range:
+            variable_value = " ".join(self.line_processing_list[value_index:])
+        else:
+            variable_value = self.line_processing_list[value_index]
+
+        if "{" in variable_name and "}" in variable_name:
+            variable_name = variable_name.replace("{", "").replace("}", "")
+        else:
+            await self.error_template(name_index, "No brackets provided")
+            return False
+
+        async def get_type() -> type or bool:
+            if variable_value.lower() == "true" or variable_value.lower() == "false":
+                return bool
+
+            try:
+                int(variable_value)
+                return int
+            except ValueError:
+                pass
+
+            try:
+                float(variable_value)
+                return float
+            except ValueError:
+                pass
+
+            try:
+                str(variable_value)
+                return str
+            except ValueError:
+                pass
+
+            return False
+
+        if not await get_type():
+            await self.error_template(variable_value, "Couldn't convert variable to any type")
+            return None
+
+        self.custom_variables.append([variable_name, await get_type(), player_var, variable_value])
+
+        return True
+
+    @log_func
+    async def is_variable(self,
+                          line_index: int, *, var_type: list,
+                          required: bool = True, star_allowed: bool = False) -> bool:
         if not required:
             if len(self.line_processing_list) - 1 < line_index:
                 return True
 
-        if var_type is None:
-            list_appended.append(variable.replace("{", "").replace("}", ""))
-            return True
+        variable = self.line_processing_list[line_index]
 
         if var_type[0] == "DEBUG_ROOM_TYPE":
-            reason = "Invalid room variable | Find all here"
-            link = "https://pastebin.com/k38VrRin"
+            reason = "Invalid room variable"
             brackets_required = False
 
         elif var_type[0] == "DEBUG_ITEM_TYPE":
-            reason = "Invalid item variable | Find all here"
-            link = "https://pastebin.com/68X43pJU"
+            reason = "Invalid item variable"
             brackets_required = False
 
         elif var_type[0] == "DEBUG_EFFECT_TYPE":
-            reason = "Invalid effect variable | Find all here"
-            link = "https://pastebin.com/bmXKEjTz"
+            reason = "Invalid effect variable"
             brackets_required = False
 
         elif var_type[0] == "DEBUG_ROLE_TYPE":
-            reason = "Invalid role variable | Find all here"
-            link = "https://pastebin.com/WHe38hQj"
+            reason = "Invalid role variable"
             brackets_required = False
 
         elif var_type[0] == "DEGUG_DOOR_TYPE":
-            reason = "Invalid door variable | Find all here"
-            link = "https://pastebin.com/Z5LJ2umC"
+            reason = "Invalid door variable"
             brackets_required = False
 
         elif var_type[0] == "DEBUG_SE_VARIABLE":
-            reason = "Invalid `SE` variable | Find all here"
-            link = "https://pastebin.com/ktwSBjJZ"
+            reason = "Invalid SE variable"
             brackets_required = True
 
-        elif var_type[0] == "DEBUG_SE_PLAYER_VARIABLE":
-            reason = "Invalid `SE` player variable | Find all here"
-            link = "https://pastebin.com/5eUbbL5L"
-            brackets_required = True
         else:
-            reason = "Unknown error, variable check failed"
-            link = None
+            reason = "UNKNOWN ERROR | CONTACT ANDRZEJ"
             brackets_required = False
 
         if star_allowed and variable == "*":
@@ -874,8 +1074,9 @@ class CodeVerifier:
 
         if brackets_required and "{" in variable and "}" in variable:
             variable = variable.replace("{", "").replace("}", "")
+
         elif brackets_required:
-            await self.error_template(line_index, "`{}` required", link=None)
+            await self.error_template(line_index, "`{}` required")
             return False
 
         if variable in var_type:
@@ -885,22 +1086,30 @@ class CodeVerifier:
             await self.add_line_to_result("🔳")
             return True
 
-        await self.error_template(line_index, reason, link=link)
+        await self.error_template(line_index, reason)
         return False
 
+    @log_func
     async def is_bool(self, position, *, required: bool = True) -> bool:
+
+        variable = self.line_processing_list[position]
+
         if not required:
             if len(self.line_processing_list) - 1 < position:
                 return True
 
-        if self.line_processing_list[position] == "TRUE" or \
-                self.line_processing_list[position] == "FALSE":
+        if variable == "TRUE" or variable == "FALSE":
             return True
-        else:
-            await self.error_template(position, "Invalid TRUE/FALSE argument", link=None)
-            return False
 
-    async def is_iterator(self, position) -> bool:
+        for se_var in self.se_variables:
+            if variable.replace("{", "").replace("}", "") == se_var[0] and se_var[1] is bool:
+                return True
+
+        await self.error_template(position, "Invalid TRUE/FALSE argument")
+        return False
+
+    @log_func
+    async def is_label(self, position) -> bool:
         try:
             iterator = self.line_processing_list[position]
 
@@ -908,21 +1117,20 @@ class CodeVerifier:
                 return True
             elif int(iterator):
                 reason = f"Don't use line numbers, use labels instead!!!"
-                link = "https://pastebin.com/Wj97g1JX"
 
-                await self.error_template(position, reason, link=link)
+                await self.error_template(position, reason)
                 return False
 
         except:
             pass
 
         reason = f"Invalid label | Redirecting to nowhere"
-        link = "https://pastebin.com/Wj97g1JX"
 
-        await self.error_template(position, reason, link=link)
+        await self.error_template(position, reason)
         return False
 
-    async def is_valid_math_operation(self, line_index: int) -> bool:
+    @log_func
+    async def check_for_brackets(self, line_index: int, number_type: type) -> bool:
         open_brackets = 0
         for char in self.line_processing_list[line_index:]:
             if "{" in char:
@@ -931,62 +1139,105 @@ class CodeVerifier:
                 open_brackets -= 1
 
         if open_brackets != 0:
-            await self.invalid_number(line_index, True, "float")
+            await self.invalid_number(line_index, number_type)
             return False
 
         return True
 
+    @log_func
     async def is_float(self, line_index: int, *, math_supported: bool = False,
-                       required: bool = True) -> bool:
-        if not required:
-            if len(self.line_processing_list) - 1 < line_index:
-                return True
+                       required: bool = True, min_value: int = float('-inf'), max_value: int = float('inf')) -> bool:
 
-        to_be_float = ""
-        if math_supported:
-            for index in range(len(self.line_processing_list[line_index:])):
-                if not await self.is_valid_math_operation(line_index + index):
-                    await self.invalid_number(line_index, math_supported, "float")
-                    return False
+        if not required and not await self.is_variable_present(line_index):
+            return True
 
-            for value in self.line_processing_list[line_index:]:
-                to_be_float += re.sub(r"{.*?}", "0", value)
-        else:
-            to_be_float = self.line_processing_list[line_index]
+        if await self.is_variable_provided_defined(float, line_index, False):
+            return True
 
-        try:
-            float(eval(to_be_float))
-        except:
-            await self.invalid_number(line_index, math_supported, "float")
+        if not await self.is_variable_specified_type(float, line_index):
+            return False
+
+        to_be_float = self.line_processing_list[line_index]
+
+        if not min_value <= int(eval(to_be_float)) <= max_value:
+            await self.invalid_number(line_index, float)
             return False
 
         return True
 
-    async def is_int(self, line_index: int, *, math_supported: bool = False, required: bool = True,
-                     min_value: int = float('-inf'), max_value: int = float('inf')) -> bool:
-        if not required:
-            if len(self.line_processing_list) - 1 < line_index:
-                return True
+    @log_func
+    async def is_variable_present(self, line_index: int) -> bool:
+        if len(self.line_processing_list) - 1 < line_index:
+            return True
 
+    '''async def is_math_supported(self) -> bool:
         if math_supported:
             to_be_int = ""
             for index in range(len(self.line_processing_list[line_index:])):
-                if not await self.is_valid_math_operation(line_index + index):
+                if not await self.check_for_brackets(line_index + index, int):
                     await self.invalid_number(line_index, math_supported, "int")
-
+    
                     return False
 
-            for value in self.line_processing_list[line_index:]:
-                to_be_int += re.sub(r"{.*?}", "0", value)
-        else:
-            to_be_int = self.line_processing_list[line_index]
+        for value in self.line_processing_list[line_index:]:
+            to_be_int += re.sub(r"{.*?}", "0", value)'''
+
+    @log_func
+    async def is_variable_provided_defined(self, var_type: type, line_index: int, player_var: bool):
+        async def check_in_lists(var_list: list, var_type: type, line_index: int, player_var: bool):
+            print(var_list)
+            var = self.line_processing_list[line_index]
+            var_name = var.replace("{", "").replace("}", "")
+
+            for se_var in var_list:
+                if len(se_var) < 4:
+                    continue
+
+                print(f"{var_name=} == {se_var[0]=} and {se_var[1]=} is {var_type=} and {se_var[2]=} == {player_var=}")
+                if var_name == se_var[0] and se_var[1] == var_type and se_var[2] == player_var:
+                    return True
+
+                elif var_name == se_var[0] and se_var[2] == player_var:
+                    try:
+                        var_type(se_var[3])
+                        return True
+                    except:
+                        pass
+
+        if await check_in_lists(self.custom_variables, var_type, line_index, player_var):
+            return True
+        elif await check_in_lists(self.se_variables, var_type, line_index, player_var):
+            return True
+
+    @log_func
+    async def is_variable_specified_type(self, var_type: type, line_index: int):
+        variable = self.line_processing_list[line_index]
 
         try:
-            if not min_value <= int(eval(to_be_int)) <= max_value:
-                await self.invalid_number(line_index, math_supported, "int")
-                return False
+            var_type(variable)
         except:
-            await self.invalid_number(line_index, math_supported, "int")
+            await self.invalid_number(line_index, int)
+            return False
+
+        return True
+
+    @log_func
+    async def is_int(self, line_index: int, *, math_supported: bool = False, required: bool = True,
+                     min_value: int = float('-inf'), max_value: int = float('inf')) -> bool:
+
+        if not required and not self.is_variable_present(line_index):
+            return True
+
+        if self.is_variable_provided_defined(int, line_index, False):
+            return True
+
+        if not self.is_variable_specified_type(int, line_index):
+            return False
+
+        to_be_int = self.line_processing_list[line_index]
+
+        if not min_value <= int(eval(to_be_int)) <= max_value:
+            await self.invalid_number(line_index, int)
             return False
 
         return True
@@ -1034,7 +1285,8 @@ class CodeVerifier:
                 input_data = input("Wprowadź dane: ")
                 result = check_boolean_input(input_data)'''
 
-    async def is_required_length(self, min_len: int, max_len) -> bool:
+    @log_func
+    async def is_action_required_length(self, min_len: int, max_len) -> bool:
         if not min_len <= len(self.line_processing_list) - 1:
             await self.invalid_min_length(abs(len(self.line_processing_list) - 1 - min_len))
 

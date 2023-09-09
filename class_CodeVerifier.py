@@ -1,7 +1,31 @@
 import variables
 import discord
 # import re
-from log_func import log_func
+import logging
+
+logging.basicConfig(level=logging.DEBUG, filename="logs.txt", filemode="w",
+                        format=f"%(levelname)s | %(message)s", datefmt="%H:%M:%S", encoding="utf8")
+
+
+def log_func(func):
+    def wrapper(*args, **kwargs):
+        if args:
+            params = f"{args} {kwargs}" if kwargs else args
+        elif kwargs:
+            params = kwargs
+        else:
+            params = "None"
+
+        try:
+            logging.debug(f'Called: {func.__name__} - {params}')
+
+            result = func(*args, **kwargs)
+            return result
+
+        except Exception:
+            logging.exception(f'{func.__name__} got fucked')
+    return wrapper
+
 
 @log_func
 class CodeVerifier:
@@ -87,13 +111,14 @@ class CodeVerifier:
         self.se_variables = variables.se_variables
         self.enable_disable_keys = variables.enable_disable_key
         self.custom_variables: list[list] = []
-
+        print(f"{self.se_variables=}")
         for role in self.role_types:
             self.se_variables.append([role.upper(), int, True])
-
+        print(f"{self.se_variables=}")
         for room in self.room_types:
             self.se_variables.append([room.upper(), int, True])
-
+        print(f"{self.se_variables=}")
+    @log_func
     async def no_code(self):
         await self.ctx.reply("No code to check! First line is always ignored.")
 
@@ -251,8 +276,7 @@ class CodeVerifier:
         if not await self.is_action_required_length(3, None):
             return False
 
-        if not await self.is_variable(1, var_type=self.se_variables,
-                                      star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
 
         if not await self.is_float(2):
@@ -264,9 +288,9 @@ class CodeVerifier:
     async def action_countdown(self) -> bool:
         if not await self.is_action_required_length(3, None):
             return False
-        if not await self.is_variable(1, var_type=self.se_variables,
-                                      star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
+
         if not await self.is_int(2):
             return False
 
@@ -276,8 +300,7 @@ class CodeVerifier:
     async def action_broadcastplayer(self) -> bool:
         if not await self.is_action_required_length(3, None):
             return False
-        if not await self.is_variable(1, var_type=self.se_variables,
-                                      star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
         if not await self.is_float(2):
             return False
@@ -319,7 +342,7 @@ class CodeVerifier:
     async def action_clearinventory(self) -> bool:
         if not await self.is_action_required_length(1, 1):
             return False
-        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
 
         return True
@@ -328,7 +351,7 @@ class CodeVerifier:
     async def action_removeitem(self) -> bool:
         if not await self.is_action_required_length(2, 3):
             return False
-        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
         if not await self.is_variable(2, var_type=self.item_types):
             return False
@@ -341,7 +364,7 @@ class CodeVerifier:
     async def action_give(self) -> bool:
         if not await self.is_action_required_length(2, 3):
             return False
-        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
         if not await self.is_variable(2, var_type=self.item_types):
             return False
@@ -430,12 +453,12 @@ class CodeVerifier:
         modes = ("LOCK", "UNLOCK", "OPEN", "CLOSE", "DESTROY")
         mode_selected = self.line_processing_list[1]
 
-        if not await self.is_variable(1, var_type=self.door_types, star_allowed=True):
+        if mode_selected not in modes:
+            await self.error_template(1, "Invalid mode | "
+                                         "LOCK/UNLOCK/OPEN/CLOSE/DESTROY")
             return False
 
-        if mode_selected not in modes:
-            await self.error_template(2, "Invalid mode | "
-                                         "LOCK/UNLOCK/OPEN/CLOSE/DESTROY")
+        if not await self.is_variable(2, var_type=self.door_types, star_allowed=True):
             return False
 
         return True
@@ -457,7 +480,7 @@ class CodeVerifier:
         elif mode_selected == "PLAYERS":
             if not await self.is_action_required_length(2, 2):
                 return False
-            if not await self.is_variable(2, var_type=self.se_variables, star_allowed=True):
+            if not await self.is_se_variable(1):
                 return False
 
         else:
@@ -520,8 +543,7 @@ class CodeVerifier:
             await self.error_template(1, "Invalid mode | "
                                       "SET/CLEAR")
             return False
-        if not await self.is_variable(2, var_type=self.se_variables,
-                                      required=False, star_allowed=True):
+        if not await self.is_se_variable(2):
             return False
 
         return True
@@ -530,7 +552,7 @@ class CodeVerifier:
     async def action_damage(self) -> bool:
         if not await self.is_action_required_length(2, 3):
             return False
-        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
         if not await self.is_float(2, required=False):
             return False
@@ -548,7 +570,7 @@ class CodeVerifier:
             await self.error_template(1, "Invalid mode | "
                                          "GIVE/REMOVE")
             return False
-        if not await self.is_variable(2, var_type=self.se_variables, star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
         if not await self.is_variable(3, var_type=self.effect_types):
             return False
@@ -570,7 +592,7 @@ class CodeVerifier:
             await self.error_template(1, "Invalid mode | "
                                          "SET/LOCK")
             return False
-        if not await self.is_variable(2, var_type=self.se_variables, star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
 
         if range_selected not in ranges:
@@ -585,7 +607,7 @@ class CodeVerifier:
         if not await self.is_action_required_length(1, None):
             return False
 
-        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
 
         return True
@@ -595,7 +617,7 @@ class CodeVerifier:
         if not await self.is_action_required_length(2, 2):
             return False
 
-        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
 
         if not self.is_float(2):
@@ -608,7 +630,7 @@ class CodeVerifier:
         if not await self.is_action_required_length(2, 2):
             return False
 
-        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
 
         if not await self.is_float(2):
@@ -621,7 +643,7 @@ class CodeVerifier:
         if not await self.is_action_required_length(2, 2):
             return False
 
-        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
 
         if not await self.is_float(2):
@@ -634,7 +656,7 @@ class CodeVerifier:
         if not await self.is_action_required_length(2, 2):
             return False
 
-        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
 
         if not await self.is_variable(2, var_type=self.door_types):
@@ -647,7 +669,7 @@ class CodeVerifier:
         if not await self.is_action_required_length(2, 2):
             return False
 
-        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
 
         if not await self.is_variable(2, var_type=self.room_types):
@@ -660,7 +682,7 @@ class CodeVerifier:
         if not await self.is_action_required_length(4, 4):
             return False
 
-        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
 
         for i in range(2, 5):
@@ -674,7 +696,7 @@ class CodeVerifier:
         if not await self.is_action_required_length(4, 5):
             return False
 
-        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
 
         for i in range(2, 5):
@@ -699,7 +721,7 @@ class CodeVerifier:
                                          "GIVE/REMOVE")
             return False
 
-        if not await self.is_variable(2, var_type=self.se_variables, star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
 
         if not await self.is_variable(3, var_type=self.effect_types):
@@ -718,7 +740,7 @@ class CodeVerifier:
         if not await self.is_action_required_length(2, 3):
             return False
 
-        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
 
         if not await self.is_variable(2, var_type=self.role_types):
@@ -734,7 +756,7 @@ class CodeVerifier:
         if not await self.is_action_required_length(2, 5):
             return False
 
-        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
 
         if not await self.is_variable(2, var_type=self.role_types):
@@ -888,11 +910,10 @@ class CodeVerifier:
         if not await self.is_action_required_length(2, 3):
             return False
 
-        if not await self.register_variable(2, 3, player_var=True):
+        if not await self.register_variable(1, 2, player_var=True):
             return False
 
-        if not await self.is_variable(2, var_type=self.se_variables,
-                                      star_allowed=True):
+        if not await self.is_se_variable(2):
             return False
 
         if not await self.is_int(3, required=False):
@@ -931,7 +952,7 @@ class CodeVerifier:
         if not await self.is_action_required_length(2, 7):
             return False
 
-        if not await self.is_variable(1, var_type=self.se_variables):
+        if not await self.is_se_variable(1):
             return False
 
         if not await self.is_float(2):
@@ -959,7 +980,7 @@ class CodeVerifier:
         if not await self.is_action_required_length(2, 2):
             return False
 
-        if not await self.is_variable(1, var_type=self.se_variables, star_allowed=True):
+        if not await self.is_se_variable(1):
             return False
 
         if not await self.is_variable(2, var_type=self.role_types):
@@ -993,10 +1014,7 @@ class CodeVerifier:
         else:
             variable_value = self.line_processing_list[value_index]
 
-        if "{" in variable_name and "}" in variable_name:
-            variable_name = variable_name.replace("{", "").replace("}", "")
-        else:
-            await self.error_template(name_index, "No brackets provided")
+        if not await self.is_containing_brackets(name_index):
             return False
 
         async def get_type() -> type or bool:
@@ -1023,11 +1041,14 @@ class CodeVerifier:
 
             return False
 
-        if not await get_type():
-            await self.error_template(variable_value, "Couldn't convert variable to any type")
-            return None
+        if not player_var:
+            if not await get_type():
+                await self.error_template(variable_value, "Couldn't convert variable to any type")
+                return None
 
-        self.custom_variables.append([variable_name, await get_type(), player_var, variable_value])
+            self.custom_variables.append([variable_name, await get_type(), False, variable_value])
+        elif player_var:
+            self.custom_variables.append([variable_name, int, True, variable_value])
 
         return True
 
@@ -1061,10 +1082,6 @@ class CodeVerifier:
             reason = "Invalid door variable"
             brackets_required = False
 
-        elif var_type[0] == "DEBUG_SE_VARIABLE":
-            reason = "Invalid SE variable"
-            brackets_required = True
-
         else:
             reason = "UNKNOWN ERROR | CONTACT ANDRZEJ"
             brackets_required = False
@@ -1088,6 +1105,27 @@ class CodeVerifier:
 
         await self.error_template(line_index, reason)
         return False
+
+    @log_func
+    async def is_se_variable(self, line_index, *, required: bool = True) -> bool:
+
+        if not await self.is_variable_present(line_index) and not required:
+            return True
+
+        if not await self.is_containing_brackets(line_index):
+            return False
+
+        variable = self.line_processing_list[line_index]
+
+        if ":" in variable:
+            await self.add_line_to_result("🔳")
+            return True
+
+        if await self.is_variable_provided_defined():
+            return False
+
+        return True
+
 
     @log_func
     async def is_bool(self, position, *, required: bool = True) -> bool:
@@ -1116,7 +1154,7 @@ class CodeVerifier:
             if iterator in self.labels:
                 return True
             elif int(iterator):
-                reason = f"Don't use line numbers, use labels instead!!!"
+                reason = f"Detected line number | USE LABELS!!1!!11!"
 
                 await self.error_template(position, reason)
                 return False
@@ -1130,19 +1168,13 @@ class CodeVerifier:
         return False
 
     @log_func
-    async def check_for_brackets(self, line_index: int, number_type: type) -> bool:
-        open_brackets = 0
-        for char in self.line_processing_list[line_index:]:
-            if "{" in char:
-                open_brackets += 1
-            if "}" in char:
-                open_brackets -= 1
+    async def is_containing_brackets(self, line_index: int) -> bool:
+        variable = self.line_processing_list[line_index]
+        if variable[0] == "{" and variable[-1] == "}":
+            return True
 
-        if open_brackets != 0:
-            await self.invalid_number(line_index, number_type)
-            return False
-
-        return True
+        await self.error_template(line_index, "No brackets provided")
+        return False
 
     @log_func
     async def is_float(self, line_index: int, *, math_supported: bool = False,
@@ -1151,7 +1183,7 @@ class CodeVerifier:
         if not required and not await self.is_variable_present(line_index):
             return True
 
-        if await self.is_variable_provided_defined(float, line_index, False):
+        if await self.is_variable_provided_defined(float, line_index):
             return True
 
         if not await self.is_variable_specified_type(float, line_index):
@@ -1167,47 +1199,36 @@ class CodeVerifier:
 
     @log_func
     async def is_variable_present(self, line_index: int) -> bool:
-        if len(self.line_processing_list) - 1 < line_index:
+        if len(self.line_processing_list) - 1 >= line_index:
             return True
 
-    '''async def is_math_supported(self) -> bool:
-        if math_supported:
-            to_be_int = ""
-            for index in range(len(self.line_processing_list[line_index:])):
-                if not await self.check_for_brackets(line_index + index, int):
-                    await self.invalid_number(line_index, math_supported, "int")
-    
-                    return False
-
-        for value in self.line_processing_list[line_index:]:
-            to_be_int += re.sub(r"{.*?}", "0", value)'''
-
     @log_func
-    async def is_variable_provided_defined(self, var_type: type, line_index: int, player_var: bool):
-        async def check_in_lists(var_list: list, var_type: type, line_index: int, player_var: bool):
-            print(var_list)
-            var = self.line_processing_list[line_index]
-            var_name = var.replace("{", "").replace("}", "")
+    async def is_variable_provided_defined(self, *, var_type: type, line_index: int, player_var: bool) -> bool:
+
+        @log_func
+        async def check_in_lists(var_list: list, var_type: type, line_index: int):
+            var_name = self.line_processing_list[line_index]
 
             for se_var in var_list:
-                if len(se_var) < 4:
-                    continue
-
-                print(f"{var_name=} == {se_var[0]=} and {se_var[1]=} is {var_type=} and {se_var[2]=} == {player_var=}")
-                if var_name == se_var[0] and se_var[1] == var_type and se_var[2] == player_var:
+                if var_name == se_var[0] and se_var[1] == var_type:
                     return True
 
-                elif var_name == se_var[0] and se_var[2] == player_var:
+                elif len(se_var) > 3 and var_name == se_var[0]:
                     try:
                         var_type(se_var[3])
                         return True
                     except:
                         pass
 
-        if await check_in_lists(self.custom_variables, var_type, line_index, player_var):
+
+        if len(self.custom_variables) > 0:
+            if await check_in_lists(self.custom_variables, var_type, line_index):
+                return True
+
+        elif await check_in_lists(self.se_variables, var_type, line_index):
             return True
-        elif await check_in_lists(self.se_variables, var_type, line_index, player_var):
-            return True
+
+        return False
 
     @log_func
     async def is_variable_specified_type(self, var_type: type, line_index: int):
@@ -1225,13 +1246,13 @@ class CodeVerifier:
     async def is_int(self, line_index: int, *, math_supported: bool = False, required: bool = True,
                      min_value: int = float('-inf'), max_value: int = float('inf')) -> bool:
 
-        if not required and not self.is_variable_present(line_index):
+        if (not required) and (not await self.is_variable_present(line_index)):
             return True
 
-        if self.is_variable_provided_defined(int, line_index, False):
+        if await self.is_variable_provided_defined(int, line_index):
             return True
 
-        if not self.is_variable_specified_type(int, line_index):
+        if not await self.is_variable_specified_type(int, line_index):
             return False
 
         to_be_int = self.line_processing_list[line_index]
@@ -1242,48 +1263,9 @@ class CodeVerifier:
 
         return True
 
-    '''async def is_condition(self, position) -> bool:
-        def get_se_variable_from_str(data) -> list:
-            open_brackets = 0
-            open_bracket_pos = []
-            close_bracket_pos = []
-            for index, char in enumerate(data):
-                if "{" in char:
-                    open_brackets += 1
-                    if open_brackets > 1:
-                        return False
-                    else:
-                        open_bracket_pos.append(index)
-                if "}" in char:
-                    open_brackets -= 1
-                    if open_brackets < 0:
-                        return False
-                    else:
-                        close_bracket_pos.append(index)
-
-            if not open_brackets == 0:
-                return False
-
-            for index in range(0, len(open_bracket_pos)):
-                se_variables = []
-                se_variables.append(data[open_bracket_pos[index]:close_bracket_pos[index] + 1])
-
-                return se_variables
-                final_bool = []
-                open_variables = []
-
-                   if char == "=":
-                        final_bool.append("==")
-                    elif char == ""
-
-                try:
-                    result = eval(data)
-                    return result
-                except:
-                    return False
-            while True:
-                input_data = input("Wprowadź dane: ")
-                result = check_boolean_input(input_data)'''
+    @log_func
+    async def is_valid_condition(self, start_line_index: int):
+        pass
 
     @log_func
     async def is_action_required_length(self, min_len: int, max_len) -> bool:

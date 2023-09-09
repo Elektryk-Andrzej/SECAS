@@ -1,5 +1,6 @@
 room_type = [
     "DEBUG_ROOM_TYPE",
+    "*",
     "LczArmory",
     "LczCurve",
     "LczStraight",
@@ -177,6 +178,7 @@ role_type = [
 
 door_type = [
     "DEGUG_DOOR_TYPE",
+    "*",
     "Scp914Door",
     "GR18Inner",
     "Scp049Gate",
@@ -236,6 +238,7 @@ door_type = [
 
 se_variables: list = [
     ["DEBUG_SE_VARIABLE", None, False, None],
+    ["*", None, True],
     ["CASSIESPEAKING", bool, False],
     ["DECONTAMINATED", bool, False],
     ["ISRUNNING", bool, False],

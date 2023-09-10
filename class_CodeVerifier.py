@@ -90,18 +90,14 @@ class CodeVerifier:
         self.se_variables = variables.se_variables
         self.enable_disable_keys = variables.enable_disable_key
         self.custom_variables: list[list] = []
-        print(f"{self.se_variables=}")
         for role in self.role_types:
             self.se_variables.append([role.upper(), int, True])
-        print(f"{self.se_variables=}")
         for room in self.room_types:
             self.se_variables.append([room.upper(), int, True])
-        print(f"{self.se_variables=}")
-
     """
-    END OF __init__ TAB
+    END OF __init__ SECTION
     
-    START OF ERROR HANDLING TAB
+    START OF ERROR HANDLING SECTION
     """
 
     # Simple reminidng reply
@@ -146,6 +142,13 @@ class CodeVerifier:
 
         self.error_reasons.append(to_append)
 
+    """
+    END OF ERROR HANDLING SECTION
+    
+    START OF OUTPUT MANAGEMENT SECTION
+    """
+
+    # Format all of the data and add it into a list, from which it will be assembled into an embed
     async def add_line_to_result(self, emoji: str):
         if self.line_already_added_to_result:
             return
@@ -160,6 +163,7 @@ class CodeVerifier:
 
         self.line_already_added_to_result = True
 
+    # Self explanatory
     @staticmethod
     async def create_embed(title, description, color) -> discord.Embed:
         return discord.Embed(title=title,
@@ -167,7 +171,7 @@ class CodeVerifier:
                              color=color)
 
     async def send_result_embed(self):
-        class CallSupport(discord.ui.View):
+        """class CallSupport(discord.ui.View):
             def __init__(self, ctx):
                 super().__init__()
                 self.ctx = ctx
@@ -179,37 +183,52 @@ class CodeVerifier:
             async def button_clicked(self, interaction: discord.Interaction, button: discord.Button):
                 # noinspection PyUnresolvedReferences
                 await interaction.response.send_message("Message sent!", ephemeral=True)
-                await self.ctx.reply(f"{self.ctx.author.display_name} requested help\n||<@&1138508416269156402>||")
+                await self.ctx.reply(f"{interaction.user} requested help\n||<@&1138508416269156402>||")
+
+        class CallDev(discord.ui.View):
+            def __init__(self, ctx):
+                super().__init__()
+                self.ctx = ctx
+
+            @discord.ui.button(
+                label="Found a bug? Call devs!",
+                style=discord.ButtonStyle.red
+            )
+            async def button_clicked(self, interaction: discord.Interaction, button: discord.Button):
+                # noinspection PyUnresolvedReferences
+                await interaction.response.send_message("Message sent!", ephemeral=True)
+                await self.ctx.reply(f"{interaction.user} requested help\n||<@762016625096261652>||")"""
 
         if self.errored:
-            embed_number_errors = discord.Embed(title=f"Errors found: `{len(self.error_reasons)}`",
-                                                description=None,
-                                                color=0xdd2e44)
-            await self.ctx.channel.send(embed=embed_number_errors)
+            embed_number_errors = await self.create_embed(f"Errors found: `{len(self.error_reasons)}`",
+                                                          None,
+                                                          0xdd2e44)
+            await self.ctx.reply(embed=embed_number_errors, mention_author=False)
 
             for index, line in enumerate(self.processed_lines):
                 self.embed_content += f"{line}\n"
 
                 if len(self.embed_content) > 2000:
                     await self.ctx.channel.send(embed=await self.create_embed(
-                        None, self.embed_content, 0xdd2e44))
+                                                None,
+                                                self.embed_content,
+                                                0xdd2e44))
                     self.embed_content = ""
 
             await self.ctx.channel.send(embed=await self.create_embed(
-                None, self.embed_content, 0xdd2e44))
+                                        None,
+                                        self.embed_content,
+                                        0xdd2e44))
             self.embed_content = ""
 
             for line in self.error_reasons:
                 self.embed_content += f"### > {line[2]}\n`{line[0]}`🟥` {line[1]} `\n"
 
                 if len(self.embed_content) > 2000:
-                    final_embed = discord.Embed(title=None,
-                                                description=self.embed_content,
-                                                color=0xdd2e44)
-
-                    final_embed.set_footer(text=f"{self.bot.user.name} by @elektryk_andrzej",
-                                           icon_url=self.bot.user.avatar)
-                    await self.ctx.channel.send(embed=final_embed)
+                    await self.ctx.channel.send(embed=await self.create_embed(
+                                                None,
+                                                self.embed_content,
+                                                0xdd2e44))
 
                     self.embed_content = ""
 
@@ -218,19 +237,35 @@ class CodeVerifier:
                                         color=0xdd2e44)
 
         else:
-            final_embed = discord.Embed(title="No errors found!",
+            await self.ctx.channel.send(embed=await self.create_embed(
+                                 "No errors found!",
+                                 None,
+                                 0x77b255),
+                                 mention_author=False)
+
+            for index, line in enumerate(self.processed_lines):
+                self.embed_content += f"{line}\n"
+
+                if len(self.embed_content) > 2000:
+                    await self.ctx.channel.send(embed=await self.create_embed(
+                                                None,
+                                                self.embed_content,
+                                                0x77b255))
+                    self.embed_content = ""
+
+            final_embed = discord.Embed(title=None,
                                         description=self.embed_content,
                                         color=0x77b255)
 
-        final_embed.set_footer(text=f"{self.bot.user.name} by @elektryk_andrzej",
+        final_embed.set_footer(text=f"{self.bot.user.name}by @elektryk_andrzej",
                                icon_url=self.bot.user.avatar)
 
-        await self.ctx.channel.send(embed=final_embed, view=CallSupport(ctx=self.ctx))
+        await self.ctx.channel.send(embed=final_embed, mention_author=False)
 
     """
-    END OF OUTPUT MANAGEMENT
+    END OF OUTPUT MANAGEMENT SECTION
     
-    START OF ACTIONS
+    START OF ACTION SECTION
     
     
     Basic action check schematic:
@@ -1027,14 +1062,13 @@ class CodeVerifier:
         return False
 
     async def is_se_variable(self, line_index, *, required: bool = True) -> bool:
-
         if not await self.is_variable_present(line_index) and not required:
             return True
 
         if not await self.is_containing_brackets(line_index):
             return False
 
-        variable = self.line_processing_list[line_index]
+        variable = await self.get_str_from_line(line_index)
 
         if ":" in variable:
             await self.add_line_to_result("🔳")
@@ -1044,9 +1078,9 @@ class CodeVerifier:
                                           line_index=line_index,
                                           player_var=True,
                                           var_list=self.se_variables):
-            return False
+            return True
 
-        return True
+        return False
 
     async def is_bool(self, line_index, *, required: bool = True) -> bool:
 
@@ -1073,7 +1107,7 @@ class CodeVerifier:
             if iterator in self.labels:
                 return True
             elif int(iterator):
-                await self.error_template(line_index, f"Detected line number | USE LABELS!!1!!11!")
+                await self.error_template(line_index, f"Detected line number | USE LABELS")
                 return False
 
         except:
@@ -1081,7 +1115,7 @@ class CodeVerifier:
             return False
 
     async def is_containing_brackets(self, line_index: int) -> bool:
-        variable = await self.line_processing_list[line_index]
+        variable = await self.get_str_from_line(line_index)
         if variable[0] == "{" and variable[-1] == "}":
             return True
 
@@ -1095,12 +1129,12 @@ class CodeVerifier:
     # Get a value from the line list, report error if outside of range
     async def get_str_from_line(self, line_index) -> str:
         try:
-            return self.line_processing_list[line_index]
+            return str(self.line_processing_list[line_index]).strip()
         except IndexError:
             await self.report_bug(line_index,
                                   "Tried to get a value that's outside of the line."
                                   "Returned the last value in the line instead.")
-            return self.line_processing_list[-1]
+            return str(self.line_processing_list[-1]).strip()
 
     # Send a message that something went wrong
     async def report_bug(self, line_index: int, error: str):
@@ -1115,18 +1149,8 @@ class CodeVerifier:
 
     # Check if a variable in a list is present, True if is, False if not
     async def is_variable_defined(self, *, var_type: type, line_index: int, player_var: bool, var_list: list) -> bool:
-
-        # If provided se_variables, custom_variables will also be checked, and if a match is found, returned True
         if var_list == self.se_variables:
-            if await self.is_variable_defined(var_type=var_type,
-                                           line_index=line_index,
-                                           player_var=player_var,
-                                           var_list=self.custom_variables):
-                return True
-
-        # If nothing in the list, return False
-        if not len(var_list) > 0:
-            return False
+            var_list = self.se_variables + self.custom_variables
 
         var_name = await self.get_str_from_line(line_index)
         var_name = await self.strip_brackets(var_name)
@@ -1157,7 +1181,6 @@ class CodeVerifier:
             var_type(variable)
             return True
         except:
-            await self.error_template(line_index, f"Expected {var_type}, got {type(variable)} instead")
             return False
 
     async def is_number(self, line_index: int, var_type: int or float, *,
@@ -1175,16 +1198,19 @@ class CodeVerifier:
                                           var_list=self.se_variables):
             return True
 
-        if not await self.is_variable_specified_type(var_type, line_index):
-            return False
+        if await self.is_variable_specified_type(var_type, line_index):
+            return True
 
         to_be_number = await self.get_str_from_line(line_index)
 
-        if not min_value <= var_type(eval(to_be_number)) <= max_value:
-            await self.error_template(line_index, "Number outside of required range")
-            return False
+        try:
+            if min_value <= var_type(eval(to_be_number)) <= max_value:
+                return True
+        except:
+            pass
 
-        return True
+        await self.error_template(line_index, "Invalid integer number")
+        return False
 
     async def is_valid_condition(self, start_line_index: int):
         pass

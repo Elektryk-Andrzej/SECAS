@@ -80,7 +80,7 @@ async def proccess_verify_request(script, count_first_line: bool):
                     script.errored = True
 
             if lines_done == 1:
-                await script.no_code()
+                await script.error_no_code()
             else:
                 await script.send_result_embed()
 

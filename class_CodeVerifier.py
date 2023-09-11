@@ -1116,11 +1116,15 @@ class CodeVerifier:
 
     async def is_containing_brackets(self, line_index: int) -> bool:
         variable = await self.get_str_from_line(line_index)
-        if variable[0] == "{" and variable[-1] == "}":
-            return True
+        if not variable[0] == "{" and variable[-1] == "}":
+            return False
 
-        await self.error_template(line_index, "No brackets provided")
-        return False
+        variable = variable.removeprefix("{").removesuffix("}")
+
+        if "{" in variable or "}" in variable:
+            return False
+
+        return True
 
     async def is_variable_present(self, line_index: int) -> bool:
         if len(self.line_processing_list) - 1 >= line_index:
@@ -1211,9 +1215,6 @@ class CodeVerifier:
 
         await self.error_template(line_index, "Invalid integer number")
         return False
-
-    async def is_valid_condition(self, start_line_index: int):
-        pass
 
     async def is_action_required_length(self, min_len: int, max_len) -> bool:
         if not min_len <= len(self.line_processing_list) - 1:

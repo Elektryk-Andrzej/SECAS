@@ -360,7 +360,7 @@ class CodeVerifier:
             return False
         if not await self.is_param_se_var(1):
             return False
-        if not await self.is_param_other_var(2, var_type=self.item_types):
+        if not await self.is_param_special_var(2, var_type=self.item_types):
             return False
         if not await self.is_param_number(3, int, required=False):
             return False
@@ -372,7 +372,7 @@ class CodeVerifier:
             return False
         if not await self.is_param_se_var(1):
             return False
-        if not await self.is_param_other_var(2, var_type=self.item_types):
+        if not await self.is_param_special_var(2, var_type=self.item_types):
             return False
         if not await self.is_param_number(3, int, required=False):
             return False
@@ -382,7 +382,7 @@ class CodeVerifier:
     async def action_lightcolor(self) -> bool:
         if not await self.is_action_required_len(4, 4):
             return False
-        if not await self.is_param_other_var(1, var_type=self.room_types, star_allowed=True):
+        if not await self.is_param_special_var(1, var_type=self.room_types, star_allowed=True):
             return False
         for index in range(2, 5):
             if not await self.is_param_number(index, int, min_value=0, max_value=255):
@@ -393,14 +393,14 @@ class CodeVerifier:
     async def action_resetlightcolor(self) -> bool:
         if not await self.is_action_required_len(1, 1):
             return False
-        if not await self.is_param_other_var(1, var_type=self.room_types, star_allowed=True):
+        if not await self.is_param_special_var(1, var_type=self.room_types, star_allowed=True):
             return False
         return True
 
     async def action_lightsoff(self) -> bool:
         if not await self.is_action_required_len(2, 2):
             return False
-        if not await self.is_param_other_var(1, var_type=self.room_types, star_allowed=True):
+        if not await self.is_param_special_var(1, var_type=self.room_types, star_allowed=True):
             return False
         if not await self.is_param_number(2, float):
             return False
@@ -455,7 +455,7 @@ class CodeVerifier:
                                          "LOCK/UNLOCK/OPEN/CLOSE/DESTROY")
             return False
 
-        if not await self.is_param_other_var(2, var_type=self.door_types, star_allowed=True):
+        if not await self.is_param_special_var(2, var_type=self.door_types, star_allowed=True):
             return False
 
         return True
@@ -470,7 +470,7 @@ class CodeVerifier:
         elif mode_selected == "ROLETYPE":
             if not await self.is_action_required_len(2, 2):
                 return False
-            if not await self.is_param_other_var(2, var_type=self.role_types):
+            if not await self.is_param_special_var(2, var_type=self.role_types):
                 return False
 
         elif mode_selected == "PLAYERS":
@@ -560,7 +560,7 @@ class CodeVerifier:
             return False
         if not await self.is_param_se_var(1):
             return False
-        if not await self.is_param_other_var(3, var_type=self.effect_types):
+        if not await self.is_param_special_var(3, var_type=self.effect_types):
             return False
         if not await self.is_param_number(4, float, required=False):
             return False
@@ -641,7 +641,7 @@ class CodeVerifier:
         if not await self.is_param_se_var(1):
             return False
 
-        if not await self.is_param_other_var(2, var_type=self.door_types):
+        if not await self.is_param_special_var(2, var_type=self.door_types):
             return False
 
         return True
@@ -653,7 +653,7 @@ class CodeVerifier:
         if not await self.is_param_se_var(1):
             return False
 
-        if not await self.is_param_other_var(2, var_type=self.room_types):
+        if not await self.is_param_special_var(2, var_type=self.room_types):
             return False
 
         return True
@@ -702,7 +702,7 @@ class CodeVerifier:
         if not await self.is_param_se_var(2):
             return False
 
-        if not await self.is_param_other_var(3, var_type=self.effect_types):
+        if not await self.is_param_special_var(3, var_type=self.effect_types):
             return False
 
         if not await self.is_param_number(4, int, required=False, min_value=0, max_value=255):
@@ -720,7 +720,7 @@ class CodeVerifier:
         if not await self.is_param_se_var(1):
             return False
 
-        if not await self.is_param_other_var(2, var_type=self.role_types):
+        if not await self.is_param_special_var(2, var_type=self.role_types):
             return False
 
         if not await self.is_param_number(3, int, required=False):
@@ -735,7 +735,7 @@ class CodeVerifier:
         if not await self.is_param_se_var(1):
             return False
 
-        if not await self.is_param_other_var(2, var_type=self.role_types):
+        if not await self.is_param_special_var(2, var_type=self.role_types):
             return False
 
         if not await self.is_param_bool(3, required=False):
@@ -830,9 +830,9 @@ class CodeVerifier:
     async def action_infectrule(self) -> bool:
         if not await self.is_action_required_len(2, 3):
             return False
-        if not await self.is_param_other_var(1, var_type=self.role_types, star_allowed=True):
+        if not await self.is_param_special_var(1, var_type=self.role_types, star_allowed=True):
             return False
-        if not await self.is_param_other_var(2, var_type=self.role_types):
+        if not await self.is_param_special_var(2, var_type=self.role_types):
             return False
         if not await self.is_param_bool(3, required=False):
             return False
@@ -842,7 +842,7 @@ class CodeVerifier:
     async def action_spawnrule(self) -> bool:
         if not await self.is_action_required_len(1, 2):
             return False
-        if not await self.is_param_other_var(1, var_type=self.role_types):
+        if not await self.is_param_special_var(1, var_type=self.role_types):
             return False
         if not await self.is_param_number(2, int, required=False):
             return False
@@ -869,7 +869,6 @@ class CodeVerifier:
 
         variable = await self.get_str_from_line(1)
         variable = await self.strip_brackets(variable)
-        print(f"{variable} not in self.se_variables and {variable} not in self.custom_vars")
 
         if variable not in self.se_variables[0] and variable not in self.custom_variables[0]:
             await self.error_template(1, "Invalid player variable | "
@@ -950,7 +949,7 @@ class CodeVerifier:
         if not await self.is_param_se_var(1):
             return False
 
-        if not await self.is_param_other_var(2, var_type=self.role_types):
+        if not await self.is_param_special_var(2, var_type=self.role_types):
             return False
 
         return True
@@ -967,6 +966,13 @@ class CodeVerifier:
 
         return True
 
+    """
+    END OF ACTION SECTION
+    
+    START OF ACTION HANDLING SECTION
+    """
+
+    # Register a certain value to a SE variable
     async def register_variable(self, name_index: int, value_index: int, *,
                                 player_var: bool, everything_in_range: bool = False):
 
@@ -1018,9 +1024,11 @@ class CodeVerifier:
 
         return True
 
-    async def is_param_other_var(self,
-                                 line_index: int, *, var_type: list,
-                                 required: bool = True, star_allowed: bool = False) -> bool:
+    # Handles all non-standard variables, like doors, rooms, roles etc.
+    # Requires to specify a list which is to be checked
+    async def is_param_special_var(self,
+                                   line_index: int, *, var_type: list,
+                                   required: bool = True, star_allowed: bool = False) -> bool:
         if not required:
             if len(self.line_processing_list) - 1 < line_index:
                 return True

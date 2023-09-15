@@ -853,7 +853,10 @@ class CodeVerifier:
         if not await self.is_action_required_len(1, 1):
             return False
 
-        if self.line_processing_list[1] not in self.se_variables:
+        variable = await self.get_str_from_line(1)
+        variable = await self.strip_brackets(variable)
+
+        if variable not in self.se_variables[0] and variable not in self.custom_variables[0]:
             await self.error_template(1, "Invalid variable | "
                                          "Variable doesn't exist")
             return False
@@ -864,7 +867,11 @@ class CodeVerifier:
         if not await self.is_action_required_len(1, 1):
             return False
 
-        if self.line_processing_list[1] not in self.se_variables:
+        variable = await self.get_str_from_line(1)
+        variable = await self.strip_brackets(variable)
+        print(f"{variable} not in self.se_variables and {variable} not in self.custom_vars")
+
+        if variable not in self.se_variables[0] and variable not in self.custom_variables[0]:
             await self.error_template(1, "Invalid player variable | "
                                          "Variable doesn't exist")
             return False
@@ -963,13 +970,14 @@ class CodeVerifier:
     async def register_variable(self, name_index: int, value_index: int, *,
                                 player_var: bool, everything_in_range: bool = False):
 
-        variable_name = self.line_processing_list[name_index]
+        variable_name = await self.get_str_from_line(name_index)
+        variable_name = await self.strip_brackets(variable_name)
         variable_value = ""
 
         if everything_in_range:
             variable_value = " ".join(self.line_processing_list[value_index:])
         else:
-            variable_value = self.line_processing_list[value_index]
+            variable_value = await self.get_str_from_line(value_index)
 
         if not await self.is_containing_brackets(name_index):
             return False
@@ -1004,6 +1012,7 @@ class CodeVerifier:
                 return None
 
             self.custom_variables.append([variable_name, await get_type(), False, variable_value])
+
         elif player_var:
             self.custom_variables.append([variable_name, int, True, variable_value])
 
@@ -1073,12 +1082,13 @@ class CodeVerifier:
             return False
 
         variable = await self.get_str_from_line(line_index)
+        variable = await self.strip_brackets(variable)
 
         if ":" in variable:
             await self.add_line_to_result("🔳")
             return True
 
-        if await self.is_variable_defined(var_type=int or str or float,
+        if await self.is_variable_defined(var_type=int,
                                           line_index=line_index,
                                           player_var=True,
                                           var_list=self.se_variables):
@@ -1116,7 +1126,7 @@ class CodeVerifier:
             if iterator in self.labels:
                 return True
             elif int(iterator):
-                await self.error_template(line_index, f"Detected line number | USE LABELS")
+                await self.error_template(line_index, f"Detected number | USE LABELS!")
                 return False
 
         except:
@@ -1125,7 +1135,7 @@ class CodeVerifier:
 
     async def is_containing_brackets(self, line_index: int) -> bool:
         variable = await self.get_str_from_line(line_index)
-        if not variable[0] == "{" and variable[-1] == "}":
+        if not (variable[0] == "{" and variable[-1] == "}"):
             return False
 
         variable = variable.removeprefix("{").removesuffix("}")
@@ -1172,6 +1182,7 @@ class CodeVerifier:
         var_name = await self.strip_brackets(var_name)
 
         for se_var in var_list:
+            print(se_var)
             # Skip check if name is not the same, or if variable is a player var or not
             if not var_name == se_var[0] or not se_var[2] == player_var:
                 continue

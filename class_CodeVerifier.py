@@ -1135,6 +1135,7 @@ class CodeVerifier:
 
         return True
 
+    # Check if len(list) can accommodate a param at the specified index
     async def is_variable_present(self, line_index: int) -> bool:
         if len(self.line_processing_list) - 1 >= line_index:
             return True

@@ -1216,6 +1216,10 @@ class CodeVerifier:
         if await self.is_variable_specified_type(var_type, line_index):
             return True
 
+        if math_supported:
+            await self.add_line_to_result("🔲")
+            return True
+
         to_be_number = await self.get_str_from_line(line_index)
 
         try:

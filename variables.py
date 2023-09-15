@@ -232,6 +232,9 @@ door_type = [
     "CheckpointArmoryA",
     "CheckpointArmoryB",
     "Airlock",
+    "*",
+    "**",
+    "!*"
 ]
 
 se_variables: list = [

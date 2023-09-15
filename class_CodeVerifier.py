@@ -94,6 +94,7 @@ class CodeVerifier:
             self.se_variables.append([role.upper(), int, True])
         for room in self.room_types:
             self.se_variables.append([room.upper(), int, True])
+
     """
     END OF __init__ SECTION
     
@@ -272,178 +273,178 @@ class CodeVerifier:
     
     > Check if param is as it should be
     > If it's good, check the next param, if not, return False
-    >> Errors are usually raised at the top of the "check tree" (things like is_var_specified_type),
-    >> so operating on bool values is essential to pass the info that something went wrong
+    >> Errors are usually raised in the middle of the "check tree" (things like is_action_required_len),
+    >> so operating on bool values is essential to pass the info that something went wrong to lower parts
     > If all params were checked and none returned False, return True
     """
 
     async def action_hint(self) -> bool:
-        if not await self.is_action_required_length(2, None):
+        if not await self.is_action_required_len(2, None):
             return False
 
-        if not await self.is_number(1, float):
+        if not await self.is_param_number(1, float):
             return False
 
         return True
 
     async def action_hintplayer(self) -> bool:
-        if not await self.is_action_required_length(3, None):
+        if not await self.is_action_required_len(3, None):
             return False
 
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
 
-        if not await self.is_number(2, float):
+        if not await self.is_param_number(2, float):
             return False
 
         return True
 
     async def action_countdown(self) -> bool:
-        if not await self.is_action_required_length(3, None):
+        if not await self.is_action_required_len(3, None):
             return False
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
 
-        if not await self.is_number(2, int):
+        if not await self.is_param_number(2, int):
             return False
 
         return True
 
     async def action_broadcastplayer(self) -> bool:
-        if not await self.is_action_required_length(3, None):
+        if not await self.is_action_required_len(3, None):
             return False
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
-        if not await self.is_number(2, float):
+        if not await self.is_param_number(2, float):
             return False
 
         return True
 
     async def action_broadcast(self) -> bool:
-        if not await self.is_action_required_length(2, None):
+        if not await self.is_action_required_len(2, None):
             return False
 
-        if not await self.is_number(1, float):
+        if not await self.is_param_number(1, float):
             return False
 
         return True
 
     async def action_clearcassie(self) -> bool:
-        if not await self.is_action_required_length(0, 0):
+        if not await self.is_action_required_len(0, 0):
             return False
 
         return True
 
     async def action_silentcassie(self) -> bool:
-        if not await self.is_action_required_length(1, None):
+        if not await self.is_action_required_len(1, None):
             return False
 
         return True
 
     async def action_cassie(self) -> bool:
-        if not await self.is_action_required_length(1, None):
+        if not await self.is_action_required_len(1, None):
             return False
 
         return True
 
     async def action_clearinventory(self) -> bool:
-        if not await self.is_action_required_length(1, 1):
+        if not await self.is_action_required_len(1, 1):
             return False
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
 
         return True
 
     async def action_removeitem(self) -> bool:
-        if not await self.is_action_required_length(2, 3):
+        if not await self.is_action_required_len(2, 3):
             return False
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
-        if not await self.is_variable(2, var_type=self.item_types):
+        if not await self.is_param_other_var(2, var_type=self.item_types):
             return False
-        if not await self.is_number(3, int, required=False):
+        if not await self.is_param_number(3, int, required=False):
             return False
 
         return True
 
     async def action_give(self) -> bool:
-        if not await self.is_action_required_length(2, 3):
+        if not await self.is_action_required_len(2, 3):
             return False
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
-        if not await self.is_variable(2, var_type=self.item_types):
+        if not await self.is_param_other_var(2, var_type=self.item_types):
             return False
-        if not await self.is_number(3, int, required=False):
+        if not await self.is_param_number(3, int, required=False):
             return False
 
         return True
 
     async def action_lightcolor(self) -> bool:
-        if not await self.is_action_required_length(4, 4):
+        if not await self.is_action_required_len(4, 4):
             return False
-        if not await self.is_variable(1, var_type=self.room_types, star_allowed=True):
+        if not await self.is_param_other_var(1, var_type=self.room_types, star_allowed=True):
             return False
         for index in range(2, 5):
-            if not await self.is_number(index, int, min_value=0, max_value=255):
+            if not await self.is_param_number(index, int, min_value=0, max_value=255):
                 return False
 
         return True
 
     async def action_resetlightcolor(self) -> bool:
-        if not await self.is_action_required_length(1, 1):
+        if not await self.is_action_required_len(1, 1):
             return False
-        if not await self.is_variable(1, var_type=self.room_types, star_allowed=True):
+        if not await self.is_param_other_var(1, var_type=self.room_types, star_allowed=True):
             return False
         return True
 
     async def action_lightsoff(self) -> bool:
-        if not await self.is_action_required_length(2, 2):
+        if not await self.is_action_required_len(2, 2):
             return False
-        if not await self.is_variable(1, var_type=self.room_types, star_allowed=True):
+        if not await self.is_param_other_var(1, var_type=self.room_types, star_allowed=True):
             return False
-        if not await self.is_number(2, float):
+        if not await self.is_param_number(2, float):
             return False
 
         return True
 
     async def action_goto(self) -> bool:
-        if not await self.is_action_required_length(1, 1):
+        if not await self.is_action_required_len(1, 1):
             return False
-        if not await self.is_label(1):
+        if not await self.is_param_label(1):
             return False
 
         return True
 
     async def action_gotoif(self) -> bool:
-        if not await self.is_action_required_length(3, None):
+        if not await self.is_action_required_len(3, None):
             return False
-        if not await self.is_label(1):
+        if not await self.is_param_label(1):
             return False
-        if not await self.is_label(2):
+        if not await self.is_param_label(2):
             return False
 
         return True
 
     async def action_if(self) -> bool:
-        if not await self.is_action_required_length(1, None):
+        if not await self.is_action_required_len(1, None):
             return False
 
         return True
 
     async def action_stop(self) -> bool:
-        if not await self.is_action_required_length(0, 0):
+        if not await self.is_action_required_len(0, 0):
             return False
 
         return True
 
     async def action_stopif(self) -> bool:
-        if not await self.is_action_required_length(1, None):
+        if not await self.is_action_required_len(1, None):
             return False
 
         return True
 
     async def action_door(self) -> bool:
-        if not await self.is_action_required_length(2, 2):
+        if not await self.is_action_required_len(2, 2):
             return False
 
         modes = ("LOCK", "UNLOCK", "OPEN", "CLOSE", "DESTROY")
@@ -454,7 +455,7 @@ class CodeVerifier:
                                          "LOCK/UNLOCK/OPEN/CLOSE/DESTROY")
             return False
 
-        if not await self.is_variable(2, var_type=self.door_types, star_allowed=True):
+        if not await self.is_param_other_var(2, var_type=self.door_types, star_allowed=True):
             return False
 
         return True
@@ -463,19 +464,19 @@ class CodeVerifier:
         mode_selected = self.line_processing_list[1]
 
         if mode_selected == "ENABLE" or mode_selected == "DISABLE":
-            if not await self.is_action_required_length(1, 1):
+            if not await self.is_action_required_len(1, 1):
                 return False
 
         elif mode_selected == "ROLETYPE":
-            if not await self.is_action_required_length(2, 2):
+            if not await self.is_action_required_len(2, 2):
                 return False
-            if not await self.is_variable(2, var_type=self.role_types):
+            if not await self.is_param_other_var(2, var_type=self.role_types):
                 return False
 
         elif mode_selected == "PLAYERS":
-            if not await self.is_action_required_length(2, 2):
+            if not await self.is_action_required_len(2, 2):
                 return False
-            if not await self.is_se_variable(1):
+            if not await self.is_param_se_var(1):
                 return False
 
         else:
@@ -488,7 +489,7 @@ class CodeVerifier:
         modes = ("START", "STOP", "LOCK", "UNLOCK", "DETONATE", "BLASTDOORS")
         mode_selected = self.line_processing_list[1]
 
-        if not await self.is_action_required_length(1, 1):
+        if not await self.is_action_required_len(1, 1):
             return False
         if mode_selected not in modes:
             await self.error_template(1, "Invalid mode | "
@@ -498,25 +499,25 @@ class CodeVerifier:
         return True
 
     async def action_executescript(self) -> bool:
-        if not await self.is_action_required_length(1, 1):
+        if not await self.is_action_required_len(1, 1):
             return False
 
         return True
 
     async def action_help(self) -> bool:
-        if not await self.is_action_required_length(1, None):
+        if not await self.is_action_required_len(1, None):
             return False
 
         return True
 
     async def action_command(self) -> bool:
-        if not await self.is_action_required_length(1, None):
+        if not await self.is_action_required_len(1, None):
             return False
 
         return True
 
     async def action_log(self) -> bool:
-        if not await self.is_action_required_length(1, None):
+        if not await self.is_action_required_len(1, None):
             return False
 
         return True
@@ -525,24 +526,24 @@ class CodeVerifier:
         modes = ("SET", "CLEAR")
         mode_selected = self.line_processing_list[1]
 
-        if not await self.is_action_required_length(1, None):
+        if not await self.is_action_required_len(1, None):
             return False
 
         if mode_selected not in modes:
             await self.error_template(1, "Invalid mode | "
                                          "SET/CLEAR")
             return False
-        if not await self.is_se_variable(2):
+        if not await self.is_param_se_var(2):
             return False
 
         return True
 
     async def action_damage(self) -> bool:
-        if not await self.is_action_required_length(2, 3):
+        if not await self.is_action_required_len(2, 3):
             return False
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
-        if not await self.is_number(2, float, required=False):
+        if not await self.is_param_number(2, float, required=False):
             return False
 
         return True
@@ -551,23 +552,23 @@ class CodeVerifier:
         modes = ("SET", "CLEAR")
         mode_selected = self.line_processing_list[1]
 
-        if not await self.is_action_required_length(3, 4):
+        if not await self.is_action_required_len(3, 4):
             return False
         if mode_selected not in modes:
             await self.error_template(1, "Invalid mode | "
                                          "GIVE/REMOVE")
             return False
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
-        if not await self.is_variable(3, var_type=self.effect_types):
+        if not await self.is_param_other_var(3, var_type=self.effect_types):
             return False
-        if not await self.is_number(4, float, required=False):
+        if not await self.is_param_number(4, float, required=False):
             return False
 
         return True
 
     async def action_radiorange(self) -> bool:
-        if not await self.is_action_required_length(3, 3):
+        if not await self.is_action_required_len(3, 3):
             return False
 
         modes = ("SET", "LOCK")
@@ -578,7 +579,7 @@ class CodeVerifier:
             await self.error_template(1, "Invalid mode | "
                                          "SET/LOCK")
             return False
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
 
         if range_selected not in ranges:
@@ -589,105 +590,105 @@ class CodeVerifier:
         return True
 
     async def action_kill(self) -> bool:
-        if not await self.is_action_required_length(1, None):
+        if not await self.is_action_required_len(1, None):
             return False
 
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
 
         return True
 
     async def action_ahp(self) -> bool:
-        if not await self.is_action_required_length(2, 2):
+        if not await self.is_action_required_len(2, 2):
             return False
 
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
 
-        if not self.is_number(2, float):
+        if not self.is_param_number(2, float):
             return False
 
         return True
 
     async def action_maxhp(self) -> bool:
-        if not await self.is_action_required_length(2, 2):
+        if not await self.is_action_required_len(2, 2):
             return False
 
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
 
-        if not await self.is_number(2, float):
+        if not await self.is_param_number(2, float):
             return False
 
         return True
 
     async def action_hp(self) -> bool:
-        if not await self.is_action_required_length(2, 2):
+        if not await self.is_action_required_len(2, 2):
             return False
 
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
 
-        if not await self.is_number(2, float):
+        if not await self.is_param_number(2, float):
             return False
 
         return True
 
     async def action_tpdoor(self) -> bool:
-        if not await self.is_action_required_length(2, 2):
+        if not await self.is_action_required_len(2, 2):
             return False
 
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
 
-        if not await self.is_variable(2, var_type=self.door_types):
+        if not await self.is_param_other_var(2, var_type=self.door_types):
             return False
 
         return True
 
     async def action_tproom(self) -> bool:
-        if not await self.is_action_required_length(2, 2):
+        if not await self.is_action_required_len(2, 2):
             return False
 
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
 
-        if not await self.is_variable(2, var_type=self.room_types):
+        if not await self.is_param_other_var(2, var_type=self.room_types):
             return False
 
         return True
 
     async def action_tpx(self) -> bool:
-        if not await self.is_action_required_length(4, 4):
+        if not await self.is_action_required_len(4, 4):
             return False
 
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
 
         for i in range(2, 5):
-            if not await self.is_number(i, float):
+            if not await self.is_param_number(i, float):
                 return False
 
         return True
 
     async def action_size(self) -> bool:
-        if not await self.is_action_required_length(4, 5):
+        if not await self.is_action_required_len(4, 5):
             return False
 
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
 
         for i in range(2, 5):
-            if not await self.is_number(i, float):
+            if not await self.is_param_number(i, float):
                 return False
 
-        if not await self.is_number(5, int, required=False):
+        if not await self.is_param_number(5, int, required=False):
             return False
 
         return True
 
     async def action_effect(self) -> bool:
-        if not await self.is_action_required_length(3, 5):
+        if not await self.is_action_required_len(3, 5):
             return False
 
         modes = ("GIVE", "REMOVE")
@@ -698,58 +699,58 @@ class CodeVerifier:
                                          "GIVE/REMOVE")
             return False
 
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(2):
             return False
 
-        if not await self.is_variable(3, var_type=self.effect_types):
+        if not await self.is_param_other_var(3, var_type=self.effect_types):
             return False
 
-        if not await self.is_number(4, int, required=False, min_value=0, max_value=255):
+        if not await self.is_param_number(4, int, required=False, min_value=0, max_value=255):
             return False
 
-        if not await self.is_number(5, int, required=False):
+        if not await self.is_param_number(5, int, required=False):
             return False
 
         return True
 
     async def action_setrole(self) -> bool:
-        if not await self.is_action_required_length(2, 3):
+        if not await self.is_action_required_len(2, 3):
             return False
 
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
 
-        if not await self.is_variable(2, var_type=self.role_types):
+        if not await self.is_param_other_var(2, var_type=self.role_types):
             return False
 
-        if not await self.is_number(3, int, required=False):
+        if not await self.is_param_number(3, int, required=False):
             return False
 
         return True
 
     async def action_advsetrole(self) -> bool:
-        if not await self.is_action_required_length(2, 5):
+        if not await self.is_action_required_len(2, 5):
             return False
 
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
 
-        if not await self.is_variable(2, var_type=self.role_types):
+        if not await self.is_param_other_var(2, var_type=self.role_types):
             return False
 
-        if not await self.is_bool(3, required=False):
+        if not await self.is_param_bool(3, required=False):
             return False
 
-        if not await self.is_bool(4, required=False):
+        if not await self.is_param_bool(4, required=False):
             return False
 
-        if not await self.is_number(5, int, required=False):
+        if not await self.is_param_number(5, int, required=False):
             return False
 
         return True
 
     async def action_ticket(self) -> bool:
-        if not await self.is_action_required_length(3, 3):
+        if not await self.is_action_required_len(3, 3):
             return False
 
         modes = ("ADD", "REMOVE", "SET")
@@ -766,19 +767,19 @@ class CodeVerifier:
             await self.error_template(2, "Invalid team | "
                                          "ChaosInsurgency/NineTailedFox")
 
-        if not await self.is_number(3, int):
+        if not await self.is_param_number(3, int):
             return False
 
         return True
 
     async def action_start(self) -> bool:
-        if not await self.is_action_required_length(min_len=0, max_len=0):
+        if not await self.is_action_required_len(min_len=0, max_len=0):
             return False
 
         return True
 
     async def action_decontaminate(self) -> bool:
-        if not await self.is_action_required_length(0, 1):
+        if not await self.is_action_required_len(0, 1):
             return False
 
         if len(self.line_processing_list) - 1 == 0:
@@ -795,15 +796,15 @@ class CodeVerifier:
         return True
 
     async def action_roundlock(self) -> bool:
-        if not await self.is_action_required_length(1, 1):
+        if not await self.is_action_required_len(1, 1):
             return False
-        if not await self.is_bool(1):
+        if not await self.is_param_bool(1):
             return False
 
         return True
 
     async def action_enable(self) -> bool:
-        if not await self.is_action_required_length(1, 1):
+        if not await self.is_action_required_len(1, 1):
             return False
 
         mode_selected = self.line_processing_list[1]
@@ -815,7 +816,7 @@ class CodeVerifier:
         return True
 
     async def action_disable(self) -> bool:
-        if not await self.is_action_required_length(1, 1):
+        if not await self.is_action_required_len(1, 1):
             return False
 
         mode_selected = self.line_processing_list[1]
@@ -827,29 +828,29 @@ class CodeVerifier:
         return True
 
     async def action_infectrule(self) -> bool:
-        if not await self.is_action_required_length(2, 3):
+        if not await self.is_action_required_len(2, 3):
             return False
-        if not await self.is_variable(1, var_type=self.role_types, star_allowed=True):
+        if not await self.is_param_other_var(1, var_type=self.role_types, star_allowed=True):
             return False
-        if not await self.is_variable(2, var_type=self.role_types):
+        if not await self.is_param_other_var(2, var_type=self.role_types):
             return False
-        if not await self.is_bool(3, required=False):
+        if not await self.is_param_bool(3, required=False):
             return False
 
         return True
 
     async def action_spawnrule(self) -> bool:
-        if not await self.is_action_required_length(1, 2):
+        if not await self.is_action_required_len(1, 2):
             return False
-        if not await self.is_variable(1, var_type=self.role_types):
+        if not await self.is_param_other_var(1, var_type=self.role_types):
             return False
-        if not await self.is_number(2, int, required=False):
+        if not await self.is_param_number(2, int, required=False):
             return False
 
         return True
 
     async def action_delvariable(self) -> bool:
-        if not await self.is_action_required_length(1, 1):
+        if not await self.is_action_required_len(1, 1):
             return False
 
         if self.line_processing_list[1] not in self.se_variables:
@@ -860,7 +861,7 @@ class CodeVerifier:
         return True
 
     async def action_delplayervariable(self) -> bool:
-        if not await self.is_action_required_length(1, 1):
+        if not await self.is_action_required_len(1, 1):
             return False
 
         if self.line_processing_list[1] not in self.se_variables:
@@ -871,22 +872,22 @@ class CodeVerifier:
         return True
 
     async def action_saveplayers(self) -> bool:
-        if not await self.is_action_required_length(2, 3):
+        if not await self.is_action_required_len(2, 3):
             return False
 
         if not await self.register_variable(1, 2, player_var=True):
             return False
 
-        if not await self.is_se_variable(2):
+        if not await self.is_param_se_var(2):
             return False
 
-        if not await self.is_number(3, int, required=False):
+        if not await self.is_param_number(3, int, required=False):
             return False
 
         return True
 
     async def action_save(self) -> bool:
-        if not await self.is_action_required_length(1, None):
+        if not await self.is_action_required_len(1, None):
             return False
         if not await self.register_variable(1, 2,
                                             everything_in_range=True, player_var=False):
@@ -895,66 +896,66 @@ class CodeVerifier:
         return True
 
     async def action_waitsec(self) -> bool:
-        if not await self.is_action_required_length(1, None):
+        if not await self.is_action_required_len(1, None):
             return False
-        if not await self.is_number(1, float, math_supported=True):
+        if not await self.is_param_number(1, float, math_supported=True):
             return False
 
         return True
 
     async def action_waituntil(self) -> bool:
-        if not await self.is_action_required_length(1, None):
+        if not await self.is_action_required_len(1, None):
             return False
 
         return True
 
     async def action_advahp(self) -> bool:
-        if not await self.is_action_required_length(2, 7):
+        if not await self.is_action_required_len(2, 7):
             return False
 
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
 
-        if not await self.is_number(2, float):
+        if not await self.is_param_number(2, float):
             return False
 
-        if not await self.is_number(3, float, required=False):
+        if not await self.is_param_number(3, float, required=False):
             return False
 
-        if not await self.is_number(4, float, required=False):
+        if not await self.is_param_number(4, float, required=False):
             return False
 
-        if not await self.is_number(5, float, required=False):
+        if not await self.is_param_number(5, float, required=False):
             return False
 
-        if not await self.is_number(6, float, required=False):
+        if not await self.is_param_number(6, float, required=False):
             return False
 
-        if not await self.is_bool(7, required=False):
+        if not await self.is_param_bool(7, required=False):
             return False
 
         return True
 
     async def action_reskin(self) -> bool:
-        if not await self.is_action_required_length(2, 2):
+        if not await self.is_action_required_len(2, 2):
             return False
 
-        if not await self.is_se_variable(1):
+        if not await self.is_param_se_var(1):
             return False
 
-        if not await self.is_variable(2, var_type=self.role_types):
+        if not await self.is_param_other_var(2, var_type=self.role_types):
             return False
 
         return True
 
     async def action_httpget(self) -> bool:
-        if not await self.is_action_required_length(1, 1):
+        if not await self.is_action_required_len(1, 1):
             return False
 
         return True
 
     async def action_httppost(self) -> bool:
-        if not await self.is_action_required_length(2, 2):
+        if not await self.is_action_required_len(2, 2):
             return False
 
         return True
@@ -1008,9 +1009,9 @@ class CodeVerifier:
 
         return True
 
-    async def is_variable(self,
-                          line_index: int, *, var_type: list,
-                          required: bool = True, star_allowed: bool = False) -> bool:
+    async def is_param_other_var(self,
+                                 line_index: int, *, var_type: list,
+                                 required: bool = True, star_allowed: bool = False) -> bool:
         if not required:
             if len(self.line_processing_list) - 1 < line_index:
                 return True
@@ -1043,6 +1044,9 @@ class CodeVerifier:
 
         if star_allowed and variable == "*":
             return True
+        elif not star_allowed and variable == "*":
+            await self.error_template(line_index, "* usage forbidden | Use other values")
+            return False
 
         if brackets_required and "{" in variable and "}" in variable:
             variable = variable.replace("{", "").replace("}", "")
@@ -1061,7 +1065,7 @@ class CodeVerifier:
         await self.error_template(line_index, reason)
         return False
 
-    async def is_se_variable(self, line_index, *, required: bool = True) -> bool:
+    async def is_param_se_var(self, line_index, *, required: bool = True) -> bool:
         if not await self.is_variable_present(line_index) and not required:
             return True
 
@@ -1080,9 +1084,14 @@ class CodeVerifier:
                                           var_list=self.se_variables):
             return True
 
+        if variable == "*":
+            await self.error_template(line_index, "Asterisk usage forbidden")
+            return False
+
+        await self.error_template(line_index, "Invalid SE variable")
         return False
 
-    async def is_bool(self, line_index, *, required: bool = True) -> bool:
+    async def is_param_bool(self, line_index, *, required: bool = True) -> bool:
 
         variable = await self.get_str_from_line(line_index)
 
@@ -1100,7 +1109,7 @@ class CodeVerifier:
         await self.error_template(line_index, "Invalid TRUE/FALSE argument")
         return False
 
-    async def is_label(self, line_index) -> bool:
+    async def is_param_label(self, line_index) -> bool:
         try:
             iterator = await self.get_str_from_line(line_index)
 
@@ -1129,6 +1138,8 @@ class CodeVerifier:
     async def is_variable_present(self, line_index: int) -> bool:
         if len(self.line_processing_list) - 1 >= line_index:
             return True
+        else:
+            return False
 
     # Get a value from the line list, report error if outside of range
     async def get_str_from_line(self, line_index) -> str:
@@ -1187,11 +1198,11 @@ class CodeVerifier:
         except:
             return False
 
-    async def is_number(self, line_index: int, var_type: int or float, *,
-                        math_supported: bool = False,
-                        required: bool = True,
-                        min_value: int = float('-inf'),
-                        max_value: int = float('inf')) -> bool:
+    async def is_param_number(self, line_index: int, var_type: int or float, *,
+                              math_supported: bool = False,
+                              required: bool = True,
+                              min_value: int = float('-inf'),
+                              max_value: int = float('inf')) -> bool:
 
         if (not required) and (not await self.is_variable_present(line_index)):
             return True
@@ -1216,7 +1227,7 @@ class CodeVerifier:
         await self.error_template(line_index, "Invalid integer number")
         return False
 
-    async def is_action_required_length(self, min_len: int, max_len) -> bool:
+    async def is_action_required_len(self, min_len: int, max_len) -> bool:
         if not min_len <= len(self.line_processing_list) - 1:
             await self.error_invalid_min_length(abs(len(self.line_processing_list) - 1 - min_len))
 

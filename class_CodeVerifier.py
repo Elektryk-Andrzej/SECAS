@@ -856,7 +856,12 @@ class CodeVerifier:
         variable = await self.get_str_from_line(1)
         variable = await self.strip_brackets(variable)
 
-        if variable not in self.se_variables[0] and variable not in self.custom_variables[0]:
+        try:
+            if variable not in self.se_variables[0] and variable not in self.custom_variables[0]:
+                await self.error_template(1, "Invalid variable | "
+                                             "Variable doesn't exist")
+                return False
+        except:
             await self.error_template(1, "Invalid variable | "
                                          "Variable doesn't exist")
             return False

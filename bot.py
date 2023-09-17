@@ -1,13 +1,10 @@
 import discord
 import discord.ext.commands
 from discord.ext import commands
-
 from DO_NOT_SHIP.TOKEN import TOKEN
-# from discord.utils import get
 from class_CodeVerifier import CodeVerifier
-from class_Flowchart import Flowchart
 
-BOT = commands.Bot(command_prefix=".", intents=discord.Intents.all())
+bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
 
 async def proccess_verify_request(script, count_first_line: bool):
@@ -120,13 +117,13 @@ async def info_embed(message):
             answer = select_item.values
 
             if answer[0] == "description":
-                await self.embed.edit(embed=discord.Embed(title=f"What is {BOT.user.name}?", description=
+                await self.embed.edit(embed=discord.Embed(title=f"What is {bot.user.name}?", description=
                 "**Scripted Events Code Analysis System** "
                 "is a tool made to check if your SE code doesn't contain any errors. "
                 "If an error is found, SECAS will specify where and why it is."))
 
             elif answer[0] == "usage":
-                await self.embed.edit(embed=discord.Embed(title=f"How to use {BOT.user.name}?", description=
+                await self.embed.edit(embed=discord.Embed(title=f"How to use {bot.user.name}?", description=
                     "It's very simple! Just write `.v` and put all of your code below. E.g.\n"
                     "```\n"
                     ".v\n"
@@ -139,7 +136,7 @@ async def info_embed(message):
 
             elif answer[0] == "bugs":
                 await self.embed.edit(embed=discord.Embed(
-                    title=f"What should I do when I encounter a {BOT.user.name} bug?",
+                    title=f"What should I do when I encounter a {bot.user.name} bug?",
                     description=
                     f"Just ping <@762016625096261652> and explain the bug. \n"
                     f"If you do that enough times, as special thanks you will be granted a place in this embed "
@@ -147,7 +144,7 @@ async def info_embed(message):
 
             elif answer[0] == "contributors":
                 await self.embed.edit(embed=discord.Embed(
-                    title=f"{BOT.user.name} project contributors!",
+                    title=f"{bot.user.name} project contributors!",
                     description=
                     f"### <:elektryk_andrzej:1146409927032709190> <@762016625096261652> - Lead developer\n"
                     f"### <:jraylor:1148181032772849665> <@533344220585394206> - Supporter\n"
@@ -155,7 +152,7 @@ async def info_embed(message):
 
             elif answer[0] == "donate":
                 await self.embed.edit(embed=discord.Embed(
-                    title=f"{BOT.user.name} supporters!",
+                    title=f"{bot.user.name} supporters!",
                     description=
                     f"# <:jraylor:1148181032772849665> <@533344220585394206> - 8mo :heart:\n"
                     f"# <:saskyc:1146409898314309643> <@543711481837912078> - 1mo :heart:\n"
@@ -169,28 +166,28 @@ async def info_embed(message):
         async def send_initial_embed(self):
             self.embed = await self.message.reply(
                 embed=discord.Embed(
-                    title=f"{BOT.user.display_name} help center"), mention_author=False)
+                    title=f"{bot.user.display_name} help center"), mention_author=False)
 
     select_menu = SelectMenu(message)
     await message.channel.send(embed=(await select_menu.send_initial_embed()), view=select_menu)
 
 
-@BOT.event
+@bot.event
 async def on_ready():
-    print(f"Zalogowano jako {BOT.user}")
-    await BOT.change_presence(
+    print(f"Zalogowano jako {bot.user}")
+    await bot.change_presence(
         activity=discord.Activity(
             type=discord.ActivityType.watching,
             name=f".v / .i"),
         status=discord.Status.online)
 
 
-@BOT.event
+@bot.event
 async def on_message(message):
-    if message.author.id == BOT.user.id:
+    if message.author.id == bot.user.id:
         return
 
-    if message.content.upper().startswith(".I") or BOT.user.mentioned_in(message):
+    if message.content.upper().startswith(".I") or bot.user.mentioned_in(message):
         await info_embed(message)
         return
 
@@ -200,24 +197,15 @@ async def on_message(message):
         attachment = message.attachments[0]
         file = await attachment.read()
         file_content = file.decode('utf-8')
-        script = CodeVerifier(message, BOT, file_content)
+        script = CodeVerifier(message, bot, file_content)
 
         await proccess_verify_request(script, True)
 
     elif message.content.upper().startswith(".V"):
         print(f"{message.author} requested code verification")
-        script = CodeVerifier(message, BOT, message.content)
+        script = CodeVerifier(message, bot, message.content)
 
         await proccess_verify_request(script, False)
-
-    elif message.content.upper().startswith(".D"):
-        print(f"{message.author} requested code verification")
-        script = CodeVerifier(message, BOT, message.content)
-
-        await proccess_verify_request(script, False)
-        with open("logs.txt", "rb") as file:
-            # noinspection PyTypeChecker
-            await message.reply("## Debug", file=discord.File(file, "logs.txt"))
 
     '''elif message.content.upper().startswith(".F"):
         program_file = Flowchart((".v\n"
@@ -238,5 +226,5 @@ async def on_message(message):
         await message.channel.send(f"```{product}```")'''
 
 if __name__ == "__main__":
-    BOT.run(TOKEN)
+    bot.run(TOKEN)
     TOKEN = None

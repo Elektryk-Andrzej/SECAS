@@ -81,7 +81,6 @@ class CodeVerifier:
         self.errored: bool = False
         self.line_processing_index: int = 0
         self.labels = ["NEXT", "START"]
-        self.line_already_added_to_result: bool = False
         self.room_types = variables.room_type
         self.item_types = variables.item_type
         self.effect_types = variables.effect_type
@@ -134,8 +133,8 @@ class CodeVerifier:
 
         start_index = len(self.line_processing_list) - past_max_length
 
-        self.line_processing_list[start_index] = f"▶ {self.line_processing_list[start_index]}"
-        self.line_processing_list[-1] = f"{self.line_processing_list[-1]} ◀"
+        self.line_processing_list[start_index], self.line_processing_list[-1] = \
+            f"▶ {self.line_processing_list[start_index]}", f"{self.line_processing_list[-1]} ◀"
 
         error_with_arrows = ' '.join(self.line_processing_list)
 
@@ -151,18 +150,13 @@ class CodeVerifier:
 
     # Format all of the data and add it into a list, from which it will be assembled into an embed
     async def add_line_to_result(self, emoji: str):
-        if self.line_already_added_to_result:
-            return
-
         if emoji == "⬛":
             to_append = f"`{len(self.processed_lines) + 1}`{emoji}"
             self.processed_lines.append(to_append)
+            return
 
-        else:
-            to_append = f"`{len(self.processed_lines) + 1}`{emoji}` {self.line_processing_str} `"
-            self.processed_lines.append(to_append)
-
-        self.line_already_added_to_result = True
+        to_append = f"`{len(self.processed_lines) + 1}`{emoji}` {self.line_processing_str} `"
+        self.processed_lines.append(to_append)
 
     # Self explanatory
     @staticmethod
@@ -172,96 +166,80 @@ class CodeVerifier:
                              color=color)
 
     async def send_result_embed(self):
-        """class CallSupport(discord.ui.View):
-            def __init__(self, ctx):
-                super().__init__()
-                self.ctx = ctx
-
-            @discord.ui.button(
-                label="Having trouble? Call support!",
-                style=discord.ButtonStyle.blurple
-            )
-            async def button_clicked(self, interaction: discord.Interaction, button: discord.Button):
-                # noinspection PyUnresolvedReferences
-                await interaction.response.send_message("Message sent!", ephemeral=True)
-                await self.ctx.reply(f"{interaction.user} requested help\n||<@&1138508416269156402>||")
-
-        class CallDev(discord.ui.View):
-            def __init__(self, ctx):
-                super().__init__()
-                self.ctx = ctx
-
-            @discord.ui.button(
-                label="Found a bug? Call devs!",
-                style=discord.ButtonStyle.red
-            )
-            async def button_clicked(self, interaction: discord.Interaction, button: discord.Button):
-                # noinspection PyUnresolvedReferences
-                await interaction.response.send_message("Message sent!", ephemeral=True)
-                await self.ctx.reply(f"{interaction.user} requested help\n||<@762016625096261652>||")"""
+        character_limit = 2000
+        color_error = 0xdd2e44
+        color_no_error = 0x77b255
 
         if self.errored:
-            embed_number_errors = await self.create_embed(f"Errors found: `{len(self.error_reasons)}`",
-                                                          None,
-                                                          0xdd2e44)
+            embed_number_errors = \
+                await self.create_embed(f"Errors found: `{len(self.error_reasons)}`",
+                                        None,
+                                        color_error)
+
             await self.ctx.reply(embed=embed_number_errors, mention_author=False)
 
-            for index, line in enumerate(self.processed_lines):
+            for line in self.processed_lines:
                 self.embed_content += f"{line}\n"
 
-                if len(self.embed_content) > 2000:
-                    await self.ctx.channel.send(embed=await self.create_embed(
-                                                None,
-                                                self.embed_content,
-                                                0xdd2e44))
-                    self.embed_content = ""
+                if not len(self.embed_content) > character_limit:
+                    continue
+
+                await self.ctx.channel.send(embed=await self.create_embed(
+                                            None,
+                                            self.embed_content,
+                                            color_error))
+                self.embed_content = ""
 
             await self.ctx.channel.send(embed=await self.create_embed(
                                         None,
                                         self.embed_content,
-                                        0xdd2e44))
+                                        color_error))
             self.embed_content = ""
 
             for line in self.error_reasons:
                 self.embed_content += f"### > {line[2]}\n`{line[0]}`🟥` {line[1]} `\n"
 
-                if len(self.embed_content) > 2000:
-                    await self.ctx.channel.send(embed=await self.create_embed(
-                                                None,
-                                                self.embed_content,
-                                                0xdd2e44))
+                if not len(self.embed_content) > character_limit:
+                    continue
 
-                    self.embed_content = ""
+                await self.ctx.channel.send(embed=await self.create_embed(
+                                            None,
+                                            self.embed_content,
+                                            color_error))
+
+                self.embed_content = ""
 
             final_embed = discord.Embed(title=None,
                                         description=self.embed_content,
-                                        color=0xdd2e44)
+                                        color=color_error)
 
         else:
             await self.ctx.channel.send(embed=await self.create_embed(
                                  "No errors found!",
                                  None,
-                                 0x77b255),
+                                 color_no_error),
                                  mention_author=False)
 
-            for index, line in enumerate(self.processed_lines):
+            for line in self.processed_lines:
                 self.embed_content += f"{line}\n"
 
-                if len(self.embed_content) > 2000:
-                    await self.ctx.channel.send(embed=await self.create_embed(
-                                                None,
-                                                self.embed_content,
-                                                0x77b255))
-                    self.embed_content = ""
+                if not len(self.embed_content) > character_limit:
+                    continue
+
+                await self.ctx.channel.send(embed=await self.create_embed(
+                                            None,
+                                            self.embed_content,
+                                            color_no_error))
+                self.embed_content = ""
 
             final_embed = discord.Embed(title=None,
                                         description=self.embed_content,
-                                        color=0x77b255)
+                                        color=color_no_error)
 
         final_embed.set_footer(text=f"{self.bot.user.name}by @elektryk_andrzej",
                                icon_url=self.bot.user.avatar)
 
-        await self.ctx.channel.send(embed=final_embed, mention_author=False)
+        await self.ctx.channel.send(embed=final_embed)
 
     """
     END OF OUTPUT MANAGEMENT SECTION

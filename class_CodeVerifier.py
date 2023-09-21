@@ -158,7 +158,7 @@ class CodeVerifier:
         to_append = f"`{len(self.processed_lines) + 1}`{emoji}` {self.line_processing_str} `"
         self.processed_lines.append(to_append)
 
-    # Self explanatory
+    # Idk why i did this, it doesnt make anything easier
     @staticmethod
     async def create_embed(title, description, color) -> discord.Embed:
         return discord.Embed(title=title,

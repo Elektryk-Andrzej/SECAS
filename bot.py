@@ -7,6 +7,11 @@ from class_CodeVerifier import CodeVerifier
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
 
+async def delete_empty_params(line_processing_list: list) -> None:
+    line_processing_list.remove("")
+    line_processing_list.remove(" ")
+
+
 async def proccess_verify_request(script, count_first_line: bool):
     async with (script.ctx.channel.typing()):
         lines_done = 0
@@ -25,22 +30,17 @@ async def proccess_verify_request(script, count_first_line: bool):
             # for all lines to be verified
             for index, line in enumerate(script.code):
                 lines_done += 1
-                script.line_processing_index = index
-                script.line_processing_str = line.strip("\n")
-                script.line_processing_list = line.split(" ")
-                script.line_processing_list[-1].strip("\n")
-                script.line_already_added_to_result = False
 
                 # delete .v from the first line
                 if index == 0 and not count_first_line:
                     continue
 
-                '''for position, argument in enumerate(script.line_processing_list):
-                    if argument == "":
-                        await script.add_line_to_result("🟥")
-                        await script.error_template(position, "Invalid space character | Delete it",
-                                                    link=None)
-                        script.errored = True'''
+                script.line_processing_index = index
+                script.line_processing_str = line.strip("\n")
+                script.line_processing_list = line.split(" ")
+                script.line_processing_list[-1].strip("\n")
+                script.line_already_added_to_result = False
+                await delete_empty_params(script.line_processing_list)
 
                 # run check for action if exists
                 if (action_name := script.line_processing_list[0]) in script.actions:
@@ -84,10 +84,8 @@ async def proccess_verify_request(script, count_first_line: bool):
         except Exception as e:
             await script.ctx.reply("An error occured while generating the overviev.\n"
                                    "Please report it to <@762016625096261652>, thank you.\n"
-                                   f"`{e}`")
-            with open("logs.txt", "rb") as file:
-                # noinspection PyTypeChecker
-                await script.ctx.channel.send("## Debug", file=discord.File(file, "logs.txt"))
+                                   f"`{e}`",
+                                   mention_author=False)
 
     script.custom_variables = []
 
@@ -166,7 +164,7 @@ async def info_embed(message):
         async def send_initial_embed(self):
             self.embed = await self.message.reply(
                 embed=discord.Embed(
-                    title=f"{bot.user.display_name} help center"), mention_author=False)
+                    title=f"About {bot.user.display_name}"), mention_author=False)
 
     select_menu = SelectMenu(message)
     await message.channel.send(embed=(await select_menu.send_initial_embed()), view=select_menu)

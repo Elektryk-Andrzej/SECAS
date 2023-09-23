@@ -1131,6 +1131,7 @@ class CodeVerifier:
 
         variable = variable.removeprefix("{").removesuffix("}")
 
+
         if "{" in variable or "}" in variable:
             return False
 

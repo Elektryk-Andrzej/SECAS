@@ -8,8 +8,7 @@ bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
 
 async def delete_empty_params(line_processing_list: list) -> None:
-    line_processing_list.remove("")
-    line_processing_list.remove(" ")
+    pass
 
 
 async def proccess_verify_request(script, count_first_line: bool):
@@ -204,6 +203,32 @@ async def on_message(message):
         script = CodeVerifier(message, bot, message.content)
 
         await proccess_verify_request(script, False)
+
+
+    elif message.content.upper().startswith(".H"):
+        embed = \
+            discord.Embed(title=f"About getting help from others",
+                          description="""
+                          1. If you want someone to help you (which is the thing you're doing), 
+                          you want your question to be as easy to understand as possible.
+                          No one is going to try and decipher what you are asking for.
+                              
+                          2. It's in your best intrest to respect people helping you, because
+                          they're doing it for free, and they can and will refuse to help you if
+                          you don't treat them like human beings.
+                              
+                          3. Ask about certian things __AFTER__ reading the documentation
+                          and trying something out for yourself. This way you'll learn to not
+                          be reliant on other people only.
+                          
+                          """)
+        embed.add_field(name="1:",
+                        value="If you want someone to help you (which is the thing you're doing), " 
+                        "you want your question to be as easy to understand as possible.\n"
+                        "No one is going to try and decipher what you are asking for.")
+
+        await message.reply(embed=embed)
+
 
     '''elif message.content.upper().startswith(".F"):
         program_file = Flowchart((".v\n"

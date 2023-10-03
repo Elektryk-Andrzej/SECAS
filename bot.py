@@ -3,6 +3,8 @@ import discord.ext.commands
 from discord.ext import commands
 from DO_NOT_SHIP.TOKEN import TOKEN
 from class_CodeVerifier import CodeVerifier
+import class_DataHandler
+import class_ActionHandler
 
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
@@ -49,19 +51,17 @@ async def proccess_verify_request(script, count_first_line: bool):
                 script.line_already_added_to_result = False
                 await delete_empty_params(script.line_processing_list)
 
-                # run check for action if exists
-                try:
-                    action_done = await script.actions[script.line_processing_list[0]]()
+                action_specified = script.actions[script.line_processing_list[0]]
 
-                    if action_done:
+                if action_specified in script.actions:
+                    if await action_specified():
                         await script.add_line_to_result("🟩")
+
                     else:
                         await script.add_line_to_result("🟥")
                         script.errored = True
 
                     continue
-                except:
-                    pass
 
                 # comments have blue
                 if "#" in script.line_processing_list[0]:

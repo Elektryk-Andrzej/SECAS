@@ -2,4 +2,300 @@ import class_DataHandler
 
 
 class ParamHandler:
-    def __init__(self):
+    def __init__(self, data: class_DataHandler.DataHandler):
+        self.data = data
+        pass
+
+    # Register a certain value to a SE variable
+    async def register_variable(self, name_index: int, value_index: int, *,
+                                player_var: bool, everything_in_range: bool = False):
+
+        variable_name = await self.get_str_from_line(name_index)
+        variable_name = await self.strip_brackets(variable_name)
+        variable_value = ""
+
+        if everything_in_range:
+            variable_value = " ".join(self.data.line_in_list[value_index:])
+        else:
+            variable_value = await self.get_str_from_line(value_index)
+
+        if not await self.is_containing_brackets(name_index):
+            return False
+
+        async def get_type() -> type or bool:
+            if variable_value.lower() == "true" or variable_value.lower() == "false":
+                return bool
+
+            try:
+                int(variable_value)
+                return int
+            except ValueError:
+                pass
+
+            try:
+                float(variable_value)
+                return float
+            except ValueError:
+                pass
+
+            try:
+                str(variable_value)
+                return str
+            except ValueError:
+                pass
+
+            return False
+
+        if not player_var:
+            if not await get_type():
+                await self.error_template(variable_value, "Couldn't convert variable to any type")
+                return None
+
+            self.custom_variables.append([variable_name, await get_type(), False, variable_value])
+
+        elif player_var:
+            self.custom_variables.append([variable_name, int, True, variable_value])
+
+        return True
+
+    # Handles all non-standard variables, like doors, rooms, roles etc.
+    # Requires to specify a list which is to be checked
+    async def is_param_special_var(self,
+                                   line_index: int, *, var_type: list,
+                                   required: bool = True, star_allowed: bool = False) -> bool:
+        if not required:
+            if len(self.line_processing_list) - 1 < line_index:
+                return True
+
+        variable = self.line_processing_list[line_index]
+
+        if var_type[0] == "DEBUG_ROOM_TYPE":
+            reason = "Invalid room variable"
+            brackets_required = False
+
+        elif var_type[0] == "DEBUG_ITEM_TYPE":
+            reason = "Invalid item variable"
+            brackets_required = False
+
+        elif var_type[0] == "DEBUG_EFFECT_TYPE":
+            reason = "Invalid effect variable"
+            brackets_required = False
+
+        elif var_type[0] == "DEBUG_ROLE_TYPE":
+            reason = "Invalid role variable"
+            brackets_required = False
+
+        elif var_type[0] == "DEGUG_DOOR_TYPE":
+            reason = "Invalid door variable"
+            brackets_required = False
+
+        else:
+            reason = "UNKNOWN ERROR | CONTACT ANDRZEJ"
+            brackets_required = False
+
+        if star_allowed and variable == "*":
+            return True
+        elif not star_allowed and variable == "*":
+            await self.error_template(line_index, "* usage forbidden | Use other values")
+            return False
+
+        if brackets_required and "{" in variable and "}" in variable:
+            variable = variable.replace("{", "").replace("}", "")
+
+        elif brackets_required:
+            await self.error_template(line_index, "`{}` required")
+            return False
+
+        if variable in var_type:
+            return True
+
+        if ":" in variable:
+            await self.add_line_to_result("🔳")
+            return True
+
+        await self.error_template(line_index, reason)
+        return False
+
+    async def is_param_se_var(self, line_index, *, required: bool = True) -> bool:
+        if not await self.is_variable_present(line_index) and not required:
+            return True
+
+        if not await self.is_containing_brackets(line_index):
+            return False
+
+        variable = await self.get_str_from_line(line_index)
+        variable = await self.strip_brackets(variable)
+
+        if ":" in variable:
+            await self.add_line_to_result("🔳")
+            return True
+
+        if await self.is_variable_defined(var_type=int,
+                                          line_index=line_index,
+                                          player_var=True,
+                                          var_list=self.se_variables):
+            return True
+
+        if variable == "*":
+            await self.error_template(line_index, "Asterisk usage forbidden")
+            return False
+
+        await self.error_template(line_index, "Invalid SE variable")
+        return False
+
+    async def is_param_bool(self, line_index, *, required: bool = True) -> bool:
+
+        variable = await self.get_str_from_line(line_index)
+
+        if not required:
+            if len(self.line_processing_list) - 1 < line_index:
+                return True
+
+        if variable == "TRUE" or variable == "FALSE":
+            return True
+
+        for se_var in self.se_variables:
+            if variable.replace("{", "").replace("}", "") == se_var[0] and se_var[1] is bool:
+                return True
+
+        await self.error_template(line_index, "Invalid TRUE/FALSE argument")
+        return False
+
+    async def is_param_label(self, line_index) -> bool:
+        try:
+            iterator = await self.get_str_from_line(line_index)
+
+            if iterator in self.labels:
+                logging.debug(f"{self.is_param_label.__name__}")
+                return True
+            elif int(iterator):
+                await self.error_template(line_index, f"Detected number | USE LABELS!")
+                return False
+
+        except:
+            await self.error_template(line_index, f"Invalid label")
+            return False
+
+    async def is_containing_brackets(self, line_index: int) -> bool:
+        variable = await self.get_str_from_line(line_index)
+        if not (variable[0] == "{" and variable[-1] == "}"):
+            return False
+
+        variable = variable.removeprefix("{").removesuffix("}")
+
+        if "{" in variable or "}" in variable:
+            return False
+
+        return True
+
+    # Check if len(list) can accommodate a param at the specified index
+    async def is_variable_present(self, line_index: int) -> bool:
+        if len(self.line_processing_list) - 1 >= line_index:
+            return True
+        else:
+            return False
+
+    # Get a value from the line list, report error if outside of range
+    async def get_str_from_line(self, line_index) -> str:
+        try:
+            return str(self.line_processing_list[line_index]).strip()
+        except IndexError:
+            await self.report_bug(line_index,
+                                  "Tried to get a value that's outside of the line."
+                                  "Returned the last value in the line instead.")
+            return str(self.line_processing_list[-1]).strip()
+
+    # Send a message that something went wrong
+    async def report_bug(self, line_index: int, error: str):
+        self.ctx.reply(f"""
+        The bot has experienced a bug:
+        `{error}` | param `{line_index}` @ line `{self.line_processing_index}`
+        """)
+
+    @staticmethod
+    async def strip_brackets(val: str) -> str:
+        return val.replace("{", "").replace("}", "")
+
+    # Check if a variable in a list is present, True if is, False if not
+    async def is_variable_defined(self, *, var_type: type, line_index: int, player_var: bool, var_list: list) -> bool:
+        if var_list == self.se_variables:
+            var_list = self.se_variables + self.custom_variables
+
+        var_name = await self.get_str_from_line(line_index)
+        var_name = await self.strip_brackets(var_name)
+
+        for se_var in var_list:
+            print(se_var)
+            # Skip check if name is not the same, or if variable is a player var or not
+            if not var_name == se_var[0] or not se_var[2] == player_var:
+                continue
+
+            # Check variable type
+            if se_var[1] == var_type:
+                return True
+
+            # Try to force the value into a requested one (only possible with custom variables)
+            if len(se_var) > 3:
+                try:
+                    var_type(se_var[3])
+                    return True
+                except:
+                    continue
+
+        return False
+
+    async def is_variable_specified_type(self, var_type: type, line_index: int):
+        variable = await self.get_str_from_line(line_index)
+
+        try:
+            var_type(variable)
+            return True
+        except:
+            return False
+
+    async def is_param_number(self, line_index: int, var_type: int or float, *,
+                              math_supported: bool = False,
+                              required: bool = True,
+                              min_value: int = float('-inf'),
+                              max_value: int = float('inf')) -> bool:
+
+        if (not required) and (not await self.is_variable_present(line_index)):
+            return True
+
+        if await self.is_variable_defined(var_type=var_type,
+                                          line_index=line_index,
+                                          player_var=True,
+                                          var_list=self.se_variables):
+            return True
+
+        if await self.is_variable_specified_type(var_type, line_index):
+            return True
+
+        if math_supported:
+            await self.add_line_to_result("🔲")
+            return True
+
+        to_be_number = await self.get_str_from_line(line_index)
+
+        try:
+            if min_value <= var_type(eval(to_be_number)) <= max_value:
+                return True
+        except:
+            pass
+
+        await self.error_template(line_index, "Invalid integer number")
+        return False
+
+    async def is_action_required_len(self, min_len: int, max_len) -> bool:
+        if not min_len <= len(self.line_processing_list) - 1:
+            await self.error_invalid_min_length(abs(len(self.line_processing_list) - 1 - min_len))
+
+            return False
+
+        if max_len is not None:
+            if not len(self.line_processing_list) - 1 <= max_len:
+                await self.error_invalid_max_length(len(self.line_processing_list) - 1 - max_len)
+
+                return False
+
+        return True

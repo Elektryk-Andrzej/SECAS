@@ -2,103 +2,11 @@ import discord
 import discord.ext.commands
 from discord.ext import commands
 from DO_NOT_SHIP.TOKEN import TOKEN
-from class_CodeVerifier import CodeVerifier
+from class_IOHandler import IOHandler
 import class_DataHandler
 import class_ActionHandler
 
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
-
-
-async def delete_empty_params(line_processing_list: list) -> None:
-    index_to_pop = []
-
-    for index, value in enumerate(line_processing_list):
-        if value == "" or value == " ":
-            index_to_pop.append(index)
-
-    for i in range(len(index_to_pop) - 1, -1, -1):
-        line_processing_list.remove(index_to_pop[i])
-
-
-async def proccess_verify_request(script, count_first_line: bool):
-    async with (script.ctx.channel.typing()):
-        lines_done = 0
-        try:
-            # register all labels
-            for index, line in enumerate(script.code):
-                script.line_processing_list = line.split(" ")
-                script.line_processing_list[-1].strip("\n")
-
-                if index == 0 and len(script.line_processing_list) > 1 and \
-                        script.line_processing_list[0].startswith("."):
-                    script.line_processing_list.pop(0)
-
-                if ":" in (label := script.line_processing_list[-1]):
-                    script.labels.append(label.strip(":"))
-
-            # for all lines to be verified
-            for index, line in enumerate(script.code):
-                lines_done += 1
-
-                # delete .v from the first line
-                if index == 0 and not count_first_line:
-                    continue
-
-                script.line_processing_index = index
-                script.line_processing_str = line.strip("\n")
-                script.line_processing_list = line.split(" ")
-                script.line_processing_list[-1].strip("\n")
-                script.line_already_added_to_result = False
-                await delete_empty_params(script.line_processing_list)
-
-                action_specified = script.actions[script.line_processing_list[0]]
-
-                if action_specified in script.actions:
-                    if await action_specified():
-                        await script.add_line_to_result("🟩")
-
-                    else:
-                        await script.add_line_to_result("🟥")
-                        script.errored = True
-
-                    continue
-
-                # comments have blue
-                if "#" in script.line_processing_list[0]:
-                    await script.add_line_to_result("🟦")
-
-                # blank spaces have black
-                elif all(znak.isspace() for znak in script.line_processing_list) or \
-                        script.line_processing_list == ['']:
-                    await script.add_line_to_result("⬛")
-
-                # labels have purple
-                elif ":" in script.line_processing_list[-1] and len(script.line_processing_list) == 1:
-                    await script.add_line_to_result("🟪")
-
-                # flags have white
-                elif "!--" in script.line_processing_list[0]:
-                    await script.add_line_to_result("⬜")
-
-                # if nothing matches, then error
-                else:
-                    await script.add_line_to_result("🟥")
-                    await script.error_template(0, "Invalid action")
-
-                    script.errored = True
-
-            if lines_done == 1:
-                await script.error_no_code()
-            else:
-                await script.send_result_embed()
-
-        except Exception as e:
-            await script.ctx.reply("An error occured while generating the overviev.\n"
-                                   "Please report it to <@762016625096261652>, thank you.\n"
-                                   f"`{e}`",
-                                   mention_author=False)
-
-    script.custom_variables = []
 
 
 async def info_embed(message):
@@ -198,16 +106,18 @@ async def on_message(message):
     elif message.attachments and message.attachments[0].filename.endswith('.txt') \
             and message.content.upper().startswith(".V"):
 
+        data = class_DataHandler.DataHandler()
+
         attachment = message.attachments[0]
         file = await attachment.read()
         file_content = file.decode('utf-8')
-        script = CodeVerifier(message, bot, file_content)
+        script = IOHandler(message, bot, file_content)
 
         await proccess_verify_request(script, True)
 
     elif message.content.upper().startswith(".V"):
         print(f"{message.author} requested code verification")
-        script: CodeVerifier = CodeVerifier(message, bot, message.content)
+        script: IOHandler = IOHandler(message, bot, message.content)
 
         await proccess_verify_request(script, False)
 

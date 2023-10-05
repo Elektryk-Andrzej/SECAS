@@ -1,10 +1,8 @@
 import class_ActionHandler
 import logging
-action = class_ActionHandler.ActionHandler()
 
 
-
-class Data:
+class DataHandler:
     def __init__(self):
         self.room_type = [
             "DEBUG_ROOM_TYPE",
@@ -383,77 +381,78 @@ class Data:
             "WORKSTATIONS"
         ]
 
-        self.actions: dict = {
-            "HINT": action.HINT(),
-            "HINTPLAYER": action.HINTPLAYER,
-            "COUNTDOWN": action.COUNTDOWN,
-            "BROADCASTPLAYER": action.BROADCASTPLAYER,
-            "BROADCAST": action.BROADCAST,
-            "CLEARCASSIE": action.CLEARCASSIE,
-            "SILENTCASSIE": action.SILENTCASSIE,
-            "CASSIE": action.CASSIE,
-            "CLEARINVENTORY": action.CLEARINVENTORY,
-            "REMOVEITEM": action.REMOVEITEM,
-            "GIVE": action.GIVE,
-            "LIGHTCOLOR": action.LIGHTCOLOR,
-            "RESETLIGHTCOLOR": action.RESETLIGHTCOLOR,
-            "LIGHTSOFF": action.LIGHTSOFF,
-            "GOTO": action.GOTO,
-            "GOTOIF": action.GOTOIF,
-            "IF": action.IF,
-            "STOP": action.STOP,
-            "STOPIF": action.STOPIF,
-            "DOOR": action.DOOR,
-            "TESLA": action.TESLA,
-            "WARHEAD": action.WARHEAD,
-            "EXECUTESCRIPT": action.EXECUTESCRIPT,
-            "HELP": action.HELP,
-            "COMMAND": action.COMMAND,
-            "LOG": action.LOG,
-            "CUSTOMINFO": action.CUSTOMINFO,
-            "DAMAGE": action.DAMAGE,
-            "EFFECTPERM": action.EFFECTPERM,
-            "RADIORANGE": action.RADIORANGE,
-            "KILL": action.KILL,
-            "AHP": action.AHP,
-            "MAXHP": action.MAXHP,
-            "HP": action.HP,
-            "TPDOOR": action.TPDOOR,
-            "TPROOM": action.TPROOM,
-            "TPX": action.TPX,
-            "SIZE": action.SIZE,
-            "EFFECT": action.EFFECT,
-            "SETROLE": action.SETROLE,
-            "TICKET": action.TICKET,
-            "START": action.START,
-            "DECONTAMINATE": action.DECONTAMINATE,
-            "ROUNDLOCK": action.ROUNDLOCK,
-            "ENABLE": action.ENABLE,
-            "DISABLE": action.DISABLE,
-            "INFECTRULE": action.INFECTRULE,
-            "SPAWNRULE": action.SPAWNRULE,
-            "DELVARIABLE": action.DELVARIABLE,
-            "DELPLAYERVARIABLE": action.DELPLAYERVARIABLE,
-            "SAVEPLAYERS": action.SAVEPLAYERS,
-            "SAVE": action.SAVE,
-            "WAITSEC": action.WAITSEC,
-            "WAITUNTIL": action.WAITUNTIL,
-            "RESKIN": action.RESKIN,
-            "ADVSETROLE": action.ADVSETROLE,
-            "ADVAHP": action.ADVAHP,
-            "HTTPGET": action.HTTPGET,
-            "HTTPPOST": action.HTTPPOST,
-        }
-        self.line_processing_list: list = []
-        self.line_processing_str: str = ""
+        self.actions = [
+            "HINT",
+            "HINTPLAYER",
+            "COUNTDOWN",
+            "BROADCASTPLAYER",
+            "BROADCAST",
+            "CLEARCASSIE",
+            "SILENTCASSIE",
+            "CASSIE",
+            "CLEARINVENTORY",
+            "REMOVEITEM",
+            "GIVE",
+            "LIGHTCOLOR",
+            "RESETLIGHTCOLOR",
+            "LIGHTSOFF",
+            "GOTO",
+            "GOTOIF",
+            "IF",
+            "STOP",
+            "STOPIF",
+            "DOOR",
+            "TESLA",
+            "WARHEAD",
+            "EXECUTESCRIPT",
+            "HELP",
+            "COMMAND",
+            "LOG",
+            "CUSTOMINFO",
+            "DAMAGE",
+            "EFFECTPERM",
+            "RADIORANGE",
+            "KILL",
+            "AHP",
+            "MAXHP",
+            "HP",
+            "TPDOOR",
+            "TPROOM",
+            "TPX",
+            "SIZE",
+            "EFFECT",
+            "SETROLE",
+            "TICKET",
+            "START",
+            "DECONTAMINATE",
+            "ROUNDLOCK",
+            "ENABLE",
+            "DISABLE",
+            "INFECTRULE",
+            "SPAWNRULE",
+            "DELVARIABLE",
+            "DELPLAYERVARIABLE",
+            "SAVEPLAYERS",
+            "SAVE",
+            "WAITSEC",
+            "WAITUNTIL",
+            "RESKIN",
+            "ADVSETROLE",
+            "ADVAHP",
+            "HTTPGET",
+            "HTTPPOST"
+        ]
+        self.code: str = ""
+        self.line_in_list: list = []
+        self.line_in_str: str = ""
         self.processed_lines: list = []
         self.error_reasons: list = []
-        self.embed_content: str = ""
         self.errored: bool = False
         self.line_errored: bool = False
         self.line_processing_index: int = 0
-        self.labels = ["NEXT", "START"]
+        self.labels: list = ["NEXT", "START", "STOP"]
         self.custom_variables: list[list] = []
+
         for role in self.role_type:
             self.se_variables.append([role.upper(), int, True])
         for room in self.room_type:

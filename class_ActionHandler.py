@@ -1,14 +1,15 @@
+import class_DataHandler
 import class_ParamHandler
 param_handler = class_ParamHandler.ParamHandler()
 
 
 class ActionHandler:
-    def __init__(self):
-        pass
+    def __init__(self, data: class_DataHandler.DataHandler):
+        self.data = data
+        self.param_handler = class_ParamHandler.ParamHandler(data)
 
-    @staticmethod
-    async def HINT() -> bool:
-        if not await param_handler.is_action_required_len(2, None):
+    async def HINT(self) -> bool:
+        if not await self.param_handler.is_action_required_len(2, None):
             return False
 
         if not await param_handler.is_param_number(1, float):

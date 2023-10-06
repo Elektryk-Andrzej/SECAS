@@ -195,16 +195,6 @@ class ParamHandler:
         else:
             return False
 
-    # Get a value from the line list, report error if outside of range
-    async def get_str_from_line(self, line_index) -> str:
-        try:
-            return str(self.line_processing_list[line_index]).strip()
-        except IndexError:
-            await self.report_bug(line_index,
-                                  "Tried to get a value that's outside of the line."
-                                  "Returned the last value in the line instead.")
-            return str(self.line_processing_list[-1]).strip()
-
     # Send a message that something went wrong
     async def report_bug(self, line_index: int, error: str):
         self.ctx.reply(f"""

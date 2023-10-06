@@ -448,15 +448,18 @@ class DataHandler:
         self.processed_lines: list = []
         self.error_reasons: list = []
         self.errored: bool = False
-        self.line_errored: bool = False
+        self.lines_errored: list = []
         self.line_processing_index: int = 0
         self.labels: list = ["NEXT", "START", "STOP"]
         self.custom_variables: list[list] = []
+        self.andrzej_ping: str = "<@762016625096261652>"
 
         for role in self.role_type:
             self.se_variables.append([role.upper(), int, True])
         for room in self.room_type:
             self.se_variables.append([room.upper(), int, True])
+
+
 
     def __setattr__(self, key, value):
         print(f"{key} value is now {value}")

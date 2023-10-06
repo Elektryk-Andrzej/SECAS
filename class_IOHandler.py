@@ -1,12 +1,8 @@
 import discord
 # import re
-import logging
-
 import class_DataHandler
 import class_ActionHandler
-
-logging.basicConfig(level=logging.DEBUG, filename="logs.txt", filemode="w",
-                    format=f"%(levelname)s | %(message)s", datefmt="%H:%M:%S", encoding="utf8")
+import class_ErrorHandler
 
 
 class IOHandler:
@@ -14,7 +10,7 @@ class IOHandler:
         self.data = data
         self.bot = bot
         self.ctx = ctx
-        self.action_handler = class_ActionHandler.ActionHandler(data)
+        self.error_handler = class_ErrorHandler.ErrorHandler(data)
 
     async def delete_empty_params(self) -> None:
         index_to_pop = []
@@ -60,10 +56,15 @@ class IOHandler:
                     action_specified = self.data.line_in_list[0]
 
                     if action_specified in self.data.actions:
-                        action = await action_specified()
+                        action_handler = class_ActionHandler.ActionHandler(self.data)
 
+                        try:
+                            action = getattr(action_handler, action_specified)
+                        except AttributeError as e:
+                            print(f"Action {action_specified} could not be found and executed\n{e}")
+                            return
 
-                        if await action_specified():
+                        if await action:
                             await self.add_line_to_result("🟩")
 
                         else:
@@ -73,51 +74,51 @@ class IOHandler:
                         continue
 
                     # comments have blue
-                    if "#" in self.line_in_list[0]:
+                    if "#" in self.data.line_in_list[0]:
                         await self.add_line_to_result("🟦")
 
                     # blank spaces have black
-                    elif all(znak.isspace() for znak in self.line_in_list) or \
-                            self.line_in_list == ['']:
+                    elif all(znak.isspace() for znak in self.data.line_in_list) or \
+                            self.data.line_in_list == ['']:
                         await self.add_line_to_result("⬛")
 
                     # labels have purple
-                    elif ":" in self.line_in_list[-1] and len(self.line_in_list) == 1:
+                    elif ":" in self.data.line_in_list[-1] and len(self.data.line_in_list) == 1:
                         await self.add_line_to_result("🟪")
 
                     # flags have white
-                    elif "!--" in self.line_in_list[0]:
+                    elif "!--" in self.data.line_in_list[0]:
                         await self.add_line_to_result("⬜")
 
                     # if nothing matches, then error
                     else:
                         await self.add_line_to_result("🟥")
-                        await self.error_template(0, "Invalid action")
+                        await self.error_handler.error_template(0, "Invalid action")
 
                         self.errored = True
 
                 if lines_done == 1:
-                    await self.error_no_code()
+                    await self.ctx.reply("No code found! First line is always ignored.")
                 else:
                     await self.send_result_embed()
 
             except Exception as e:
                 await self.ctx.reply("An error occured while generating the overviev.\n"
-                                       "Please report it to <@762016625096261652>, thank you.\n"
+                                       f"Please report it to {self.data.andrzej_ping}, thank you.\n"
                                        f"`{e}`",
                                      mention_author=False)
 
-        self.custom_variables = []
+        self.data.custom_variables.clear()
 
     # Format all of the data and add it into a list, from which it will be assembled into an embed
     async def add_line_to_result(self, emoji: str):
         if emoji == "⬛":
-            to_append = f"`{len(self.processed_lines) + 1}`{emoji}"
-            self.processed_lines.append(to_append)
+            to_append = f"`{len(self.data.processed_lines) + 1}`{emoji}"
+            self.data.processed_lines.append(to_append)
             return
 
-        to_append = f"`{len(self.processed_lines) + 1}`{emoji}` {self.line_processing_str} `"
-        self.processed_lines.append(to_append)
+        to_append = f"`{len(self.data.processed_lines) + 1}`{emoji}` {self.data.line_in_str} `"
+        self.data.processed_lines.append(to_append)
 
     # Idk why i did this, it doesnt make anything easier
     @staticmethod
@@ -201,29 +202,3 @@ class IOHandler:
                                icon_url=self.bot.user.avatar)
 
         await self.ctx.channel.send(embed=final_embed)
-
-    """
-    END OF OUTPUT MANAGEMENT SECTION
-    
-    START OF ACTION SECTION
-    
-    
-    Basic action check schematic:
-    
-    > Check if param is as it should be
-    > If it's good, check the next param, if not, return False
-    >> Errors are usually raised in the middle of the "check tree" (things like is_action_required_len),
-    >> so operating on bool values is essential to pass the info that something went wrong to lower parts
-    > If all params were checked and none returned False, return True
-    """
-
-
-
-
-    """
-    END OF ACTION SECTION
-    
-    START OF ACTION HANDLING SECTION
-    """
-
-

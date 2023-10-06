@@ -442,6 +442,7 @@ class DataHandler:
             "HTTPGET",
             "HTTPPOST"
         ]
+
         self.code: str = ""
         self.line_in_list: list = []
         self.line_in_str: str = ""
@@ -453,13 +454,12 @@ class DataHandler:
         self.labels: list = ["NEXT", "START", "STOP"]
         self.custom_variables: list[list] = []
         self.andrzej_ping: str = "<@762016625096261652>"
+        self.critical_error: str = ""
 
         for role in self.role_type:
             self.se_variables.append([role.upper(), int, True])
         for room in self.room_type:
             self.se_variables.append([room.upper(), int, True])
-
-
 
     def __setattr__(self, key, value):
         print(f"{key} value is now {value}")

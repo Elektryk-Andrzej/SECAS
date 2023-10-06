@@ -17,8 +17,13 @@ class ErrorHandler:
 
         self.data.error_reasons.append(to_append)
 
+    # Send a message that something went wrong
     async def secas_error(self, line_index: int, reason: str):
-        pass
+        self.data.critical_error = \
+            f"""
+            SECAS has experienced a bug:
+            `{reason}` | param `{line_index}` @ line `{self.data.line_processing_index}`
+            """
 
     # Adds three "_" for each parameter missing, while surrouding them with arrows
     async def error_invalid_min_length(self, number_missing: int):

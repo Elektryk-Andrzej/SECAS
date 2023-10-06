@@ -202,10 +202,6 @@ class ParamHandler:
         `{error}` | param `{line_index}` @ line `{self.line_processing_index}`
         """)
 
-    @staticmethod
-    async def strip_brackets(val: str) -> str:
-        return val.replace("{", "").replace("}", "")
-
     # Check if a variable in a list is present, True if is, False if not
     async def is_variable_defined(self, *, var_type: type, line_index: int, player_var: bool, var_list: list) -> bool:
         if var_list == self.se_variables:

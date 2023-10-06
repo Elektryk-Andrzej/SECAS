@@ -1,18 +1,21 @@
 import class_DataHandler
 import class_ParamHandler
-param_handler = class_ParamHandler.ParamHandler()
+import class_Utils
+import class_ErrorHandler
 
 
 class ActionHandler:
     def __init__(self, data: class_DataHandler.DataHandler):
         self.data = data
         self.param_handler = class_ParamHandler.ParamHandler(data)
+        self.utils = class_Utils.Utils(data)
+        self.error_handler = class_ErrorHandler.ErrorHandler(data)
 
     async def HINT(self) -> bool:
         if not await self.param_handler.is_action_required_len(2, None):
             return False
 
-        elif not await param_handler.is_param_number(1, float):
+        elif not await self.param_handler.is_param_number(1, float):
             return False
 
         return True
@@ -128,14 +131,14 @@ class ActionHandler:
     async def RESETLIGHTCOLOR(self) -> bool:
         if not await self.param_handler.is_action_required_len(1, 1):
             return False
-        if not await self.param_handler.is_param_special_var(1, var_type=self.data.room_types, star_allowed=True):
+        if not await self.param_handler.is_param_special_var(1, var_type=self.data.room_type, star_allowed=True):
             return False
         return True
 
     async def LIGHTSOFF(self) -> bool:
         if not await self.param_handler.is_action_required_len(2, 2):
             return False
-        if not await self.param_handler.is_param_special_var(1, var_type=self.data.room_types, star_allowed=True):
+        if not await self.param_handler.is_param_special_var(1, var_type=self.data.room_type, star_allowed=True):
             return False
         if not await self.param_handler.is_param_number(2, float):
             return False
@@ -183,20 +186,20 @@ class ActionHandler:
             return False
 
         modes = ("LOCK", "UNLOCK", "OPEN", "CLOSE", "DESTROY")
-        mode_selected = self.data.line_processing_list[1]
+        mode_selected = self.data.line_in_list[1]
 
         if mode_selected not in modes:
-            await self.param_handler.error_template(1, "Invalid mode | "
+            await self.error_handler.error_template(1, "Invalid mode | "
                                          "LOCK/UNLOCK/OPEN/CLOSE/DESTROY")
             return False
 
-        if not await self.param_handler.is_param_special_var(2, var_type=self.data.door_types, star_allowed=True):
+        if not await self.param_handler.is_param_special_var(2, var_type=self.data.door_type, star_allowed=True):
             return False
 
         return True
 
     async def TESLA(self) -> bool:
-        mode_selected = self.data.line_processing_list[1]
+        mode_selected = self.data.line_in_list[1]
 
         if mode_selected == "ENABLE" or mode_selected == "DISABLE":
             if not await self.param_handler.is_action_required_len(1, 1):
@@ -205,7 +208,7 @@ class ActionHandler:
         elif mode_selected == "ROLETYPE":
             if not await self.param_handler.is_action_required_len(2, 2):
                 return False
-            if not await self.param_handler.is_param_special_var(2, var_type=self.data.role_types):
+            if not await self.param_handler.is_param_special_var(2, var_type=self.data.role_type):
                 return False
 
         elif mode_selected == "PLAYERS":
@@ -215,19 +218,19 @@ class ActionHandler:
                 return False
 
         else:
-            await self.error_template(1, "Invalid mode | "
+            await self.error_handler.error_template(1, "Invalid mode | "
                                          "PLAYERS/ROLETYPE/DISABLE/ENABLE")
             return False
         return True
 
     async def WARHEAD(self) -> bool:
         modes = ("START", "STOP", "LOCK", "UNLOCK", "DETONATE", "BLASTDOORS")
-        mode_selected = self.data.line_processing_list[1]
+        mode_selected = self.data.line_in_list[1]
 
         if not await self.param_handler.is_action_required_len(1, 1):
             return False
         if mode_selected not in modes:
-            await self.error_template(1, "Invalid mode | "
+            await self.error_handler.error_template(1, "Invalid mode | "
                                          "START/STOP/LOCK/UNLOCK/DETONATE/BLASTDOORS")
             return False
 
@@ -259,13 +262,13 @@ class ActionHandler:
 
     async def CUSTOMINFO(self) -> bool:
         modes = ("SET", "CLEAR")
-        mode_selected = self.data.line_processing_list[1]
+        mode_selected = self.data.line_in_list[1]
 
         if not await self.param_handler.is_action_required_len(1, None):
             return False
 
         if mode_selected not in modes:
-            await self.error_template(1, "Invalid mode | "
+            await self.error_handler.error_template(1, "Invalid mode | "
                                          "SET/CLEAR")
             return False
         if not await self.param_handler.is_param_se_var(2):
@@ -285,17 +288,17 @@ class ActionHandler:
 
     async def EFFECTPERM(self) -> bool:
         modes = ("SET", "CLEAR")
-        mode_selected = self.data.line_processing_list[1]
+        mode_selected = self.data.line_in_list[1]
 
         if not await self.param_handler.is_action_required_len(3, 4):
             return False
         if mode_selected not in modes:
-            await self.error_template(1, "Invalid mode | "
+            await self.error_handler.error_template(1, "Invalid mode | "
                                          "GIVE/REMOVE")
             return False
         if not await self.param_handler.is_param_se_var(1):
             return False
-        if not await self.data.param_handler.is_param_special_var(3, var_type=self.effect_types):
+        if not await self.param_handler.is_param_special_var(3, var_type=self.data.effect_type):
             return False
         if not await self.param_handler.is_param_number(4, float, required=False):
             return False
@@ -307,18 +310,18 @@ class ActionHandler:
             return False
 
         modes = ("SET", "LOCK")
-        mode_selected = self.data.line_processing_list[1]
+        mode_selected = self.data.line_in_list[1]
         ranges = ("Short", "Medium", "Long", "Ultra")
-        range_selected = self.data.line_processing_list[3]
+        range_selected = self.data.line_in_list[3]
         if mode_selected in modes:
-            await self.error_template(1, "Invalid mode | "
+            await self.error_handler.error_template(1, "Invalid mode | "
                                          "SET/LOCK")
             return False
         if not await self.param_handler.is_param_se_var(1):
             return False
 
         if range_selected not in ranges:
-            await self.error_template(3, "Invalid range | "
+            await self.error_handler.error_template(3, "Invalid range | "
                                          "Short/Medium/Long/Ultra")
             return False
 
@@ -376,7 +379,7 @@ class ActionHandler:
         if not await self.param_handler.is_param_se_var(1):
             return False
 
-        if not await self.param_handler.is_param_special_var(2, var_type=self.data.door_types):
+        if not await self.param_handler.is_param_special_var(2, var_type=self.data.door_type):
             return False
 
         return True
@@ -388,7 +391,7 @@ class ActionHandler:
         if not await self.param_handler.is_param_se_var(1):
             return False
 
-        if not await self.param_handler.is_param_special_var(2, var_type=self.data.room_types):
+        if not await self.param_handler.is_param_special_var(2, var_type=self.data.room_type):
             return False
 
         return True
@@ -427,17 +430,17 @@ class ActionHandler:
             return False
 
         modes = ("GIVE", "REMOVE")
-        mode_selected = self.data.line_processing_list[1]
+        mode_selected = self.data.line_in_list[1]
 
         if mode_selected not in modes:
-            await self.error_template(1, "Invalid mode | "
+            await self.error_handler.error_template(1, "Invalid mode | "
                                          "GIVE/REMOVE")
             return False
 
         if not await self.param_handler.is_param_se_var(2):
             return False
 
-        if not await self.param_handler.is_param_special_var(3, var_type=self.data.effect_types):
+        if not await self.param_handler.is_param_special_var(3, var_type=self.data.effect_type):
             return False
 
         if not await self.param_handler.is_param_number(4, int, required=False, min_value=0, max_value=255):
@@ -455,7 +458,7 @@ class ActionHandler:
         if not await self.param_handler.is_param_se_var(1):
             return False
 
-        if not await self.param_handler.is_param_special_var(2, var_type=self.data.role_types):
+        if not await self.param_handler.is_param_special_var(2, var_type=self.data.role_type):
             return False
 
         if not await self.param_handler.is_param_number(3, int, required=False):
@@ -470,7 +473,7 @@ class ActionHandler:
         if not await self.param_handler.is_param_se_var(1):
             return False
 
-        if not await self.param_handler.is_param_special_var(2, var_type=self.data.role_types):
+        if not await self.param_handler.is_param_special_var(2, var_type=self.data.role_type):
             return False
 
         if not await self.param_handler.is_param_bool(3, required=False):
@@ -489,17 +492,17 @@ class ActionHandler:
             return False
 
         modes = ("ADD", "REMOVE", "SET")
-        mode_selected = self.data.line_processing_list[1]
+        mode_selected = self.data.line_in_list[1]
 
         if mode_selected not in modes:
-            await self.error_template(1, "Invalid mode | "
+            await self.error_handler.error_template(1, "Invalid mode | "
                                          "ADD/REMOVE/SET")
 
         teams = ("ChaosInsurgency", "NineTailedFox")
-        team_selected = self.data.line_processing_list[2]
+        team_selected = self.data.line_in_list[2]
 
         if team_selected not in teams:
-            await self.error_template(2, "Invalid team | "
+            await self.error_handler.error_template(2, "Invalid team | "
                                          "ChaosInsurgency/NineTailedFox")
 
         if not await self.param_handler.is_param_number(3, int):
@@ -517,14 +520,14 @@ class ActionHandler:
         if not await self.param_handler.is_action_required_len(0, 1):
             return False
 
-        if len(self.data.line_processing_list) - 1 == 0:
+        if len(self.data.line_in_list) - 1 == 0:
             return True
 
         modes = ("ENABLE", "DISABLE", "FORCE")
-        mode_selected = self.data.line_processing_list[1]
+        mode_selected = self.data.line_in_list[1]
 
         if mode_selected not in modes:
-            await self.error_template(1, "Invalid mode | "
+            await self.error_handler.error_template(1, "Invalid mode | "
                                          "ENABLE/DISABLE/FORCE")
             return False
 
@@ -542,10 +545,10 @@ class ActionHandler:
         if not await self.param_handler.is_action_required_len(1, 1):
             return False
 
-        mode_selected = self.data.line_processing_list[1]
+        mode_selected = self.data.line_in_list[1]
 
-        if mode_selected not in self.data.enable_disable_keys:
-            await self.error_template(1, "Invalid key")
+        if mode_selected not in self.data.enable_disable_key:
+            await self.error_handler.error_template(1, "Invalid key")
             return False
 
         return True
@@ -554,10 +557,10 @@ class ActionHandler:
         if not await self.param_handler.is_action_required_len(1, 1):
             return False
 
-        mode_selected = self.data.line_processing_list[1]
+        mode_selected = self.data.line_in_list[1]
 
-        if mode_selected not in self.data.enable_disable_keys:
-            await self.error_template(1, "Invalid key")
+        if mode_selected not in self.data.enable_disable_key:
+            await self.error_handler.error_template(1, "Invalid key")
             return False
 
         return True
@@ -565,9 +568,9 @@ class ActionHandler:
     async def INFECTRULE(self) -> bool:
         if not await self.param_handler.is_action_required_len(2, 3):
             return False
-        if not await self.param_handler.is_param_special_var(1, var_type=self.data.role_types, star_allowed=True):
+        if not await self.param_handler.is_param_special_var(1, var_type=self.data.role_type, star_allowed=True):
             return False
-        if not await self.param_handler.is_param_special_var(2, var_type=self.data.role_types):
+        if not await self.param_handler.is_param_special_var(2, var_type=self.data.role_type):
             return False
         if not await self.param_handler.is_param_bool(3, required=False):
             return False
@@ -577,7 +580,7 @@ class ActionHandler:
     async def SPAWNRULE(self) -> bool:
         if not await self.param_handler.is_action_required_len(1, 2):
             return False
-        if not await self.param_handler.is_param_special_var(1, var_type=self.role_types):
+        if not await self.param_handler.is_param_special_var(1, var_type=self.data.role_type):
             return False
         if not await self.param_handler.is_param_number(2, int, required=False):
             return False
@@ -588,16 +591,16 @@ class ActionHandler:
         if not await self.param_handler.is_action_required_len(1, 1):
             return False
 
-        variable = await self.get_str_from_line(1)
-        variable = await self.strip_brackets(variable)
+        variable = await self.utils.get_str_from_line(1)
+        variable = await self.utils.strip_brackets(variable)
 
         try:
-            if variable not in self.se_variables[0] and variable not in self.custom_variables[0]:
-                await self.error_template(1, "Invalid variable | "
+            if variable not in self.data.se_variables[0] and variable not in self.data.custom_variables[0]:
+                await self.error_handler.error_template(1, "Invalid variable | "
                                              "Variable doesn't exist")
                 return False
         except:
-            await self.error_template(1, "Invalid variable | "
+            await self.error_handler.error_template(1, "Invalid variable | "
                                          "Variable doesn't exist")
             return False
 
@@ -607,11 +610,11 @@ class ActionHandler:
         if not await self.param_handler.is_action_required_len(1, 1):
             return False
 
-        variable = await self.get_str_from_line(1)
-        variable = await self.strip_brackets(variable)
+        variable = await self.utils.get_str_from_line(1)
+        variable = await self.utils.strip_brackets(variable)
 
-        if variable not in self.se_variables[0] and variable not in self.custom_variables[0]:
-            await self.error_template(1, "Invalid player variable | "
+        if variable not in self.data.se_variables[0] and variable not in self.data.custom_variables[0]:
+            await self.error_handler.error_template(1, "Invalid player variable | "
                                          "Variable doesn't exist")
             return False
 
@@ -689,7 +692,7 @@ class ActionHandler:
         if not await self.param_handler.is_param_se_var(1):
             return False
 
-        if not await self.param_handler.is_param_special_var(2, var_type=self.role_types):
+        if not await self.param_handler.is_param_special_var(2, var_type=self.data.role_type):
             return False
 
         return True

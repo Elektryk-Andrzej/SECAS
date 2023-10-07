@@ -1,6 +1,3 @@
-import class_ActionHandler
-import logging
-
 
 class DataHandler:
     def __init__(self):
@@ -153,6 +150,7 @@ class DataHandler:
             "Scanned"
         ]
 
+        print("init role_type")
         self.role_type = [
             "DEBUG_ROLE_TYPE",
             "None",
@@ -180,6 +178,7 @@ class DataHandler:
             "ChaosRepressor",
             "ChaosMarauder"
         ]
+        print(self.role_type)
 
         self.door_type = [
             "DEGUG_DOOR_TYPE",
@@ -460,6 +459,3 @@ class DataHandler:
             self.se_variables.append([role.upper(), int, True])
         for room in self.room_type:
             self.se_variables.append([room.upper(), int, True])
-
-    def __setattr__(self, key, value):
-        print(f"{key} value is now {value}")

@@ -1,10 +1,10 @@
 import discord
 import discord.ext.commands
 from discord.ext import commands
+
+import class_IOHandler
 from DO_NOT_SHIP.TOKEN import TOKEN
-from class_IOHandler import IOHandler
 import class_DataHandler
-import class_ActionHandler
 
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
@@ -107,19 +107,21 @@ async def on_message(message):
             and message.content.upper().startswith(".V"):
 
         data = class_DataHandler.DataHandler()
+        io_handler = class_IOHandler.IOHandler(data, message, bot)
 
         attachment = message.attachments[0]
-        file = await attachment.read()
-        file_content = file.decode('utf-8')
-        script = IOHandler(message, bot, file_content)
+        message_content = await attachment.read()
+        data.code = message_content.decode("utf-8")
 
-        await proccess_verify_request(script, True)
+        await io_handler.proccess_verify_request(count_first_line=True)
 
     elif message.content.upper().startswith(".V"):
-        print(f"{message.author} requested code verification")
-        script: IOHandler = IOHandler(message, bot, message.content)
 
-        await proccess_verify_request(script, False)
+        data = class_DataHandler.DataHandler()
+        io_handler = class_IOHandler.IOHandler(data, message, bot)
+
+        data.code = message.content
+        await io_handler.proccess_verify_request(count_first_line=False)
 
     elif message.content.upper().startswith(".H"):
         embed = \

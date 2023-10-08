@@ -95,14 +95,14 @@ class ParamHandler:
         if star_allowed and variable == "*":
             return True
         elif not star_allowed and variable == "*":
-            await self.error_handler.error_template(line_index, "* usage forbidden | Use other values")
+            await self.error_handler.template(line_index, "* usage forbidden | Use other values")
             return False
 
         if brackets_required and "{" in variable and "}" in variable:
             variable = variable.replace("{", "").replace("}", "")
 
         elif brackets_required:
-            await self.error_handler.error_template(line_index, "`{}` required")
+            await self.error_handler.template(line_index, "`{}` required")
             return False
 
         if variable in var_type:
@@ -112,7 +112,7 @@ class ParamHandler:
             await self.utils.add_line_to_result("🔳")
             return True
 
-        await self.error_handler.error_template(line_index, reason)
+        await self.error_handler.template(line_index, reason)
         return False
 
     async def is_param_se_var(self, line_index, *, required: bool = True) -> bool:
@@ -136,10 +136,10 @@ class ParamHandler:
             return True
 
         if variable == "*":
-            await self.error_handler.error_template(line_index, "Asterisk usage forbidden")
+            await self.error_handler.template(line_index, "Asterisk usage forbidden")
             return False
 
-        await self.error_handler.error_template(line_index, "Invalid SE variable")
+        await self.error_handler.template(line_index, "Invalid SE variable")
         return False
 
     async def is_param_bool(self, line_index, *, required: bool = True) -> bool:
@@ -157,7 +157,7 @@ class ParamHandler:
             if variable.replace("{", "").replace("}", "") == se_var[0] and se_var[1] is bool:
                 return True
 
-        await self.error_handler.error_template(line_index, "Invalid TRUE/FALSE argument")
+        await self.error_handler.template(line_index, "Invalid TRUE/FALSE argument")
         return False
 
     async def is_param_label(self, line_index) -> bool:
@@ -168,11 +168,11 @@ class ParamHandler:
                 return True
 
             elif int(iterator):
-                await self.error_handler.error_template(line_index, f"Detected number | USE LABELS!")
+                await self.error_handler.template(line_index, f"Detected number | USE LABELS!")
                 return False
 
         except:
-            await self.error_handler.error_template(line_index, f"Invalid label")
+            await self.error_handler.template(line_index, f"Invalid label")
             return False
 
     async def is_containing_brackets(self, line_index: int) -> bool:
@@ -261,18 +261,18 @@ class ParamHandler:
         except:
             pass
 
-        await self.error_handler.error_template(line_index, "Invalid integer number")
+        await self.error_handler.template(line_index, "Invalid integer number")
         return False
 
     async def is_action_required_len(self, min_len: int, max_len) -> bool:
         if not min_len <= len(self.data.line_in_list) - 1:
-            await self.error_handler.error_invalid_min_length(abs(len(self.data.line_in_list) - 1 - min_len))
+            await self.error_handler.invalid_min_length(abs(len(self.data.line_in_list) - 1 - min_len))
 
             return False
 
         if max_len is not None:
             if not len(self.data.line_in_list) - 1 <= max_len:
-                await self.error_handler.error_invalid_max_length(len(self.data.line_in_list) - 1 - max_len)
+                await self.error_handler.invalid_max_length(len(self.data.line_in_list) - 1 - max_len)
 
                 return False
 

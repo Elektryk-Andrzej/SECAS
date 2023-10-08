@@ -6,8 +6,9 @@ class ErrorHandler:
         self.data = data
 
     # Used to handle most errors, surrounds the specified line index with arrows
-    async def error_template(self, line_index: int, reason: str):
+    async def template(self, line_index: int, reason: str):
         self.data.line_errored = True
+        self.data.errored = True
 
         self.data.line_in_list[line_index] = f"▶ {self.data.line_in_list[line_index]} ◀"
 
@@ -25,7 +26,7 @@ class ErrorHandler:
             """
 
     # Adds three "_" for each parameter missing, while surrouding them with arrows
-    async def error_invalid_min_length(self, number_missing: int):
+    async def invalid_min_length(self, number_missing: int):
         self.data.line_errored = True
 
         reason = f"Missing arguments | {number_missing}"
@@ -41,21 +42,20 @@ class ErrorHandler:
         self.data.error_reasons.append(to_append)
 
     # Surrounds all unwanted parameters with arrows
-    async def error_invalid_max_length(self, past_max_length: int):
-        if past_max_length == 1:  # this method needs to have more than 1 argument, if not, redirect to a normal one
-            await self.error_template(-1, "Unexpected arguments | 1")
+    async def invalid_max_length(self, past_max_length: int):
+
+        # this method needs to have more than 1 argument, if not, redirect to a normal one
+        if past_max_length == 1:
+            await self.template(-1, "Unexpected arguments | 1")
 
         self.data.line_errored = True
-
         reason = f"Unexpected arguments | {past_max_length}"
-
         start_index = len(self.data.line_in_list) - past_max_length
 
         self.data.line_in_list[start_index], self.data.line_in_list[-1] = \
             f"▶ {self.data.line_in_list[start_index]}", f"{self.data.line_in_list[-1]} ◀"
 
         line_with_arrows = ' '.join(self.data.line_in_list)
-
         to_append = [self.data.line_processing_index, line_with_arrows, reason, None]
 
         self.data.error_reasons.append(to_append)

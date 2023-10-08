@@ -1,4 +1,3 @@
-
 class DataHandler:
     def __init__(self):
         self.room_type = [
@@ -178,7 +177,6 @@ class DataHandler:
             "ChaosRepressor",
             "ChaosMarauder"
         ]
-        print(self.role_type)
 
         self.door_type = [
             "DEGUG_DOOR_TYPE",
@@ -378,68 +376,6 @@ class DataHandler:
             "TESLAS",
             "WARHEAD",
             "WORKSTATIONS"
-        ]
-
-        self.actions = [
-            "HINT",
-            "HINTPLAYER",
-            "COUNTDOWN",
-            "BROADCASTPLAYER",
-            "BROADCAST",
-            "CLEARCASSIE",
-            "SILENTCASSIE",
-            "CASSIE",
-            "CLEARINVENTORY",
-            "REMOVEITEM",
-            "GIVE",
-            "LIGHTCOLOR",
-            "RESETLIGHTCOLOR",
-            "LIGHTSOFF",
-            "GOTO",
-            "GOTOIF",
-            "IF",
-            "STOP",
-            "STOPIF",
-            "DOOR",
-            "TESLA",
-            "WARHEAD",
-            "EXECUTESCRIPT",
-            "HELP",
-            "COMMAND",
-            "LOG",
-            "CUSTOMINFO",
-            "DAMAGE",
-            "EFFECTPERM",
-            "RADIORANGE",
-            "KILL",
-            "AHP",
-            "MAXHP",
-            "HP",
-            "TPDOOR",
-            "TPROOM",
-            "TPX",
-            "SIZE",
-            "EFFECT",
-            "SETROLE",
-            "TICKET",
-            "START",
-            "DECONTAMINATE",
-            "ROUNDLOCK",
-            "ENABLE",
-            "DISABLE",
-            "INFECTRULE",
-            "SPAWNRULE",
-            "DELVARIABLE",
-            "DELPLAYERVARIABLE",
-            "SAVEPLAYERS",
-            "SAVE",
-            "WAITSEC",
-            "WAITUNTIL",
-            "RESKIN",
-            "ADVSETROLE",
-            "ADVAHP",
-            "HTTPGET",
-            "HTTPPOST"
         ]
 
         self.code: str = ""

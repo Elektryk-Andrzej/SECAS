@@ -24,8 +24,7 @@ class Utils:
     async def strip_brackets(val: str) -> str:
         return val.replace("{", "").replace("}", "")
 
-        # Format all of the data and add it into a list, from which it will be assembled into an embed
-
+    # Format all of the data and add it into a list, from which it will be assembled into an embed
     async def add_line_to_result(self, emoji: str):
         if emoji == "⬛":
             to_append = f"`{len(self.data.processed_lines) + 1}`{emoji}"
@@ -35,8 +34,7 @@ class Utils:
         to_append = f"`{len(self.data.processed_lines) + 1}`{emoji}` {self.data.line_in_str} `"
         self.data.processed_lines.append(to_append)
 
-        # Idk why i did this, it doesnt make anything easier
-
+    # Idk why i did this, it doesnt make anything easier
     @staticmethod
     async def create_embed(title, description, color) -> discord.Embed:
         return discord.Embed(title=title,

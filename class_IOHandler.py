@@ -57,49 +57,33 @@ class IOHandler:
                 self.data.line_already_added_to_result = False
                 await self.delete_empty_params()
 
-                action_specified = self.data.line_in_list[0]
+                if (action_name := self.data.line_in_list[0]) in self.action_handler.actions:
+                    action_done = await self.action_handler.actions[action_name]()
 
-                if action_specified in self.data.actions:
-                    try:
-                        action = await getattr(self.action_handler, action_specified)
-                        print(action)
-                    except AttributeError as e:
-                        print(f"Action {action_specified} could not be found\n{e}")
-                        return
-
-                    if action:
+                    if action_done:
                         await self.utils.add_line_to_result("🟩")
 
                     else:
+
                         await self.utils.add_line_to_result("🟥")
                         self.data.errored = True
                         self.data.lines_errored.append(self.data.line_processing_index)
 
-                    continue
-
-                # comments have blue
-                if "#" in self.data.line_in_list[0]:
+                elif "#" in self.data.line_in_list[0]:
                     await self.utils.add_line_to_result("🟦")
 
-                # blank spaces have black
                 elif all(znak.isspace() for znak in self.data.line_in_list) or \
                         self.data.line_in_list == ['']:
                     await self.utils.add_line_to_result("⬛")
 
-                # labels have purple
                 elif ":" in self.data.line_in_list[-1] and len(self.data.line_in_list) == 1:
                     await self.utils.add_line_to_result("🟪")
 
-                # flags have white
                 elif "!--" in self.data.line_in_list[0]:
                     await self.utils.add_line_to_result("⬜")
 
-                # if nothing matches, then error
                 else:
-                    await self.utils.add_line_to_result("🟥")
-                    await self.error_handler.error_template(0, "Invalid action")
-
-                    self.data.errored = True
+                    await self.error_handler.template(0, "Invalid action")
 
             if lines_done == 1:
                 await self.ctx.reply("No code found! First line is always ignored.")

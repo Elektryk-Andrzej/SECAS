@@ -10,6 +10,70 @@ class ActionHandler:
         self.param_handler = class_ParamHandler.ParamHandler(data)
         self.utils = class_Utils.Utils(data)
         self.error_handler = class_ErrorHandler.ErrorHandler(data)
+        self.actions: dict = {
+            "HINT": self.HINT,
+            "HINTPLAYER": self.HINTPLAYER,
+            "COUNTDOWN": self.COUNTDOWN,
+            "BROADCASTPLAYER": self.BROADCASTPLAYER,
+            "BROADCAST": self.BROADCAST,
+            "CLEARCASSIE": self.CLEARCASSIE,
+            "SILENTCASSIE": self.SILENTCASSIE,
+            "CASSIE": self.CASSIE,
+            "CLEARINVENTORY": self.CLEARINVENTORY,
+            "REMOVEITEM": self.REMOVEITEM,
+            "GIVE": self.GIVE,
+            "LIGHTCOLOR": self.LIGHTCOLOR,
+            "RESETLIGHTCOLOR": self.RESETLIGHTCOLOR,
+            "LIGHTSOFF": self.LIGHTSOFF,
+            "GOTO": self.GOTO,
+            "GOTOIF": self.GOTOIF,
+            "IF": self.IF,
+            "STOP": self.STOP,
+            "STOPIF": self.STOPIF,
+            "DOOR": self.DOOR,
+            "TESLA": self.TESLA,
+            "WARHEAD": self.WARHEAD,
+            "EXECUTESCRIPT": self.EXECUTESCRIPT,
+            "HELP": self.HELP,
+            "COMMAND": self.COMMAND,
+            "LOG": self.LOG,
+            "CUSTOMINFO": self.CUSTOMINFO,
+            "DAMAGE": self.DAMAGE,
+            "EFFECTPERM": self.EFFECTPERM,
+            "RADIORANGE": self.RADIORANGE,
+            "KILL": self.KILL,
+            "AHP": self.AHP,
+            "MAXHP": self.MAXHP,
+            "HP": self.HP,
+            "TPDOOR": self.TPDOOR,
+            "TPROOM": self.TPROOM,
+            "TPX": self.TPX,
+            "SIZE": self.SIZE,
+            "EFFECT": self.EFFECT,
+            "SETROLE": self.SETROLE,
+            "TICKET": self.TICKET,
+            "START": self.START,
+            "DECONTAMINATE": self.DECONTAMINATE,
+            "ROUNDLOCK": self.ROUNDLOCK,
+            "ENABLE": self.ENABLE,
+            "DISABLE": self.DISABLE,
+            "INFECTRULE": self.INFECTRULE,
+            "SPAWNRULE": self.SPAWNRULE,
+            "DELVARIABLE": self.DELVARIABLE,
+            "DELPLAYERVARIABLE": self.DELPLAYERVARIABLE,
+            "SAVEPLAYERS": self.SAVEPLAYERS,
+            "SAVE": self.SAVE,
+            "WAITSEC": self.WAITSEC,
+            "WAITUNTIL": self.WAITUNTIL,
+            "RESKIN": self.RESKIN,
+            "ADVSETROLE": self.ADVSETROLE,
+            "ADVAHP": self.ADVAHP,
+            "HTTPGET": self.HTTPGET,
+            "HTTPPOST": self.HTTPPOST,
+        }
+
+    def get_available_actions(self):
+        return
 
     async def HINT(self) -> bool:
         if not await self.param_handler.is_action_required_len(2, None):
@@ -189,7 +253,7 @@ class ActionHandler:
         mode_selected = self.data.line_in_list[1]
 
         if mode_selected not in modes:
-            await self.error_handler.error_template(1, "Invalid mode | "
+            await self.error_handler.template(1, "Invalid mode | "
                                          "LOCK/UNLOCK/OPEN/CLOSE/DESTROY")
             return False
 
@@ -218,7 +282,7 @@ class ActionHandler:
                 return False
 
         else:
-            await self.error_handler.error_template(1, "Invalid mode | "
+            await self.error_handler.template(1, "Invalid mode | "
                                          "PLAYERS/ROLETYPE/DISABLE/ENABLE")
             return False
         return True
@@ -230,7 +294,7 @@ class ActionHandler:
         if not await self.param_handler.is_action_required_len(1, 1):
             return False
         if mode_selected not in modes:
-            await self.error_handler.error_template(1, "Invalid mode | "
+            await self.error_handler.template(1, "Invalid mode | "
                                          "START/STOP/LOCK/UNLOCK/DETONATE/BLASTDOORS")
             return False
 
@@ -268,7 +332,7 @@ class ActionHandler:
             return False
 
         if mode_selected not in modes:
-            await self.error_handler.error_template(1, "Invalid mode | "
+            await self.error_handler.template(1, "Invalid mode | "
                                          "SET/CLEAR")
             return False
         if not await self.param_handler.is_param_se_var(2):
@@ -293,7 +357,7 @@ class ActionHandler:
         if not await self.param_handler.is_action_required_len(3, 4):
             return False
         if mode_selected not in modes:
-            await self.error_handler.error_template(1, "Invalid mode | "
+            await self.error_handler.template(1, "Invalid mode | "
                                          "GIVE/REMOVE")
             return False
         if not await self.param_handler.is_param_se_var(1):
@@ -314,14 +378,14 @@ class ActionHandler:
         ranges = ("Short", "Medium", "Long", "Ultra")
         range_selected = self.data.line_in_list[3]
         if mode_selected in modes:
-            await self.error_handler.error_template(1, "Invalid mode | "
+            await self.error_handler.template(1, "Invalid mode | "
                                          "SET/LOCK")
             return False
         if not await self.param_handler.is_param_se_var(1):
             return False
 
         if range_selected not in ranges:
-            await self.error_handler.error_template(3, "Invalid range | "
+            await self.error_handler.template(3, "Invalid range | "
                                          "Short/Medium/Long/Ultra")
             return False
 
@@ -433,7 +497,7 @@ class ActionHandler:
         mode_selected = self.data.line_in_list[1]
 
         if mode_selected not in modes:
-            await self.error_handler.error_template(1, "Invalid mode | "
+            await self.error_handler.template(1, "Invalid mode | "
                                          "GIVE/REMOVE")
             return False
 
@@ -495,14 +559,14 @@ class ActionHandler:
         mode_selected = self.data.line_in_list[1]
 
         if mode_selected not in modes:
-            await self.error_handler.error_template(1, "Invalid mode | "
+            await self.error_handler.template(1, "Invalid mode | "
                                          "ADD/REMOVE/SET")
 
         teams = ("ChaosInsurgency", "NineTailedFox")
         team_selected = self.data.line_in_list[2]
 
         if team_selected not in teams:
-            await self.error_handler.error_template(2, "Invalid team | "
+            await self.error_handler.template(2, "Invalid team | "
                                          "ChaosInsurgency/NineTailedFox")
 
         if not await self.param_handler.is_param_number(3, int):
@@ -527,7 +591,7 @@ class ActionHandler:
         mode_selected = self.data.line_in_list[1]
 
         if mode_selected not in modes:
-            await self.error_handler.error_template(1, "Invalid mode | "
+            await self.error_handler.template(1, "Invalid mode | "
                                          "ENABLE/DISABLE/FORCE")
             return False
 
@@ -548,7 +612,7 @@ class ActionHandler:
         mode_selected = self.data.line_in_list[1]
 
         if mode_selected not in self.data.enable_disable_key:
-            await self.error_handler.error_template(1, "Invalid key")
+            await self.error_handler.template(1, "Invalid key")
             return False
 
         return True
@@ -560,7 +624,7 @@ class ActionHandler:
         mode_selected = self.data.line_in_list[1]
 
         if mode_selected not in self.data.enable_disable_key:
-            await self.error_handler.error_template(1, "Invalid key")
+            await self.error_handler.template(1, "Invalid key")
             return False
 
         return True
@@ -596,11 +660,11 @@ class ActionHandler:
 
         try:
             if variable not in self.data.se_variables[0] and variable not in self.data.custom_variables[0]:
-                await self.error_handler.error_template(1, "Invalid variable | "
+                await self.error_handler.template(1, "Invalid variable | "
                                              "Variable doesn't exist")
                 return False
         except:
-            await self.error_handler.error_template(1, "Invalid variable | "
+            await self.error_handler.template(1, "Invalid variable | "
                                          "Variable doesn't exist")
             return False
 
@@ -614,7 +678,7 @@ class ActionHandler:
         variable = await self.utils.strip_brackets(variable)
 
         if variable not in self.data.se_variables[0] and variable not in self.data.custom_variables[0]:
-            await self.error_handler.error_template(1, "Invalid player variable | "
+            await self.error_handler.template(1, "Invalid player variable | "
                                          "Variable doesn't exist")
             return False
 

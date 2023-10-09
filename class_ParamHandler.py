@@ -10,8 +10,8 @@ class ParamHandler:
         self.error_handler = class_ErrorHandler.ErrorHandler(data)
 
     # Register a certain value to a SE variable
-    async def register_variable(self, name_index: int, value_index: int, *,
-                                player_var: bool, everything_in_range: bool = False):
+    async def register_var(self, name_index: int, value_index: int, *,
+                           player_var: bool, everything_in_range: bool = False):
 
         variable_name = await self.utils.get_str_from_line(name_index)
         variable_name = await self.utils.strip_brackets(variable_name)
@@ -59,9 +59,9 @@ class ParamHandler:
 
     # Handles all non-standard variables, like doors, rooms, roles etc.
     # Requires to specify a list which is to be checked
-    async def is_param_special_var(self,
-                                   line_index: int, *, var_type: list,
-                                   required: bool = True, star_allowed: bool = False) -> bool:
+    async def is_special_var(self,
+                             line_index: int, *, var_type: list,
+                             required: bool = True, star_allowed: bool = False) -> bool:
         if not required:
             if len(self.data.line_in_list) - 1 < line_index:
                 return True
@@ -115,7 +115,7 @@ class ParamHandler:
         await self.error_handler.template(line_index, reason)
         return False
 
-    async def is_param_se_var(self, line_index, *, required: bool = True) -> bool:
+    async def is_se_var(self, line_index, *, required: bool = True) -> bool:
         if not await self.is_variable_present(line_index) and not required:
             return True
 
@@ -142,7 +142,7 @@ class ParamHandler:
         await self.error_handler.template(line_index, "Invalid SE variable")
         return False
 
-    async def is_param_bool(self, line_index, *, required: bool = True) -> bool:
+    async def is_bool(self, line_index, *, required: bool = True) -> bool:
 
         variable = await self.utils.get_str_from_line(line_index)
 
@@ -160,7 +160,7 @@ class ParamHandler:
         await self.error_handler.template(line_index, "Invalid TRUE/FALSE argument")
         return False
 
-    async def is_param_label(self, line_index) -> bool:
+    async def is_label(self, line_index) -> bool:
         try:
             iterator = await self.utils.get_str_from_line(line_index)
 
@@ -203,7 +203,6 @@ class ParamHandler:
         var_name = await self.utils.strip_brackets(var_name)
 
         for se_var in var_list:
-            print(se_var)
             # Skip check if name is not the same, or if variable is a player var or not
             if not var_name == se_var[0] or not se_var[2] == player_var:
                 continue
@@ -231,11 +230,11 @@ class ParamHandler:
         except:
             return False
 
-    async def is_param_number(self, line_index: int, var_type: int or float, *,
-                              math_supported: bool = False,
-                              required: bool = True,
-                              min_value: int = float('-inf'),
-                              max_value: int = float('inf')) -> bool:
+    async def is_number(self, line_index: int, var_type: int or float, *,
+                        math_supported: bool = False,
+                        required: bool = True,
+                        min_value: int = float('-inf'),
+                        max_value: int = float('inf')) -> bool:
 
         if (not required) and (not await self.is_variable_present(line_index)):
             return True
@@ -264,7 +263,7 @@ class ParamHandler:
         await self.error_handler.template(line_index, "Invalid integer number")
         return False
 
-    async def is_action_required_len(self, min_len: int, max_len) -> bool:
+    async def is_required_len(self, min_len: int, max_len) -> bool:
         if not min_len <= len(self.data.line_in_list) - 1:
             await self.error_handler.invalid_min_length(abs(len(self.data.line_in_list) - 1 - min_len))
 

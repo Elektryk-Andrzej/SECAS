@@ -1,19 +1,25 @@
+from datetime import *
 import discord
 import class_DataHandler
 import class_ActionHandler
 import class_ErrorHandler
 import class_Utils
-import icecream
 
 
 class IOHandler:
     def __init__(self, data: class_DataHandler.DataHandler, ctx, bot):
-        self.data = data
+        self.data: class_DataHandler.DataHandler = data
         self.bot = bot
         self.ctx = ctx
-        self.error_handler = class_ErrorHandler.ErrorHandler(data)
-        self.action_handler = class_ActionHandler.ActionHandler(data)
-        self.utils = class_Utils.Utils(data)
+        self.error_handler: class_ErrorHandler.ErrorHandler = class_ErrorHandler.ErrorHandler(data)
+        self.action_handler: class_ActionHandler.ActionHandler = class_ActionHandler.ActionHandler(data)
+        self.utils: class_Utils.Utils = class_Utils.Utils(data)
+
+        date = datetime.now()
+        self.data.tag = f"{datetime.strftime(date, '%H-%M-%S.%f')} @ {ctx.author.display_name}"
+
+        with open(self.data.tag, "x") as file:
+            file.close()
 
     async def delete_empty_params(self) -> None:
         index_to_pop = []
@@ -26,10 +32,15 @@ class IOHandler:
             self.data.line_in_list.pop(index)
 
     async def proccess_verify_request(self, count_first_line: bool) -> None:
+        await self.utils.log(f"Initialized ver request as {self.data.tag}")
+
         async with (self.ctx.channel.typing()):
             lines_done = 0
             '''try:'''
             self.data.code = self.data.code.split("\n")
+
+            await self.utils.log(f'Recorded code as:\n {[await self.utils.log(i) for i in self.data.code]}')
+
             # register all labels
             for index, line in enumerate(self.data.code):
                 self.data.line_in_list = line.split(" ")

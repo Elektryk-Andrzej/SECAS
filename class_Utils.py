@@ -1,6 +1,7 @@
 import class_DataHandler
 import class_ErrorHandler
 import discord
+from datetime import *
 
 
 class Utils:
@@ -23,6 +24,14 @@ class Utils:
     @staticmethod
     async def strip_brackets(val: str) -> str:
         return val.replace("{", "").replace("}", "")
+
+    async def log(self, reason):
+        with open(self.data.tag, "a") as file:
+            date = datetime.now()
+
+            file.write(f"{datetime.strftime(date, r'%H:%M:%S.%f')} - {reason}")
+
+            file.close()
 
     # Format all of the data and add it into a list, from which it will be assembled into an embed
     async def add_line_to_result(self, emoji: str):

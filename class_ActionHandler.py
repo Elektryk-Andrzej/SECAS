@@ -81,7 +81,6 @@ class ActionHandler:
         }
 
     async def HINT(self) -> bool:
-        
         if not await self.param_handler.is_required_len(2, None):
             return False
 

@@ -29,7 +29,7 @@ class Utils:
         with open(self.data.tag, "a") as file:
             date = datetime.now()
 
-            file.write(f"{datetime.strftime(date, r'%H:%M:%S.%f')} - {reason}")
+            file.write(f"{datetime.strftime(date, r'%H:%M:%S.%f')} - {reason}\n")
 
             file.close()
 

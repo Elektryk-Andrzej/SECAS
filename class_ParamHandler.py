@@ -143,21 +143,27 @@ class ParamHandler:
         return False
 
     async def is_bool(self, line_index, *, required: bool = True) -> bool:
+        await self.utils.log(f"{self.is_bool.__name__} - "
+                             f"{line_index = } | "
+                             f"{required = }")
 
         variable = await self.utils.get_str_from_line(line_index)
 
-        if not required:
-            if len(self.data.line_in_list) - 1 < line_index:
-                return True
+        if not required and not await self.is_variable_present(line_index):
+            await self.utils.log(f"{self.is_bool.__name__} - returned True (1)")
+            return True
 
         if variable == "TRUE" or variable == "FALSE":
+            await self.utils.log(f"{self.is_bool.__name__} - returned True (2)")
             return True
 
         for se_var in self.data.se_variables:
             if variable.replace("{", "").replace("}", "") == se_var[0] and se_var[1] is bool:
+                await self.utils.log(f"{self.is_bool.__name__} - returned True (3)")
                 return True
 
         await self.error_handler.template(line_index, "Invalid TRUE/FALSE argument")
+        await self.utils.log(f"{self.is_bool.__name__} - returned False (4)")
         return False
 
     async def is_label(self, line_index) -> bool:

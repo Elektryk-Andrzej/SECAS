@@ -49,5 +49,3 @@ class Utils:
         return discord.Embed(title=title,
                              description=description,
                              color=color)
-
-

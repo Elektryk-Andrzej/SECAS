@@ -1,7 +1,9 @@
+import asyncio
+
 import discord
 import discord.ext.commands
 from discord.ext import commands
-
+import os
 import class_IOHandler
 from DO_NOT_SHIP.TOKEN import TOKEN
 import class_DataHandler
@@ -93,7 +95,6 @@ async def on_ready():
         status=discord.Status.online)
 
 
-# noinspection PyTypeChecker
 @bot.event
 async def on_message(message):
     if message.author.id == bot.user.id:
@@ -109,6 +110,10 @@ async def on_message(message):
         data = class_DataHandler.DataHandler()
         io_handler = class_IOHandler.IOHandler(data, message, bot)
 
+        if os.path.exists(f"LOGS/{data.tag}") or os.path.exists(f"LOGS\\{data.tag}"):
+            await asyncio.sleep(1.5)
+            data = class_DataHandler.DataHandler()
+
         attachment = message.attachments[0]
         message_content = await attachment.read()
         data.code = message_content.decode("utf-8")
@@ -119,6 +124,10 @@ async def on_message(message):
 
         data = class_DataHandler.DataHandler()
         io_handler = class_IOHandler.IOHandler(data, message, bot)
+
+        if os.path.exists(f"LOGS/{data.tag}") or os.path.exists(f"LOGS\\{data.tag}"):
+            await asyncio.sleep(1.5)
+            data = class_DataHandler.DataHandler()
 
         data.code = message.content
         await io_handler.proccess_verify_request(count_first_line=False)

@@ -167,8 +167,10 @@ class ActionHandler:
 
         elif not await self.param_handler.is_se_var(1):
             return False
+
         if not await self.param_handler.is_special_var(2, var_type=self.data.item_type):
             return False
+
         if not await self.param_handler.is_number(3, int, required=False):
             return False
 
@@ -177,10 +179,13 @@ class ActionHandler:
     async def GIVE(self) -> bool:
         if not await self.param_handler.is_required_len(2, 3):
             return False
+
         if not await self.param_handler.is_se_var(1):
             return False
+
         if not await self.param_handler.is_special_var(2, var_type=self.data.item_type):
             return False
+
         if not await self.param_handler.is_number(3, int, required=False):
             return False
 
@@ -189,8 +194,10 @@ class ActionHandler:
     async def LIGHTCOLOR(self) -> bool:
         if not await self.param_handler.is_required_len(4, 4):
             return False
+
         if not await self.param_handler.is_special_var(1, var_type=self.data.room_type, star_allowed=True):
             return False
+
         for index in range(2, 5):
             if not await self.param_handler.is_number(index, int, min_value=0, max_value=255):
                 return False
@@ -200,15 +207,19 @@ class ActionHandler:
     async def RESETLIGHTCOLOR(self) -> bool:
         if not await self.param_handler.is_required_len(1, 1):
             return False
+
         if not await self.param_handler.is_special_var(1, var_type=self.data.room_type, star_allowed=True):
             return False
+
         return True
 
     async def LIGHTSOFF(self) -> bool:
         if not await self.param_handler.is_required_len(2, 2):
             return False
+
         if not await self.param_handler.is_special_var(1, var_type=self.data.room_type, star_allowed=True):
             return False
+
         if not await self.param_handler.is_number(2, float):
             return False
 
@@ -217,6 +228,7 @@ class ActionHandler:
     async def GOTO(self) -> bool:
         if not await self.param_handler.is_required_len(1, 1):
             return False
+
         if not await self.param_handler.is_label(1):
             return False
 
@@ -225,8 +237,10 @@ class ActionHandler:
     async def GOTOIF(self) -> bool:
         if not await self.param_handler.is_required_len(3, None):
             return False
+
         if not await self.param_handler.is_label(1):
             return False
+
         if not await self.param_handler.is_label(2):
             return False
 
@@ -277,12 +291,14 @@ class ActionHandler:
         elif mode_selected == "ROLETYPE":
             if not await self.param_handler.is_required_len(2, 2):
                 return False
+
             if not await self.param_handler.is_special_var(2, var_type=self.data.role_type):
                 return False
 
         elif mode_selected == "PLAYERS":
             if not await self.param_handler.is_required_len(2, 2):
                 return False
+
             if not await self.param_handler.is_se_var(1):
                 return False
 
@@ -298,6 +314,7 @@ class ActionHandler:
 
         if not await self.param_handler.is_required_len(1, 1):
             return False
+
         if mode_selected not in modes:
             await self.error_handler.template(1, "Invalid mode | "
                                          "START/STOP/LOCK/UNLOCK/DETONATE/BLASTDOORS")
@@ -340,6 +357,7 @@ class ActionHandler:
             await self.error_handler.template(1, "Invalid mode | "
                                          "SET/CLEAR")
             return False
+
         if not await self.param_handler.is_se_var(2):
             return False
 
@@ -348,8 +366,10 @@ class ActionHandler:
     async def DAMAGE(self) -> bool:
         if not await self.param_handler.is_required_len(2, 3):
             return False
+
         if not await self.param_handler.is_se_var(1):
             return False
+
         if not await self.param_handler.is_number(2, float, required=False):
             return False
 
@@ -367,8 +387,10 @@ class ActionHandler:
             return False
         if not await self.param_handler.is_se_var(1):
             return False
+
         if not await self.param_handler.is_special_var(3, var_type=self.data.effect_type):
             return False
+
         if not await self.param_handler.is_number(4, float, required=False):
             return False
 
@@ -386,6 +408,7 @@ class ActionHandler:
             await self.error_handler.template(1, "Invalid mode | "
                                          "SET/LOCK")
             return False
+
         if not await self.param_handler.is_se_var(1):
             return False
 
@@ -605,6 +628,7 @@ class ActionHandler:
     async def ROUNDLOCK(self) -> bool:
         if not await self.param_handler.is_required_len(1, 1):
             return False
+
         if not await self.param_handler.is_bool(1):
             return False
 
@@ -637,10 +661,13 @@ class ActionHandler:
     async def INFECTRULE(self) -> bool:
         if not await self.param_handler.is_required_len(2, 3):
             return False
+
         if not await self.param_handler.is_special_var(1, var_type=self.data.role_type, star_allowed=True):
             return False
+
         if not await self.param_handler.is_special_var(2, var_type=self.data.role_type):
             return False
+
         if not await self.param_handler.is_bool(3, required=False):
             return False
 
@@ -649,8 +676,10 @@ class ActionHandler:
     async def SPAWNRULE(self) -> bool:
         if not await self.param_handler.is_required_len(1, 2):
             return False
+
         if not await self.param_handler.is_special_var(1, var_type=self.data.role_type):
             return False
+
         if not await self.param_handler.is_number(2, int, required=False):
             return False
 
@@ -707,6 +736,7 @@ class ActionHandler:
     async def SAVE(self) -> bool:
         if not await self.param_handler.is_required_len(1, None):
             return False
+
         if not await self.param_handler.register_var(1, 2,
                                                      everything_in_range=True, player_var=False):
             return False
@@ -716,6 +746,7 @@ class ActionHandler:
     async def WAITSEC(self) -> bool:
         if not await self.param_handler.is_required_len(1, None):
             return False
+
         if not await self.param_handler.is_number(1, float, math_supported=True):
             return False
 

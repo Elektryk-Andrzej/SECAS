@@ -264,15 +264,24 @@ class ParamHandler:
         return False
 
     async def is_required_len(self, min_len: int, max_len) -> bool:
-        if not min_len <= len(self.data.line_in_list) - 1:
-            await self.error_handler.invalid_min_length(abs(len(self.data.line_in_list) - 1 - min_len))
+        action_len = len(self.data.line_in_list) - 1
+        await self.utils.log(f"is_required_len - {min_len = } | {max_len = } | {action_len = }")
 
+        if not min_len <= action_len:
+            await self.error_handler.invalid_min_length(abs(action_len - min_len))
+
+            await self.utils.log("is_required_len - returned False (1)")
             return False
 
-        if max_len is not None:
-            if not len(self.data.line_in_list) - 1 <= max_len:
-                await self.error_handler.invalid_max_length(len(self.data.line_in_list) - 1 - max_len)
+        if max_len is None:
+            await self.utils.log("is_required_len - returned True (2)")
+            return True
 
-                return False
+        if not action_len <= max_len:
+            await self.error_handler.invalid_max_length(action_len - max_len)
 
+            await self.utils.log("is_required_len - returned False (3)")
+            return False
+
+        await self.utils.log("is_required_len - returned True (4)")
         return True

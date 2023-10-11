@@ -39,7 +39,7 @@ class Utils:
             with open(self.data.tag, "a") as file:
                 file.write(f"---> ERROR ({e})\n")
 
-    async def log_new_inst(self, name, context, **kwargs):
+    async def log_new_inst(self, context, **kwargs):
         try:
             kwargs_formatted: str = ""
             log_depth: str = '*' * self.data.log_depth
@@ -51,12 +51,12 @@ class Utils:
                 kwargs_formatted += f"{log_depth} -> {arg}: {val} ({val_type_formatted})\n"
 
             with open(self.data.tag, "a") as file:
-                file.write(f"{name} (new inst | {context.function} @ {context.lineno})\n")
+                file.write(f"new inst ({context.function} @ {context.lineno})\n")
                 file.write(f"{kwargs_formatted}\n")
 
         except AttributeError as e:
             with open(self.data.tag, "a") as file:
-                file.write(f"{'*' * self.data.log_depth} {name} (new inst | AttributeError - {e})\n")
+                file.write(f"{'*' * self.data.log_depth} new inst (AttributeError - {e})\n")
 
         except Exception as e:
             print(f"---> ERROR ({e})")
@@ -67,8 +67,8 @@ class Utils:
         try:
             with open(self.data.tag, "a") as file:
                 file.write(f"{'*' * self.data.log_depth} "
-                           f"returned {output} "
-                           f"(clsd inst | {context.function} @ {context.lineno})\n")
+                           f"clsd inst with {output} "
+                           f"({context.function} @ {context.lineno})\n")
                 return output
 
         except AttributeError as e:

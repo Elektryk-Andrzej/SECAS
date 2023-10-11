@@ -25,13 +25,61 @@ class Utils:
     async def strip_brackets(val: str) -> str:
         return val.replace("{", "").replace("}", "")
 
-    async def log(self, reason):
-        with open(self.data.tag, "a") as file:
-            date = datetime.now()
+    async def log(self, reason, context):
+        try:
+            with open(self.data.tag, "a") as file:
+                file.write(f"{'*' * self.data.log_depth} {reason} ({context.function} @ {context.lineno})\n")
 
-            file.write(f"{datetime.strftime(date, r'%H:%M:%S.%f')} - {reason}\n")
+        except AttributeError as e:
+            with open(self.data.tag, "a") as file:
+                file.write(f"{'*' * self.data.log_depth} {reason} (AttributeError - {e})\n")
 
-            file.close()
+        except Exception as e:
+            print(f"---> ERROR ({e})")
+            with open(self.data.tag, "a") as file:
+                file.write(f"---> ERROR ({e})\n")
+
+    async def log_new_inst(self, name, context, **kwargs):
+        try:
+            kwargs_formatted: str = ""
+            log_depth: str = '*' * self.data.log_depth
+
+            for i in kwargs.items():
+                arg, val = i
+                val_type_formatted: str = str(type(val)).strip('<class ').strip('>')
+
+                kwargs_formatted += f"{log_depth} -> {arg}: {val} ({val_type_formatted})\n"
+
+            with open(self.data.tag, "a") as file:
+                file.write(f"{name} (new inst | {context.function} @ {context.lineno})\n")
+                file.write(f"{kwargs_formatted}\n")
+
+        except AttributeError as e:
+            with open(self.data.tag, "a") as file:
+                file.write(f"{'*' * self.data.log_depth} {name} (new inst | AttributeError - {e})\n")
+
+        except Exception as e:
+            print(f"---> ERROR ({e})")
+            with open(self.data.tag, "a") as file:
+                file.write(f"---> ERROR ({e})\n")
+
+    async def log_close_inst(self, output, context):
+        try:
+            with open(self.data.tag, "a") as file:
+                file.write(f"{'*' * self.data.log_depth} "
+                           f"returned {output} "
+                           f"(clsd inst | {context.function} @ {context.lineno})\n")
+                return output
+
+        except AttributeError as e:
+            with open(self.data.tag, "a") as file:
+                file.write(f"{'*' * self.data.log_depth} "
+                           f"returned {output} (clsd inst | AttributeError - {e})\n")
+
+        except Exception as e:
+            print(f"---> ERROR ({e})")
+            with open(self.data.tag, "a") as file:
+                file.write(f"---> ERROR ({e})\n")
 
     # Format all of the data and add it into a list, from which it will be assembled into an embed
     async def add_line_to_result(self, emoji: str):

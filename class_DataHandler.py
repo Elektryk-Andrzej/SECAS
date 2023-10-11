@@ -391,6 +391,8 @@ class DataHandler:
         self.andrzej_ping: str = "<@762016625096261652>"
         self.critical_error: str = ""
         self.tag: str = ""
+        self.log_depth: int = 1
+        self.log_depth_char: str = ">"
 
         for role in self.role_type:
             self.se_variables.append([role.upper(), int, True])

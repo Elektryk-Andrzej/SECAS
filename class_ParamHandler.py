@@ -329,23 +329,23 @@ class ParamHandler:
         await self.utils.log(f"{self.is_required_len.__name__} - "
                              f"{min_len = } | "
                              f"{max_len = } | "
-                             f"{action_len = }")
+                             f"{action_len = }", 1)
 
         if not min_len <= action_len:
             await self.error_handler.invalid_min_length(abs(action_len - min_len))
 
-            await self.utils.log(f"{self.is_required_len.__name__} - returned False (1)")
+            await self.utils.log(f"is_required_len - returned False (1)", -1)
             return False
 
         if max_len is None:
-            await self.utils.log(f"{self.is_required_len.__name__} - returned True (2)")
+            await self.utils.log(f"is_required_len - returned True (2)", -1)
             return True
 
         if not action_len <= max_len:
             await self.error_handler.invalid_max_length(action_len - max_len)
 
-            await self.utils.log(f"{self.is_required_len.__name__} - returned False (3)")
+            await self.utils.log(f"is_required_len- returned False (3)", -1)
             return False
 
-        await self.utils.log(f"{self.is_required_len.__name__} - returned True (4)")
+        await self.utils.log(f"is_required_len - returned True (4)", -1)
         return True

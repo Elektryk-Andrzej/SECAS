@@ -4,6 +4,7 @@ import class_DataHandler
 import class_ActionHandler
 import class_ErrorHandler
 import class_Utils
+import inspect
 
 
 class IOHandler:
@@ -21,6 +22,8 @@ class IOHandler:
         with open(self.data.tag, "x") as file:
             file.close()
 
+
+
     async def delete_empty_params(self) -> None:
         index_to_pop = []
 
@@ -32,26 +35,29 @@ class IOHandler:
             self.data.line_in_list.pop(index)
 
     async def proccess_verify_request(self, count_first_line: bool) -> None:
-        await self.utils.log(f"Initialized ver request as {self.data.tag}")
+        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
+                                count_first_line=count_first_line)
 
         async with (self.ctx.channel.typing()):
             lines_done = 0
             '''try:'''
             self.data.code = self.data.code.split("\n")
 
-            await self.utils.log(f'Recorded code as:\n {[await self.utils.log(i) for i in self.data.code]}')
+            await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
+                                 f'Recorded code as: {self.data.code}')
 
             # register all labels
             for index, line in enumerate(self.data.code):
+                if not count_first_line and index == 0:
+                    continue
+
                 self.data.line_in_list = line.split(" ")
                 self.data.line_in_list[-1].strip("\n")
 
-                if index == 0 and len(self.data.line_in_list) > 1 and \
-                        self.data.line_in_list[0].startswith("."):
-                    self.data.line_in_list.pop(0)
-
                 if ":" in (label := self.data.line_in_list[-1]):
                     self.data.labels.append(label.strip(":"))
+                    await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
+                                         f"Registered a label \"{label}\" in line {index}")
 
             # for all lines to be verified
             for index, line in enumerate(self.data.code):

@@ -25,7 +25,7 @@ class Utils:
     async def strip_brackets(val: str) -> str:
         return val.replace("{", "").replace("}", "")
 
-    async def log(self, reason, context):
+    async def log(self, context, reason: str):
         try:
             with open(self.data.tag, "a") as file:
                 file.write(f"{'*' * self.data.log_depth} {reason} ({context.function} @ {context.lineno})\n")
@@ -63,7 +63,7 @@ class Utils:
             with open(self.data.tag, "a") as file:
                 file.write(f"---> ERROR ({e})\n")
 
-    async def log_close_inst(self, output, context):
+    async def log_close_inst(self, context, output: str):
         try:
             with open(self.data.tag, "a") as file:
                 file.write(f"{'*' * self.data.log_depth} "

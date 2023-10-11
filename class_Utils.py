@@ -63,7 +63,7 @@ class Utils:
             with open(self.data.tag, "a") as file:
                 file.write(f"---> ERROR ({e})\n")
 
-    async def log_close_inst(self, context, output: str):
+    async def log_close_inst(self, context, output):
         try:
             with open(self.data.tag, "a") as file:
                 file.write(f"{'*' * self.data.log_depth} "

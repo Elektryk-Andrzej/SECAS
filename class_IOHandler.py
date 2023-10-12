@@ -17,12 +17,10 @@ class IOHandler:
         self.utils: class_Utils.Utils = class_Utils.Utils(data)
 
         date = datetime.now()
-        self.data.tag = f"{datetime.strftime(date, '%d;%m %H-%M-%S')} @ {ctx.author.display_name}"
+        self.data.tag = f"LOGS/{datetime.strftime(date, '%d;%m %H-%M-%S')} @ {ctx.author.display_name}"
 
         with open(self.data.tag, "x") as file:
             file.close()
-
-
 
     async def delete_empty_params(self) -> None:
         index_to_pop = []

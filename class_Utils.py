@@ -1,7 +1,6 @@
 import class_DataHandler
 import class_ErrorHandler
 import discord
-from datetime import *
 
 
 class Utils:
@@ -11,15 +10,15 @@ class Utils:
     # Get a value from the line list, report error if outside of range
     async def get_str_from_line(self, line_index) -> str:
         try:
-            return str(self.data.line_in_list[line_index])
+            return str(self.data.list_line[line_index])
 
         except IndexError:
             await (class_ErrorHandler.ErrorHandler(self.data).
                    secas_error(line_index,
                                f"Tried to access a value outside of range (`{line_index}`), "
-                               f"The last value was granted instead (`{str(self.data.line_in_list[-1])}`). "
+                               f"The last value was granted instead (`{str(self.data.list_line[-1])}`). "
                                f"Please report this error to {self.data.andrzej_ping}"))
-            return str(self.data.line_in_list[-1])
+            return str(self.data.list_line[-1])
 
     @staticmethod
     async def strip_brackets(val: str) -> str:
@@ -44,10 +43,11 @@ class Utils:
                 file.write(f"---> ERROR ({e})\n")
 
     async def log_new_inst(self, context, **kwargs):
-        try:
-            log_depth: str = self.data.log_depth_char * self.data.log_depth
-            kwargs_formatted: str = ""
+        self.data.log_depth += 1
+        log_depth: str = self.data.log_depth_char * self.data.log_depth
+        kwargs_formatted: str = ""
 
+        try:
             for i in kwargs.items():
                 arg, val = i
                 val_type_formatted: str = str(type(val)).strip('<class ').strip('>')
@@ -59,8 +59,6 @@ class Utils:
                 file.write(f"{kwargs_formatted}")
 
         except AttributeError as e:
-            log_depth: str = self.data.log_depth_char * self.data.log_depth
-
             with open(self.data.tag, "a") as file:
                 file.write(f"{log_depth} new inst (AttributeError - {e})\n")
 
@@ -69,20 +67,15 @@ class Utils:
             with open(self.data.tag, "a") as file:
                 file.write(f"---> ERROR ({e})\n")
 
-        finally:
-            self.data.log_depth += 1
-
     async def log_close_inst(self, context, output):
-        try:
-            log_depth: str = self.data.log_depth_char * self.data.log_depth
+        log_depth: str = self.data.log_depth_char * self.data.log_depth
 
+        try:
             with open(self.data.tag, "a") as file:
                 file.write(f"{log_depth} closed instance {context.function} (@ {context.lineno}) with {output}\n")
                 return output
 
         except AttributeError as e:
-            log_depth: str = self.data.log_depth_char * self.data.log_depth
-
             with open(self.data.tag, "a") as file:
                 file.write(f"{log_depth} returned {output} (clsd inst | AttributeError - {e})\n")
 
@@ -101,7 +94,7 @@ class Utils:
             self.data.processed_lines.append(to_append)
             return
 
-        to_append = f"`{len(self.data.processed_lines) + 1}`{emoji}` {self.data.line_in_str} `"
+        to_append = f"`{len(self.data.processed_lines) + 1}`{emoji}` {self.data.str_line} `"
         self.data.processed_lines.append(to_append)
 
     # Idk why i did this, it doesnt make anything easier

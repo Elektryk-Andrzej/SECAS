@@ -22,15 +22,27 @@ class IOHandler:
         with open(self.data.tag, "x") as file:
             file.close()
 
-    async def delete_empty_params(self) -> None:
-        index_to_pop = []
+    async def format_code(self) -> None:
+        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()))
+        await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
+                             f"Will be formatting: {self.data.code}")
 
-        for index, value in enumerate(self.data.line_in_list):
-            if value == "" or value == " ":
-                index_to_pop.append(index)
+        for index, line in enumerate(self.data.list_line):
+            self.data.current_code_index = index
+            self.data.str_line = line.strip("\n")
+            self.data.list_line = line.split(" ")
+            self.data.line_already_added_to_result = False
 
-        for index in range(len(index_to_pop)-1, -1, -1):
-            self.data.line_in_list.pop(index)
+        values_to_delete = "", " ", "\n"
+
+        for index in range(len(self.data.list_line) - 1, -1, -1):
+            if self.data.list_line[index] in values_to_delete:
+                self.data.list_line.pop(index)
+
+            await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
+                                 f"Deleted param @ index {index}")
+
+        await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()), None)
 
     async def proccess_verify_request(self, count_first_line: bool) -> None:
         await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
@@ -39,20 +51,15 @@ class IOHandler:
         async with (self.ctx.channel.typing()):
             lines_done = 0
             '''try:'''
-            self.data.code = self.data.code.split("\n")
 
-            await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
-                                 f'Recorded code as: {self.data.code}')
+            await self.format_code()
 
             # register all labels
             for index, line in enumerate(self.data.code):
                 if not count_first_line and index == 0:
                     continue
 
-                self.data.line_in_list = line.split(" ")
-                self.data.line_in_list[-1].strip("\n")
-
-                if ":" in (label := self.data.line_in_list[-1]):
+                if ":" in (label := self.data.list_line[-1]):
                     self.data.labels.append(label.strip(":"))
                     await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
                                          f"Registered a label \"{label}\" in line {index}")
@@ -65,36 +72,35 @@ class IOHandler:
                 if index == 0 and not count_first_line:
                     continue
 
-                self.data.line_processing_index = index
-                self.data.line_in_str = line.strip("\n")
-                self.data.line_in_list = line.split(" ")
-                self.data.line_in_list[-1].strip("\n")
-                self.data.line_already_added_to_result = False
-                await self.delete_empty_params()
 
-                if (action_name := self.data.line_in_list[0]) in self.action_handler.actions:
+
+                if len(self.data.list_line) < 1:
+                    await self.utils.add_line_to_result("⬛")
+                    continue
+
+                print(self.data.list_line)
+                if (action_name := self.data.list_line[0]) in self.action_handler.actions:
                     action_done = await self.action_handler.actions[action_name]()
 
                     if action_done:
                         await self.utils.add_line_to_result("🟩")
 
                     else:
-
                         await self.utils.add_line_to_result("🟥")
                         self.data.errored = True
-                        self.data.lines_errored.append(self.data.line_processing_index)
+                        self.data.lines_errored.append(self.data.current_code_index)
 
-                elif "#" in self.data.line_in_list[0]:
+                elif "#" in self.data.list_line[0]:
                     await self.utils.add_line_to_result("🟦")
 
-                elif all(znak.isspace() for znak in self.data.line_in_list) or \
-                        self.data.line_in_list == ['']:
+                elif all(znak.isspace() for znak in self.data.list_line) or \
+                        self.data.list_line == ['']:
                     await self.utils.add_line_to_result("⬛")
 
-                elif ":" in self.data.line_in_list[-1] and len(self.data.line_in_list) == 1:
+                elif ":" in self.data.list_line[-1] and len(self.data.list_line) == 1:
                     await self.utils.add_line_to_result("🟪")
 
-                elif "!--" in self.data.line_in_list[0]:
+                elif "!--" in self.data.list_line[0]:
                     await self.utils.add_line_to_result("⬜")
 
                 else:
@@ -114,6 +120,7 @@ class IOHandler:
         self.data.custom_variables.clear()
 
     async def send_result_embed(self):
+        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()))
         character_limit = 2000
         color_error = 0xdd2e44
         color_no_error = 0x77b255
@@ -122,7 +129,7 @@ class IOHandler:
         if self.data.errored:
             await self.ctx.reply(embed=await self.utils.create_embed(
                                              f"Errors found: `{len(self.data.error_reasons)}`",
-                                             None,
+                                             "",
                                              color_error),
                                  mention_author=False)
 
@@ -164,7 +171,7 @@ class IOHandler:
         else:
             await self.ctx.reply(embed=await self.utils.create_embed(
                                  "No errors found!",
-                                 None,
+                                 "",
                                  color_no_error),
                                  mention_author=False)
 

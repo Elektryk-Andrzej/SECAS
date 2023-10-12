@@ -10,10 +10,10 @@ class ErrorHandler:
         self.data.line_errored = True
         self.data.errored = True
 
-        self.data.line_in_list[line_index] = f"▶ {self.data.line_in_list[line_index]} ◀"
+        self.data.list_line[line_index] = f"▶ {self.data.list_line[line_index]} ◀"
 
-        line_with_arrows = ' '.join(self.data.line_in_list)
-        to_append = [self.data.line_processing_index, line_with_arrows, reason, None]
+        line_with_arrows = ' '.join(self.data.list_line)
+        to_append = [self.data.current_code_index, line_with_arrows, reason, None]
 
         self.data.error_reasons.append(to_append)
 
@@ -22,7 +22,7 @@ class ErrorHandler:
         self.data.critical_error = \
             f"""
             SECAS has experienced a bug:
-            `{reason}` | param `{line_index}` @ line `{self.data.line_processing_index}`
+            `{reason}` | param `{line_index}` @ line `{self.data.current_code_index}`
             """
 
     # Adds three "_" for each parameter missing, while surrouding them with arrows
@@ -36,8 +36,8 @@ class ErrorHandler:
         for _ in range(number_missing):
             missing_arguments += "___ "
 
-        to_append = [self.data.line_processing_index,
-                     f"{self.data.line_in_str} ▶ {missing_arguments}◀", reason, None]
+        to_append = [self.data.current_code_index,
+                     f"{self.data.str_line} ▶ {missing_arguments}◀", reason, None]
 
         self.data.error_reasons.append(to_append)
 
@@ -50,12 +50,12 @@ class ErrorHandler:
 
         self.data.line_errored = True
         reason = f"Unexpected arguments | {past_max_length}"
-        start_index = len(self.data.line_in_list) - past_max_length
+        start_index = len(self.data.list_line) - past_max_length
 
-        self.data.line_in_list[start_index], self.data.line_in_list[-1] = \
-            f"▶ {self.data.line_in_list[start_index]}", f"{self.data.line_in_list[-1]} ◀"
+        self.data.list_line[start_index], self.data.list_line[-1] = \
+            f"▶ {self.data.list_line[start_index]}", f"{self.data.list_line[-1]} ◀"
 
-        line_with_arrows = ' '.join(self.data.line_in_list)
-        to_append = [self.data.line_processing_index, line_with_arrows, reason, None]
+        line_with_arrows = ' '.join(self.data.list_line)
+        to_append = [self.data.current_code_index, line_with_arrows, reason, None]
 
         self.data.error_reasons.append(to_append)

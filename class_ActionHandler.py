@@ -269,7 +269,7 @@ class ActionHandler:
             return False
 
         modes = ("LOCK", "UNLOCK", "OPEN", "CLOSE", "DESTROY")
-        mode_selected = self.data.line_in_list[1]
+        mode_selected = self.data.list_line[1]
 
         if mode_selected not in modes:
             await self.error_handler.template(1, "Invalid mode | "
@@ -282,7 +282,7 @@ class ActionHandler:
         return True
 
     async def TESLA(self) -> bool:
-        mode_selected = self.data.line_in_list[1]
+        mode_selected = self.data.list_line[1]
 
         if mode_selected == "ENABLE" or mode_selected == "DISABLE":
             if not await self.param_handler.is_required_len(1, 1):
@@ -310,7 +310,7 @@ class ActionHandler:
 
     async def WARHEAD(self) -> bool:
         modes = ("START", "STOP", "LOCK", "UNLOCK", "DETONATE", "BLASTDOORS")
-        mode_selected = self.data.line_in_list[1]
+        mode_selected = self.data.list_line[1]
 
         if not await self.param_handler.is_required_len(1, 1):
             return False
@@ -348,7 +348,7 @@ class ActionHandler:
 
     async def CUSTOMINFO(self) -> bool:
         modes = ("SET", "CLEAR")
-        mode_selected = self.data.line_in_list[1]
+        mode_selected = self.data.list_line[1]
 
         if not await self.param_handler.is_required_len(1, None):
             return False
@@ -377,7 +377,7 @@ class ActionHandler:
 
     async def EFFECTPERM(self) -> bool:
         modes = ("SET", "CLEAR")
-        mode_selected = self.data.line_in_list[1]
+        mode_selected = self.data.list_line[1]
 
         if not await self.param_handler.is_required_len(3, 4):
             return False
@@ -401,9 +401,9 @@ class ActionHandler:
             return False
 
         modes = ("SET", "LOCK")
-        mode_selected = self.data.line_in_list[1]
+        mode_selected = self.data.list_line[1]
         ranges = ("Short", "Medium", "Long", "Ultra")
-        range_selected = self.data.line_in_list[3]
+        range_selected = self.data.list_line[3]
         if mode_selected in modes:
             await self.error_handler.template(1, "Invalid mode | "
                                          "SET/LOCK")
@@ -522,7 +522,7 @@ class ActionHandler:
             return False
 
         modes = ("GIVE", "REMOVE")
-        mode_selected = self.data.line_in_list[1]
+        mode_selected = self.data.list_line[1]
 
         if mode_selected not in modes:
             await self.error_handler.template(1, "Invalid mode | "
@@ -584,14 +584,14 @@ class ActionHandler:
             return False
 
         modes = ("ADD", "REMOVE", "SET")
-        mode_selected = self.data.line_in_list[1]
+        mode_selected = self.data.list_line[1]
 
         if mode_selected not in modes:
             await self.error_handler.template(1, "Invalid mode | "
                                          "ADD/REMOVE/SET")
 
         teams = ("ChaosInsurgency", "NineTailedFox")
-        team_selected = self.data.line_in_list[2]
+        team_selected = self.data.list_line[2]
 
         if team_selected not in teams:
             await self.error_handler.template(2, "Invalid team | "
@@ -612,11 +612,11 @@ class ActionHandler:
         if not await self.param_handler.is_required_len(0, 1):
             return False
 
-        if len(self.data.line_in_list) - 1 == 0:
+        if len(self.data.list_line) - 1 == 0:
             return True
 
         modes = ("ENABLE", "DISABLE", "FORCE")
-        mode_selected = self.data.line_in_list[1]
+        mode_selected = self.data.list_line[1]
 
         if mode_selected not in modes:
             await self.error_handler.template(1, "Invalid mode | "
@@ -638,7 +638,7 @@ class ActionHandler:
         if not await self.param_handler.is_required_len(1, 1):
             return False
 
-        mode_selected = self.data.line_in_list[1]
+        mode_selected = self.data.list_line[1]
 
         if mode_selected not in self.data.enable_disable_key:
             await self.error_handler.template(1, "Invalid key")
@@ -650,7 +650,7 @@ class ActionHandler:
         if not await self.param_handler.is_required_len(1, 1):
             return False
 
-        mode_selected = self.data.line_in_list[1]
+        mode_selected = self.data.list_line[1]
 
         if mode_selected not in self.data.enable_disable_key:
             await self.error_handler.template(1, "Invalid key")

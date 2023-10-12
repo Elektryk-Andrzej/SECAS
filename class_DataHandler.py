@@ -379,13 +379,13 @@ class DataHandler:
         ]
 
         self.code: str = ""
-        self.line_in_list: list = []
-        self.line_in_str: str = ""
+        self.list_line: list = []
+        self.str_line: str = ""
         self.processed_lines: list = []
         self.error_reasons: list = []
         self.errored: bool = False
         self.lines_errored: list = []
-        self.line_processing_index: int = 0
+        self.current_code_index: int = 0
         self.labels: list = ["NEXT", "START", "STOP"]
         self.custom_variables: list[list] = []
         self.andrzej_ping: str = "<@762016625096261652>"

@@ -1,3 +1,4 @@
 ./LOGS
 ./venv
 ./DO_NOT_SHIP
+./test.py

@@ -1,30 +1,55 @@
 import class_DataHandler
-import class_ErrorHandler
 import discord
 import inspect
 
 
 class Utils:
     def __init__(self, data: class_DataHandler.DataHandler):
+        """
+        Contains the most basic and universal functions,
+        ment to be accessed from anywhere with no problems.
+        """
+
         self.data = data
 
-    # Get a value from the line list, report error if outside of range
+    # Status: no changes needed
     async def get_str_from_line(self, line_index) -> str:
+        """
+        Safely get a value form code with provided index, return the last index if out of range
+
+        :param line_index: index to get from the line
+        :return: str value of the provided line index
+        """
+
+        await self.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
+                                line_index=line_index)
+
         try:
-            return str(self.data.list_line[line_index])
+            return await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
+                                             str(self.data.list_line[line_index]))
 
         except IndexError:
-            await (class_ErrorHandler.ErrorHandler(self.data).
-                   secas_error(line_index,
-                               f"Tried to access a value outside of range (`{line_index}`), "
-                               f"The last value was granted instead (`{str(self.data.list_line[-1])}`). "
-                               f"Please report this error to {self.data.andrzej_ping}"))
-            return str(self.data.list_line[-1])
+            await self.log(inspect.getframeinfo(inspect.currentframe()),
+                           "Specified line index is out of range")
+            return await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
+                                             str(self.data.list_line[-1]))
 
-    @staticmethod
-    async def strip_brackets(val: str) -> str:
-        return val.replace("{", "").replace("}", "")
+    # Status: no changes needed
+    async def strip_brackets(self, val: str) -> str:
+        """
+        Strip brackets form the provided value.
 
+        :param val: str value to remove brackets from
+        :return: str value without brackets
+        """
+
+        await self.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
+                                val=val)
+
+        return await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
+                                         val.replace("{", "").replace("}", ""))
+
+    # Status: no changes needed
     async def log(self, context: inspect.getframeinfo(inspect.currentframe()), reason: str) -> None:
         """
         Basic log method.
@@ -52,14 +77,17 @@ class Utils:
             with open(self.data.tag, "a") as file:
                 file.write(f"---> ERROR ({e})\n")
 
-    async def log_new_inst(self, context, **kwargs):
+    # Status: no changes needed
+    async def log_new_inst(self, context, **kwargs) -> None:
         """
-        
+        Use at the beggining of a method.
+        Will change log depth accordingly for better readability.
 
-        :param context:
-        :param kwargs:
-        :return:
+        :param context: inspect.getframeinfo(inspect.currentframe())
+        :param kwargs: all args provided
+        :return: None
         """
+
         self.data.log_depth += 1
         log_depth: str = self.data.log_depth_char * self.data.log_depth
         kwargs_formatted: str = ""
@@ -84,7 +112,17 @@ class Utils:
             with open(self.data.tag, "a") as file:
                 file.write(f"---> ERROR ({e})\n")
 
+    # Status: no changes needed
     async def log_close_inst(self, context, output):
+        """
+        Use in the return statement of a method.
+        Will change log depth accordingly for better readability.
+
+        :param context: inspect.getframeinfo(inspect.currentframe())
+        :param output: the value returned by the method
+        :return: provided output
+        """
+
         log_depth: str = self.data.log_depth_char * self.data.log_depth
 
         try:
@@ -103,9 +141,16 @@ class Utils:
 
         finally:
             self.data.log_depth -= 1
+            return
 
-    # Format all of the data and add it into a list, from which it will be assembled into an embed
-    async def add_line_to_result(self, emoji: str):
+    # Status: needs changes
+    async def add_line_to_result(self, emoji: str) -> None:
+        """
+        Format all of the data and add it into a list, from which it will be assembled into an embed
+        :param emoji: emoji used to represent the line
+        :return: None
+        """
+
         if emoji == "⬛":
             to_append = f"`{len(self.data.processed_lines) + 1}`{emoji}"
             self.data.processed_lines.append(to_append)
@@ -114,7 +159,6 @@ class Utils:
         to_append = f"`{len(self.data.processed_lines) + 1}`{emoji}` {self.data.str_line} `"
         self.data.processed_lines.append(to_append)
 
-    # Idk why i did this, it doesnt make anything easier
     @staticmethod
     async def create_embed(title, description, color) -> discord.Embed:
         return discord.Embed(title=title,

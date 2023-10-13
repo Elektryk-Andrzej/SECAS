@@ -1,6 +1,7 @@
 import class_DataHandler
 import class_ErrorHandler
 import discord
+import inspect
 
 
 class Utils:
@@ -24,7 +25,16 @@ class Utils:
     async def strip_brackets(val: str) -> str:
         return val.replace("{", "").replace("}", "")
 
-    async def log(self, context, reason: str):
+    async def log(self, context: inspect.getframeinfo(inspect.currentframe()), reason: str) -> None:
+        """
+        Basic log method.
+        Must be used after a log_new_inst method for log indent to be correct.
+
+        :param context: inspect.getframeinfo(inspect.currentframe())
+        :param reason: Reason of the log
+        :return: None
+        """
+
         try:
             log_depth: str = self.data.log_depth_char * self.data.log_depth
 
@@ -43,6 +53,13 @@ class Utils:
                 file.write(f"---> ERROR ({e})\n")
 
     async def log_new_inst(self, context, **kwargs):
+        """
+        
+
+        :param context:
+        :param kwargs:
+        :return:
+        """
         self.data.log_depth += 1
         log_depth: str = self.data.log_depth_char * self.data.log_depth
         kwargs_formatted: str = ""

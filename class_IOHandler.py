@@ -5,6 +5,7 @@ import class_ActionHandler
 import class_ErrorHandler
 import class_Utils
 import inspect
+import os
 
 
 class IOHandler:
@@ -17,8 +18,11 @@ class IOHandler:
         self.utils: class_Utils.Utils = class_Utils.Utils(data)
 
         date = datetime.now()
-        self.data.tag = f"LOGS/{datetime.strftime(date, '%d;%m %H-%M-%S')} @ {ctx.author.display_name}"
+        self.data.tag = f"logs/{datetime.strftime(date, '%d;%m %H-%M-%S')} @ {ctx.author.display_name}"
 
+        if not os.path.exists("./logs"):
+            os.makedirs("./logs")
+            
         with open(self.data.tag, "x") as file:
             file.close()
 
@@ -27,15 +31,17 @@ class IOHandler:
         await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
                              f"Will be formatting: {self.data.code}")
 
-        for index, line in enumerate(self.data.list_line):
+        self.data.code = self.data.code.split("\n")
+
+        for index, line in enumerate(self.data.code):
             self.data.current_code_index = index
             self.data.str_line = line.strip("\n")
             self.data.list_line = line.split(" ")
-            self.data.line_already_added_to_result = False
+            self.data.line_verified = False
 
         values_to_delete = "", " ", "\n"
 
-        for index in range(len(self.data.list_line) - 1, -1, -1):
+        for index in range(len(self.data.code) - 1, -1, -1):
             if self.data.list_line[index] in values_to_delete:
                 self.data.list_line.pop(index)
 
@@ -71,8 +77,6 @@ class IOHandler:
                 # delete .v from the first line
                 if index == 0 and not count_first_line:
                     continue
-
-
 
                 if len(self.data.list_line) < 1:
                     await self.utils.add_line_to_result("⬛")

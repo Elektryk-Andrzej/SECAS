@@ -1,4 +1,4 @@
-./LOGS
-./venv
-./DO_NOT_SHIP
-./test.py
+logs
+venv
+TOKEN.py
+test.py

@@ -20,8 +20,8 @@ class IOHandler:
         date = datetime.now()
         self.data.tag = f"logs/{datetime.strftime(date, '%d;%m %H-%M-%S')} @ {ctx.author.display_name}"
 
-        if not os.path.exists("./logs"):
-            os.makedirs("./logs")
+        if not os.path.exists("logs"):
+            os.makedirs("logs")
             
         with open(self.data.tag, "x") as file:
             file.close()

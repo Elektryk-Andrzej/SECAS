@@ -4,7 +4,7 @@ import discord.ext.commands
 from discord.ext import commands
 import os
 import class_IOHandler
-from DO_NOT_SHIP.TOKEN import TOKEN
+from TOKEN import TOKEN
 import class_DataHandler
 
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())

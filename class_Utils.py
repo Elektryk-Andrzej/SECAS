@@ -12,10 +12,11 @@ class Utils:
 
         self.data = data
 
-    # Status: no changes needed
     async def get_str_from_line(self, line_index) -> str:
         """
         Safely get a value form code with provided index, return the last index if out of range
+
+        - no changes needed
 
         :param line_index: index to get from the line
         :return: str value of the provided line index
@@ -24,20 +25,24 @@ class Utils:
         await self.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
                                 line_index=line_index)
 
+        output: str
+
         try:
-            return await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                             str(self.data.list_line[line_index]))
+            output = str(self.data.list_line[line_index])
 
         except IndexError:
+            output = str(self.data.list_line[-1])
             await self.log(inspect.getframeinfo(inspect.currentframe()),
-                           "Specified line index is out of range")
-            return await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                             str(self.data.list_line[-1]))
+                           "Specified line index is out of range, returned -1")
 
-    # Status: no changes needed
+        return await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
+                                         output)
+
     async def strip_brackets(self, val: str) -> str:
         """
         Strip brackets form the provided value.
+
+        - no changes needed
 
         :param val: str value to remove brackets from
         :return: str value without brackets
@@ -46,14 +51,17 @@ class Utils:
         await self.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
                                 val=val)
 
-        return await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                         val.replace("{", "").replace("}", ""))
+        output = val.replace("{", "").replace("}", "")
 
-    # Status: no changes needed
+        return await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
+                                         output)
+
     async def log(self, context: inspect.getframeinfo(inspect.currentframe()), reason: str) -> None:
         """
         Basic log method.
         Must be used after a log_new_inst method for log indent to be correct.
+
+        - no changes needed
 
         :param context: inspect.getframeinfo(inspect.currentframe())
         :param reason: Reason of the log
@@ -77,11 +85,12 @@ class Utils:
             with open(self.data.tag, "a") as file:
                 file.write(f"---> ERROR ({e})\n")
 
-    # Status: no changes needed
     async def log_new_inst(self, context, **kwargs) -> None:
         """
         Use at the beggining of a method.
         Will change log depth accordingly for better readability.
+
+        - no changes needed
 
         :param context: inspect.getframeinfo(inspect.currentframe())
         :param kwargs: all args provided
@@ -112,11 +121,12 @@ class Utils:
             with open(self.data.tag, "a") as file:
                 file.write(f"---> ERROR ({e})\n")
 
-    # Status: no changes needed
     async def log_close_inst(self, context, output):
         """
         Use in the return statement of a method.
         Will change log depth accordingly for better readability.
+
+        - no changes needed
 
         :param context: inspect.getframeinfo(inspect.currentframe())
         :param output: the value returned by the method
@@ -143,21 +153,35 @@ class Utils:
             self.data.log_depth -= 1
             return
 
-    # Status: needs changes
     async def add_line_to_result(self, emoji: str) -> None:
         """
         Format all of the data and add it into a list, from which it will be assembled into an embed
+
         :param emoji: emoji used to represent the line
         :return: None
         """
 
+        await self.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
+                                emoji=emoji)
+
+        if self.data.current_code_index in self.data.lines_errored:
+            await self.log(inspect.getframeinfo(inspect.currentframe()),
+                           f"Tried adding {self.data.current_code_index} but its already added")
+            return await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
+                                             None)
+
         if emoji == "⬛":
             to_append = f"`{len(self.data.processed_lines) + 1}`{emoji}"
             self.data.processed_lines.append(to_append)
-            return
+
+            return await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
+                                             None)
 
         to_append = f"`{len(self.data.processed_lines) + 1}`{emoji}` {self.data.str_line} `"
         self.data.processed_lines.append(to_append)
+
+        return await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
+                                         None)
 
     @staticmethod
     async def create_embed(title, description, color) -> discord.Embed:

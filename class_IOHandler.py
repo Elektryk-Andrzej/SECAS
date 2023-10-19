@@ -32,6 +32,7 @@ class IOHandler:
                              f"Will be formatting: {self.data.code}")
 
         self.data.code = self.data.code.split("\n")
+        print(self.data.code)
 
         for index, line in enumerate(self.data.code):
             self.data.current_code_index = index

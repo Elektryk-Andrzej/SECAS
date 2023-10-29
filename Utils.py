@@ -154,7 +154,7 @@ class Utils:
             return
 
     async def line_verdict(self,
-                           type: class_DataHandler.Data.LineVerdictType,
+                           verdict_type: DataHandler.Data.LineVerdictType,
                            focus_start: int | None = None,
                            focus_end: int | None = None) -> None:
         """
@@ -162,7 +162,11 @@ class Utils:
 
         :return: None
         """
-        if type
+        if verdict_type is self.data.LineVerdictType.PASSED:
+            self.data.processed_lines.append([
+                verdict_type,
+            ])
+
 
         await self.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
                                 emoji=emoji)

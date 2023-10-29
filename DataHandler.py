@@ -394,9 +394,10 @@ class Data:
     def __init__(self):
         self.code: list or str = []
         self.code_index: int = 0
+        self.line: list = []
         self.processed_lines: list = []
         self.errored: bool = False
-        self.current_code_index: int = 0
+        self.line_verdict_set: bool = False
         self.labels: list = ["NEXT", "START", "STOP"]
         self.custom_variables: list[list] = []
         self.andrzej_ping: str = "<@762016625096261652>"
@@ -406,5 +407,6 @@ class Data:
 
         for role in self.RoleType().role_types:
             self.SEVariable().se_variables.append([role.upper(), int, True])
+
         for room in self.RoomType().room_types:
             self.SEVariable().se_variables.append([room.upper(), int, True])

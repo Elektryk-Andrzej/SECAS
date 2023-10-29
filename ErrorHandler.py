@@ -1,13 +1,13 @@
 import DataHandler
+import Utils
 
 
 class ErrorHandler:
-    def __init__(self, data: class_DataHandler.Data):
+    def __init__(self, data: DataHandler.Data):
         self.data = data
 
     # Used to handle most errors, surrounds the specified line index with arrows
     async def template(self, line_index: int, reason: str):
-        self.data.line_errored = True
         self.data.errored = True
 
         self.data.list_line[line_index] = f"▶ {self.data.list_line[line_index]} ◀"

@@ -31,9 +31,7 @@ class IOHandler:
         await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
                              f"Will be formatting: {self.data.code}")
 
-        self.data.code = self.data.code.split("\n")
-        print(self.data.code)
-        new_code = []
+        new_code = self.data.code.split("\n")
 
         for index, line in enumerate(self.data.code):
             if index == 0 and not count_first_line:

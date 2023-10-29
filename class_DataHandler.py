@@ -378,7 +378,7 @@ class DataHandler:
             "WORKSTATIONS"
         ]
 
-        self.code: str = ""
+        self.code: list or str = []
         self.list_line: list = []
         self.str_line: str = ""
         self.processed_lines: list = []

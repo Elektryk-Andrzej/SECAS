@@ -44,42 +44,45 @@ class IOHandler:
 
         self.data.code = new_code
 
-        await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()), None)
+        await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
+                             f"Formatted to: {self.data.code}")
+        await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
+                                        None)
+
+    async def get_labels(self) -> None:
+        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()))
+
+        for index, line in enumerate(self.data.code):
+            if len(line) == 1 and (label := str(line[0]).endswith(":")):
+
+                self.data.labels.append(label)
+
+                await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
+                                     f"Registered a new label: {label}")
+
+        await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
+                                        None)
 
     async def proccess_verify_request(self, count_first_line: bool) -> None:
         await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
                                 count_first_line=count_first_line)
 
-        async with (self.ctx.channel.typing()):
+        async with self.ctx.channel.typing():
             lines_done = 0
-            '''try:'''
 
             await self.format_code(count_first_line=count_first_line)
 
-            # register all labels
-            for index, line in enumerate(self.data.code):
-                if not count_first_line and index == 0:
-                    continue
+            await self.get_labels()
 
-                if ":" in (label := self.data.list_line[-1]):
-                    self.data.labels.append(label.strip(":"))
-                    await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
-                                         f"Registered a label \"{label}\" in line {index}")
-
-            # for all lines to be verified
-            for index, line in enumerate(self.data.code):
+            line: list
+            for line in self.data.code:
                 lines_done += 1
 
-                # delete .v from the first line
-                if index == 0 and not count_first_line:
-                    continue
-
-                if len(self.data.list_line) < 1:
+                if len(line) == 0:
                     await self.utils.add_line_to_result("⬛")
                     continue
 
-                print(self.data.list_line)
-                if (action_name := self.data.list_line[0]) in self.action_handler.actions:
+                if (action_name := line[0]) in self.action_handler.actions:
                     action_done = await self.action_handler.actions[action_name]()
 
                     if action_done:
@@ -88,14 +91,10 @@ class IOHandler:
                     else:
                         await self.utils.add_line_to_result("🟥")
                         self.data.errored = True
-                        self.data.lines_errored.append(self.data.current_code_index)
+                        # self.data.lines_errored.append(self.data.current_code_index)
 
-                elif "#" in self.data.list_line[0]:
+                elif "#" in line[0]:
                     await self.utils.add_line_to_result("🟦")
-
-                elif all(znak.isspace() for znak in self.data.list_line) or \
-                        self.data.list_line == ['']:
-                    await self.utils.add_line_to_result("⬛")
 
                 elif ":" in self.data.list_line[-1] and len(self.data.list_line) == 1:
                     await self.utils.add_line_to_result("🟪")

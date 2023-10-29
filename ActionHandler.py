@@ -1,12 +1,12 @@
-import class_DataHandler
-import class_ParamHandler
-import class_Utils
-import class_ErrorHandler
+import DataHandler
+import ParamHandler
+import Utils
+import ErrorHandler
 
 
 class ActionHandler:
-    def __init__(self, data: class_DataHandler.DataHandler):
-        self.data: class_DataHandler.DataHandler = (
+    def __init__(self, data: class_DataHandler.Data):
+        self.data: class_DataHandler.Data = (
             data)
 
         self.param_handler: class_ParamHandler.ParamHandler = (

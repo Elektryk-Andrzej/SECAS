@@ -1,8 +1,8 @@
-import class_DataHandler
+import DataHandler
 
 
 class ErrorHandler:
-    def __init__(self, data: class_DataHandler.DataHandler):
+    def __init__(self, data: class_DataHandler.Data):
         self.data = data
 
     # Used to handle most errors, surrounds the specified line index with arrows

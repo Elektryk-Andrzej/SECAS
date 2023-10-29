@@ -1,10 +1,10 @@
-import class_DataHandler
+import DataHandler
 import discord
 import inspect
 
 
 class Utils:
-    def __init__(self, data: class_DataHandler.DataHandler):
+    def __init__(self, data: class_DataHandler.Data):
         """
         Contains the most basic and universal functions,
         ment to be accessed from anywhere with no problems.
@@ -153,13 +153,16 @@ class Utils:
             self.data.log_depth -= 1
             return
 
-    async def add_line_to_result(self, emoji: str) -> None:
+    async def line_verdict(self,
+                           type: class_DataHandler.Data.LineVerdictType,
+                           focus_start: int | None = None,
+                           focus_end: int | None = None) -> None:
         """
         Format all of the data and add it into a list, from which it will be assembled into an embed
 
-        :param emoji: emoji used to represent the line
         :return: None
         """
+        if type
 
         await self.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
                                 emoji=emoji)

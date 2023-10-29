@@ -1,10 +1,10 @@
-import class_DataHandler
-import class_ErrorHandler
-import class_Utils
+import DataHandler
+import ErrorHandler
+import Utils
 
 
 class ParamHandler:
-    def __init__(self, data: class_DataHandler.DataHandler):
+    def __init__(self, data: class_DataHandler.Data):
         self.data = data
         self.utils = class_Utils.Utils(data)
         self.error_handler = class_ErrorHandler.ErrorHandler(data)
@@ -109,7 +109,7 @@ class ParamHandler:
             return True
 
         if ":" in variable:
-            await self.utils.add_line_to_result("🔳")
+            await self.utils.line_verdict("🔳")
             return True
 
         await self.error_handler.template(line_index, reason)
@@ -126,7 +126,7 @@ class ParamHandler:
         variable = await self.utils.strip_brackets(variable)
 
         if ":" in variable:
-            await self.utils.add_line_to_result("🔳")
+            await self.utils.line_verdict("🔳")
             return True
 
         if await self.is_variable_defined(var_type=int,
@@ -262,7 +262,7 @@ class ParamHandler:
             return True
 
         if math_supported:
-            await self.utils.add_line_to_result("🔲")
+            await self.utils.line_verdict("🔲")
             return True
 
         to_be_number = await self.utils.get_str_from_line(line_index)

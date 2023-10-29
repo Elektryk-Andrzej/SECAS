@@ -2,9 +2,9 @@ import asyncio
 import discord
 from discord.ext import commands
 import os
-import class_IOHandler
+import IOHandler
 from TOKEN import TOKEN
-import class_DataHandler
+import DataHandler
 
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
@@ -105,12 +105,12 @@ async def on_message(message):
     elif message.attachments and message.attachments[0].filename.endswith('.txt') \
             and message.content.upper().startswith(".V"):
 
-        data = class_DataHandler.DataHandler()
+        data = class_DataHandler.Data()
         io_handler = class_IOHandler.IOHandler(data, message, bot)
 
         if os.path.exists(f"LOGS/{data.tag}") or os.path.exists(f"LOGS\\{data.tag}"):
             await asyncio.sleep(1.5)
-            data = class_DataHandler.DataHandler()
+            data = class_DataHandler.Data()
 
         attachment = message.attachments[0]
         message_content = await attachment.read()
@@ -120,12 +120,12 @@ async def on_message(message):
 
     elif message.content.upper().startswith(".V"):
 
-        data = class_DataHandler.DataHandler()
+        data = class_DataHandler.Data()
         io_handler = class_IOHandler.IOHandler(data, message, bot)
 
         if os.path.exists(f"LOGS/{data.tag}") or os.path.exists(f"LOGS\\{data.tag}"):
             await asyncio.sleep(1.5)
-            data = class_DataHandler.DataHandler()
+            data = class_DataHandler.Data()
 
         data.code = message.content
         await io_handler.proccess_verify_request(count_first_line=False)

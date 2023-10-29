@@ -1,16 +1,16 @@
 from datetime import *
 import discord
-import class_DataHandler
-import class_ActionHandler
-import class_ErrorHandler
-import class_Utils
+import DataHandler
+import ActionHandler
+import ErrorHandler
+import Utils
 import inspect
 import os
 
 
 class IOHandler:
-    def __init__(self, data: class_DataHandler.DataHandler, ctx, bot):
-        self.data: class_DataHandler.DataHandler = data
+    def __init__(self, data: class_DataHandler.Data, ctx, bot):
+        self.data: class_DataHandler.Data = data
         self.bot = bot
         self.ctx = ctx
         self.error_handler: class_ErrorHandler.ErrorHandler = class_ErrorHandler.ErrorHandler(data)
@@ -79,28 +79,28 @@ class IOHandler:
                 lines_done += 1
 
                 if len(line) == 0:
-                    await self.utils.add_line_to_result("⬛")
+                    await self.utils.line_verdict("⬛")
                     continue
 
                 if (action_name := line[0]) in self.action_handler.actions:
                     action_done = await self.action_handler.actions[action_name]()
 
                     if action_done:
-                        await self.utils.add_line_to_result("🟩")
+                        await self.utils.line_verdict("🟩")
 
                     else:
-                        await self.utils.add_line_to_result("🟥")
+                        await self.utils.line_verdict("🟥")
                         self.data.errored = True
                         # self.data.lines_errored.append(self.data.current_code_index)
 
                 elif "#" in line[0]:
-                    await self.utils.add_line_to_result("🟦")
+                    await self.utils.line_verdict("🟦")
 
                 elif ":" in self.data.list_line[-1] and len(self.data.list_line) == 1:
-                    await self.utils.add_line_to_result("🟪")
+                    await self.utils.line_verdict("🟪")
 
                 elif "!--" in self.data.list_line[0]:
-                    await self.utils.add_line_to_result("⬜")
+                    await self.utils.line_verdict("⬜")
 
                 else:
                     await self.error_handler.template(0, "Invalid action")

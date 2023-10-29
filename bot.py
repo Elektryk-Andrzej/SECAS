@@ -39,7 +39,7 @@ async def info_embed(message):
                                 "is a tool made to check if your SE code doesn't contain any errors. "
                                 "If an error is found, SECAS will specify where and why it is.\n"
                                 "This bot will never collect any data about you and your scripts."
-                    ))
+                ))
 
             elif answer[0] == "usage":
                 await self.embed.edit(embed=discord.Embed(
@@ -105,12 +105,12 @@ async def on_message(message):
     elif message.attachments and message.attachments[0].filename.endswith('.txt') \
             and message.content.upper().startswith(".V"):
 
-        data = class_DataHandler.Data()
-        io_handler = class_IOHandler.IOHandler(data, message, bot)
+        data = DataHandler.Data()
+        io_handler = IOHandler.IOHandler(data, message, bot)
 
         if os.path.exists(f"LOGS/{data.tag}") or os.path.exists(f"LOGS\\{data.tag}"):
             await asyncio.sleep(1.5)
-            data = class_DataHandler.Data()
+            data = DataHandler.Data()
 
         attachment = message.attachments[0]
         message_content = await attachment.read()
@@ -120,12 +120,12 @@ async def on_message(message):
 
     elif message.content.upper().startswith(".V"):
 
-        data = class_DataHandler.Data()
-        io_handler = class_IOHandler.IOHandler(data, message, bot)
+        data = DataHandler.Data()
+        io_handler = IOHandler.IOHandler(data, message, bot)
 
         if os.path.exists(f"LOGS/{data.tag}") or os.path.exists(f"LOGS\\{data.tag}"):
             await asyncio.sleep(1.5)
-            data = class_DataHandler.Data()
+            data = DataHandler.Data()
 
         data.code = message.content
         await io_handler.proccess_verify_request(count_first_line=False)
@@ -148,11 +148,12 @@ async def on_message(message):
                           
                           """)
         embed.add_field(name="1:",
-                        value="If you want someone to help you (which is the thing you're doing), " 
-                        "you want your question to be as easy to understand as possible.\n"
-                        "No one is going to try and decipher what you are asking for.")
+                        value="If you want someone to help you (which is the thing you're doing), "
+                              "you want your question to be as easy to understand as possible.\n"
+                              "No one is going to try and decipher what you are asking for.")
 
         await message.reply(embed=embed)
+
 
 if __name__ == "__main__":
     bot.run(TOKEN)

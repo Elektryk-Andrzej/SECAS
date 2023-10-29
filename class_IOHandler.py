@@ -26,28 +26,25 @@ class IOHandler:
         with open(self.data.tag, "x") as file:
             file.close()
 
-    async def format_code(self) -> None:
+    async def format_code(self, count_first_line: bool) -> None:
         await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()))
         await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
                              f"Will be formatting: {self.data.code}")
 
         self.data.code = self.data.code.split("\n")
         print(self.data.code)
+        new_code = []
 
         for index, line in enumerate(self.data.code):
-            self.data.current_code_index = index
-            self.data.str_line = line.strip("\n")
-            self.data.list_line = line.split(" ")
-            self.data.line_verified = False
+            if index == 0 and not count_first_line:
+                continue
 
-        values_to_delete = "", " ", "\n"
+            if "\n" in line:
+                line.replace("\n", "")
 
-        for index in range(len(self.data.code) - 1, -1, -1):
-            if self.data.list_line[index] in values_to_delete:
-                self.data.list_line.pop(index)
+            new_code.append(line.split(" "))
 
-            await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
-                                 f"Deleted param @ index {index}")
+        self.data.code = new_code
 
         await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()), None)
 
@@ -59,7 +56,7 @@ class IOHandler:
             lines_done = 0
             '''try:'''
 
-            await self.format_code()
+            await self.format_code(count_first_line=count_first_line)
 
             # register all labels
             for index, line in enumerate(self.data.code):

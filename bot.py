@@ -1,6 +1,5 @@
 import asyncio
 import discord
-import discord.ext.commands
 from discord.ext import commands
 import os
 import class_IOHandler
@@ -86,7 +85,7 @@ async def info_embed(message):
 
 @bot.event
 async def on_ready():
-    print(f"Zalogowano jako {bot.user}")
+    print(f"Logged in as {bot.user}")
     await bot.change_presence(
         activity=discord.Activity(
             type=discord.ActivityType.watching,
@@ -99,7 +98,7 @@ async def on_message(message):
     if message.author.id == bot.user.id:
         return
 
-    if message.content.upper().startswith(".I") or bot.user.mentioned_in(message):
+    if message.content.upper().startswith(".I") or str(bot.user.id) in message.content:
         await info_embed(message)
         return
 

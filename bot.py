@@ -37,8 +37,7 @@ async def info_embed(message):
                     title=f"What is {bot.user.name}?",
                     description="**Scripted Events Code Analysis System** "
                                 "is a tool made to check if your SE code doesn't contain any errors. "
-                                "If an error is found, SECAS will specify where and why it is.\n"
-                                "This bot will never collect any data about you and your scripts."
+                                "If an error is found, SECAS will specify where and why it is."
                 ))
 
             elif answer[0] == "usage":
@@ -68,8 +67,7 @@ async def info_embed(message):
                                 f"# <:jraylor:1148181032772849665> <@533344220585394206> - 8mo\n"
                                 f"# <:xxnubnubxx:1156643754552336504> <@389059604895498243> - 2mo\n"
                                 f"Want to support the SECAS project? Consider donating!\n"
-                                f"> [ko-fi](https://ko-fi.com/elektrykandrzej)\n"
-                                f"> "))
+                                f"## > [ko-fi](https://ko-fi.com/elektrykandrzej)\n"))
 
             else:
                 return
@@ -123,6 +121,10 @@ async def on_message(message):
             count_first_line = False
 
         await io_handler.proccess_verify_request(count_first_line=count_first_line)
+
+        if message.content.upper().startswith(".VD"):
+            with open(data.log_file_name, "rb") as file:
+                await message.channel.send("Your file is:", file=discord.File(file, "result.txt"))
 
         del data
 

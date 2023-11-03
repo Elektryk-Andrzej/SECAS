@@ -1,5 +1,5 @@
 import DataHandler
-import ErrorHandler
+import VerdictHandler
 import Utils
 
 
@@ -7,7 +7,7 @@ class ParamHandler:
     def __init__(self, data: class_DataHandler.Data):
         self.data = data
         self.utils = class_Utils.Utils(data)
-        self.error_handler = class_ErrorHandler.ErrorHandler(data)
+        self.error_handler = class_ErrorHandler.VerdictHandler(data)
 
     # Register a certain value to a SE variable
     async def register_var(self, name_index: int, value_index: int, *,
@@ -95,14 +95,14 @@ class ParamHandler:
         if star_allowed and variable == "*":
             return True
         elif not star_allowed and variable == "*":
-            await self.error_handler.template(line_index, "* usage forbidden | Use other values")
+            await self.error_handler.error_template(line_index, "* usage forbidden | Use other values")
             return False
 
         if brackets_required and "{" in variable and "}" in variable:
             variable = variable.replace("{", "").replace("}", "")
 
         elif brackets_required:
-            await self.error_handler.template(line_index, "`{}` required")
+            await self.error_handler.error_template(line_index, "`{}` required")
             return False
 
         if variable in var_type:
@@ -112,7 +112,7 @@ class ParamHandler:
             await self.utils.line_verdict("🔳")
             return True
 
-        await self.error_handler.template(line_index, reason)
+        await self.error_handler.error_template(line_index, reason)
         return False
 
     async def is_se_var(self, line_index, *, required: bool = True) -> bool:
@@ -136,10 +136,10 @@ class ParamHandler:
             return True
 
         if variable == "*":
-            await self.error_handler.template(line_index, "Asterisk usage forbidden")
+            await self.error_handler.error_template(line_index, "Asterisk usage forbidden")
             return False
 
-        await self.error_handler.template(line_index, "Invalid SE variable")
+        await self.error_handler.error_template(line_index, "Invalid SE variable")
         return False
 
     async def is_bool(self, line_index, *, required: bool = True) -> bool:
@@ -156,7 +156,7 @@ class ParamHandler:
             if variable.replace("{", "").replace("}", "") == se_var[0] and se_var[1] is bool:
                 return True
 
-        await self.error_handler.template(line_index, "Invalid TRUE/FALSE argument")
+        await self.error_handler.error_template(line_index, "Invalid TRUE/FALSE argument")
         return False
 
     async def is_label(self, line_index) -> bool:
@@ -167,11 +167,11 @@ class ParamHandler:
                 return True
 
             elif int(iterator):
-                await self.error_handler.template(line_index, f"Detected number | USE LABELS!")
+                await self.error_handler.error_template(line_index, f"Detected number | USE LABELS!")
                 return False
 
         except:
-            await self.error_handler.template(line_index, f"Invalid label")
+            await self.error_handler.error_template(line_index, f"Invalid label")
             return False
 
     async def is_containing_brackets(self, line_index: int) -> bool:
@@ -273,14 +273,14 @@ class ParamHandler:
         except:
             pass
 
-        await self.error_handler.template(line_index, "Invalid integer number")
+        await self.error_handler.error_template(line_index, "Invalid integer number")
         return False
 
     async def is_required_len(self, min_len: int, max_len) -> bool:
         action_len = len(self.data.list_line) - 1
 
         if not min_len <= action_len:
-            await self.error_handler.invalid_min_length(abs(action_len - min_len))
+            await self.error_handler.error_invalid_min_length(abs(action_len - min_len))
 
             return False
 
@@ -288,7 +288,7 @@ class ParamHandler:
             return True
 
         if not action_len <= max_len:
-            await self.error_handler.invalid_max_length(action_len - max_len)
+            await self.error_handler.error_invalid_max_length(action_len - max_len)
 
             return False
 

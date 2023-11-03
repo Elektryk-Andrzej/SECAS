@@ -4,7 +4,7 @@ import inspect
 
 
 class Utils:
-    def __init__(self, data: class_DataHandler.Data):
+    def __init__(self, data: DataHandler.Data):
         """
         Contains the most basic and universal functions,
         ment to be accessed from anywhere with no problems.
@@ -28,12 +28,12 @@ class Utils:
         output: str
 
         try:
-            output = str(self.data.list_line[line_index])
+            output = str(self.data.line[line_index])
 
         except IndexError:
-            output = str(self.data.list_line[-1])
+            output = str(self.data.line[-1])
             await self.log(inspect.getframeinfo(inspect.currentframe()),
-                           "Specified line index is out of range, returned -1")
+                           "Specified line index is out of range, returned the last index")
 
         return await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
                                          output)
@@ -71,18 +71,18 @@ class Utils:
         try:
             log_depth: str = self.data.log_depth_char * self.data.log_depth
 
-            with open(self.data.tag, "a") as file:
+            with open(self.data.log_file_name, "a") as file:
                 file.write(f"{log_depth} {context.function} (@ {context.lineno}) - {reason} \n")
 
         except AttributeError as e:
             log_depth: str = self.data.log_depth_char * self.data.log_depth
 
-            with open(self.data.tag, "a") as file:
+            with open(self.data.log_file_name, "a") as file:
                 file.write(f"{log_depth} {reason} (AttributeError - {e})\n")
 
         except Exception as e:
             print(f"---> ERROR ({e})")
-            with open(self.data.tag, "a") as file:
+            with open(self.data.log_file_name, "a") as file:
                 file.write(f"---> ERROR ({e})\n")
 
     async def log_new_inst(self, context, **kwargs) -> None:
@@ -108,17 +108,17 @@ class Utils:
 
                 kwargs_formatted += f"{log_depth} -> {arg}: {val} ({val_type_formatted})\n"
 
-            with open(self.data.tag, "a") as file:
+            with open(self.data.log_file_name, "a") as file:
                 file.write(f"{log_depth} new instance {context.function} with args:\n")
                 file.write(f"{kwargs_formatted}")
 
         except AttributeError as e:
-            with open(self.data.tag, "a") as file:
+            with open(self.data.log_file_name, "a") as file:
                 file.write(f"{log_depth} new inst (AttributeError - {e})\n")
 
         except Exception as e:
             print(f"---> ERROR ({e})")
-            with open(self.data.tag, "a") as file:
+            with open(self.data.log_file_name, "a") as file:
                 file.write(f"---> ERROR ({e})\n")
 
     async def log_close_inst(self, context, output):
@@ -136,59 +136,22 @@ class Utils:
         log_depth: str = self.data.log_depth_char * self.data.log_depth
 
         try:
-            with open(self.data.tag, "a") as file:
+            with open(self.data.log_file_name, "a") as file:
                 file.write(f"{log_depth} closed instance {context.function} (@ {context.lineno}) with {output}\n")
                 return output
 
         except AttributeError as e:
-            with open(self.data.tag, "a") as file:
+            with open(self.data.log_file_name, "a") as file:
                 file.write(f"{log_depth} returned {output} (clsd inst | AttributeError - {e})\n")
 
         except Exception as e:
             print(f"---> ERROR ({e})")
-            with open(self.data.tag, "a") as file:
+            with open(self.data.log_file_name, "a") as file:
                 file.write(f"---> ERROR ({e})\n")
 
         finally:
             self.data.log_depth -= 1
             return
-
-    async def line_verdict(self,
-                           verdict_type: DataHandler.Data.LineVerdictType,
-                           focus_start: int | None = None,
-                           focus_end: int | None = None) -> None:
-        """
-        Format all of the data and add it into a list, from which it will be assembled into an embed
-
-        :return: None
-        """
-        if verdict_type is self.data.LineVerdictType.PASSED:
-            self.data.processed_lines.append([
-                verdict_type,
-            ])
-
-
-        await self.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
-                                emoji=emoji)
-
-        if self.data.current_code_index in self.data.lines_errored:
-            await self.log(inspect.getframeinfo(inspect.currentframe()),
-                           f"Tried adding {self.data.current_code_index} but its already added")
-            return await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                             None)
-
-        if emoji == "⬛":
-            to_append = f"`{len(self.data.processed_lines) + 1}`{emoji}"
-            self.data.processed_lines.append(to_append)
-
-            return await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                             None)
-
-        to_append = f"`{len(self.data.processed_lines) + 1}`{emoji}` {self.data.str_line} `"
-        self.data.processed_lines.append(to_append)
-
-        return await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                         None)
 
     @staticmethod
     async def create_embed(title, description, color) -> discord.Embed:

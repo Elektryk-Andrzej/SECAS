@@ -102,33 +102,25 @@ async def on_message(message):
         await info_embed(message)
         return
 
-    elif message.attachments and message.attachments[0].filename.endswith('.txt') \
-            and message.content.upper().startswith(".V"):
-
-        data = DataHandler.Data()
-        io_handler = IOHandler.IOHandler(data, message, bot)
-
-        if os.path.exists(f"LOGS/{data.tag}") or os.path.exists(f"LOGS\\{data.tag}"):
-            await asyncio.sleep(1.5)
-            data = DataHandler.Data()
-
-        attachment = message.attachments[0]
-        message_content = await attachment.read()
-        data.code = message_content.decode("utf-8")
-
-        await io_handler.proccess_verify_request(count_first_line=True)
-
     elif message.content.upper().startswith(".V"):
-
         data = DataHandler.Data()
         io_handler = IOHandler.IOHandler(data, message, bot)
 
-        if os.path.exists(f"LOGS/{data.tag}") or os.path.exists(f"LOGS\\{data.tag}"):
+        if os.path.exists(f"LOGS/{data.log_file_name}") or os.path.exists(f"LOGS\\{data.log_file_name}"):
             await asyncio.sleep(1.5)
             data = DataHandler.Data()
 
-        data.code = message.content
-        await io_handler.proccess_verify_request(count_first_line=False)
+        count_first_line: bool
+        if message.attachments and message.attachments[0].filename.endswith('.txt'):
+            attachment = message.attachments[0]
+            message_content = await attachment.read()
+            data.code = message_content.decode("utf-8")
+            count_first_line = True
+        else:
+            data.code = message.content
+            count_first_line = False
+
+        await io_handler.proccess_verify_request(count_first_line=count_first_line)
 
     elif message.content.upper().startswith(".H"):
         embed = \

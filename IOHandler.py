@@ -2,28 +2,29 @@ from datetime import *
 import discord
 import DataHandler
 import ActionHandler
-import ErrorHandler
+import VerdictHandler
 import Utils
 import inspect
 import os
 
 
 class IOHandler:
-    def __init__(self, data: class_DataHandler.Data, ctx, bot):
-        self.data: class_DataHandler.Data = data
+    def __init__(self, data: DataHandler.Data, ctx, bot):
+        self.data: DataHandler.Data = data
         self.bot = bot
         self.ctx = ctx
-        self.error_handler: class_ErrorHandler.ErrorHandler = class_ErrorHandler.ErrorHandler(data)
-        self.action_handler: class_ActionHandler.ActionHandler = class_ActionHandler.ActionHandler(data)
-        self.utils: class_Utils.Utils = class_Utils.Utils(data)
+        self.error_handler: ErrorHandler.VerdictHandler = ErrorHandler.VerdictHandler(data)
+        self.action_handler: ActionHandler.ActionHandler = ActionHandler.ActionHandler(data)
+        self.utils: Utils.Utils = Utils.Utils(data)
 
         date = datetime.now()
-        self.data.tag = f"logs/{datetime.strftime(date, '%d;%m %H-%M-%S')} @ {ctx.author.display_name}"
+        self.data.log_file_name = (f"logs/{datetime.strftime(date, '%d;%m %H-%M-%S')} "
+                                   f"@ {ctx.author.display_name}")
 
         if not os.path.exists("logs"):
             os.makedirs("logs")
             
-        with open(self.data.tag, "x") as file:
+        with open(self.data.log_file_name, "x") as file:
             file.close()
 
     async def format_code(self, count_first_line: bool) -> None:
@@ -103,7 +104,7 @@ class IOHandler:
                     await self.utils.line_verdict("⬜")
 
                 else:
-                    await self.error_handler.template(0, "Invalid action")
+                    await self.error_handler.error_template(0, "Invalid action")
 
             if lines_done == 1:
                 await self.ctx.reply("No code found! First line is always ignored.")

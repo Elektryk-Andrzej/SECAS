@@ -4,7 +4,7 @@ import inspect
 
 
 class Utils:
-    def __init__(self, data: DataHandler.Data):
+    def __init__(self, data: Data.Data):
         """
         Contains the most basic and universal functions,
         ment to be accessed from anywhere with no problems.
@@ -151,7 +151,7 @@ class Utils:
 
         finally:
             self.data.log_depth -= 1
-            return
+            return output
 
     @staticmethod
     async def create_embed(title, description, color) -> discord.Embed:
@@ -165,3 +165,22 @@ class Utils:
         await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
                                   to_return)
         return to_return
+
+    async def is_containing_brackets(self, line_index: int) -> bool:
+
+        await self.log_new_inst(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
+
+        variable = await self.get_str_from_line(line_index)
+
+        if not (variable[0] == "{" and variable[-1] == "}"):
+            await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()), False)
+            return False
+
+        variable = variable.removeprefix("{").removesuffix("}")
+
+        if "{" in variable or "}" in variable:
+            await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()), False)
+            return False
+
+        await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()), True)
+        return True

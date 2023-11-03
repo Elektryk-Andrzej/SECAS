@@ -1,22 +1,19 @@
-import DataHandler
+import Data
 import ParamHandler
 import Utils
 import VerdictHandler
 
 
+# noinspection PyPep8Naming
 class ActionHandler:
-    def __init__(self, data: class_DataHandler.Data):
-        self.data: class_DataHandler.Data = (
-            data)
+    def __init__(self, data: Data.Data):
+        self.data: Data.Data = data
 
-        self.param_handler: class_ParamHandler.ParamHandler = (
-            class_ParamHandler.ParamHandler(data))
+        self.param_handler: ParamHandler.ParamHandler = ParamHandler.ParamHandler(data)
 
-        self.utils: class_Utils.Utils = (
-            class_Utils.Utils(data))
+        self.utils: Utils.Utils = Utils.Utils(data)
 
-        self.error_handler: class_ErrorHandler.VerdictHandler = (
-            class_ErrorHandler.VerdictHandler(data))
+        self.verdict_handler: VerdictHandler.VerdictHandler = VerdictHandler.VerdictHandler(data)
 
         self.actions: dict = {
             "HINT": self.HINT,
@@ -272,7 +269,7 @@ class ActionHandler:
         mode_selected = self.data.list_line[1]
 
         if mode_selected not in modes:
-            await self.error_handler.error_template(1, "Invalid mode | "
+            await self.verdict_handler.error_template(1, "Invalid mode | "
                                          "LOCK/UNLOCK/OPEN/CLOSE/DESTROY")
             return False
 
@@ -303,7 +300,7 @@ class ActionHandler:
                 return False
 
         else:
-            await self.error_handler.error_template(1, "Invalid mode | "
+            await self.verdict_handler.error_template(1, "Invalid mode | "
                                          "PLAYERS/ROLETYPE/DISABLE/ENABLE")
             return False
         return True
@@ -316,7 +313,7 @@ class ActionHandler:
             return False
 
         if mode_selected not in modes:
-            await self.error_handler.error_template(1, "Invalid mode | "
+            await self.verdict_handler.error_template(1, "Invalid mode | "
                                          "START/STOP/LOCK/UNLOCK/DETONATE/BLASTDOORS")
             return False
 
@@ -354,7 +351,7 @@ class ActionHandler:
             return False
 
         if mode_selected not in modes:
-            await self.error_handler.error_template(1, "Invalid mode | "
+            await self.verdict_handler.error_template(1, "Invalid mode | "
                                          "SET/CLEAR")
             return False
 
@@ -382,7 +379,7 @@ class ActionHandler:
         if not await self.param_handler.is_required_len(3, 4):
             return False
         if mode_selected not in modes:
-            await self.error_handler.error_template(1, "Invalid mode | "
+            await self.verdict_handler.error_template(1, "Invalid mode | "
                                          "GIVE/REMOVE")
             return False
         if not await self.param_handler.is_se_var(1):
@@ -405,7 +402,7 @@ class ActionHandler:
         ranges = ("Short", "Medium", "Long", "Ultra")
         range_selected = self.data.list_line[3]
         if mode_selected in modes:
-            await self.error_handler.error_template(1, "Invalid mode | "
+            await self.verdict_handler.error_template(1, "Invalid mode | "
                                          "SET/LOCK")
             return False
 
@@ -413,7 +410,7 @@ class ActionHandler:
             return False
 
         if range_selected not in ranges:
-            await self.error_handler.error_template(3, "Invalid range | "
+            await self.verdict_handler.error_template(3, "Invalid range | "
                                          "Short/Medium/Long/Ultra")
             return False
 
@@ -525,7 +522,7 @@ class ActionHandler:
         mode_selected = self.data.list_line[1]
 
         if mode_selected not in modes:
-            await self.error_handler.error_template(1, "Invalid mode | "
+            await self.verdict_handler.error_template(1, "Invalid mode | "
                                          "GIVE/REMOVE")
             return False
 
@@ -587,14 +584,14 @@ class ActionHandler:
         mode_selected = self.data.list_line[1]
 
         if mode_selected not in modes:
-            await self.error_handler.error_template(1, "Invalid mode | "
+            await self.verdict_handler.error_template(1, "Invalid mode | "
                                          "ADD/REMOVE/SET")
 
         teams = ("ChaosInsurgency", "NineTailedFox")
         team_selected = self.data.list_line[2]
 
         if team_selected not in teams:
-            await self.error_handler.error_template(2, "Invalid team | "
+            await self.verdict_handler.error_template(2, "Invalid team | "
                                          "ChaosInsurgency/NineTailedFox")
 
         if not await self.param_handler.is_number(3, int):
@@ -619,7 +616,7 @@ class ActionHandler:
         mode_selected = self.data.list_line[1]
 
         if mode_selected not in modes:
-            await self.error_handler.error_template(1, "Invalid mode | "
+            await self.verdict_handler.error_template(1, "Invalid mode | "
                                          "ENABLE/DISABLE/FORCE")
             return False
 
@@ -641,7 +638,7 @@ class ActionHandler:
         mode_selected = self.data.list_line[1]
 
         if mode_selected not in self.data.enable_disable_key:
-            await self.error_handler.error_template(1, "Invalid key")
+            await self.verdict_handler.error_template(1, "Invalid key")
             return False
 
         return True
@@ -653,7 +650,7 @@ class ActionHandler:
         mode_selected = self.data.list_line[1]
 
         if mode_selected not in self.data.enable_disable_key:
-            await self.error_handler.error_template(1, "Invalid key")
+            await self.verdict_handler.error_template(1, "Invalid key")
             return False
 
         return True
@@ -694,11 +691,11 @@ class ActionHandler:
 
         try:
             if variable not in self.data.se_variables[0] and variable not in self.data.custom_variables[0]:
-                await self.error_handler.error_template(1, "Invalid variable | "
+                await self.verdict_handler.error_template(1, "Invalid variable | "
                                              "Variable doesn't exist")
                 return False
         except:
-            await self.error_handler.error_template(1, "Invalid variable | "
+            await self.verdict_handler.error_template(1, "Invalid variable | "
                                          "Variable doesn't exist")
             return False
 
@@ -712,7 +709,7 @@ class ActionHandler:
         variable = await self.utils.strip_brackets(variable)
 
         if variable not in self.data.se_variables[0] and variable not in self.data.custom_variables[0]:
-            await self.error_handler.error_template(1, "Invalid player variable | "
+            await self.verdict_handler.error_template(1, "Invalid player variable | "
                                          "Variable doesn't exist")
             return False
 

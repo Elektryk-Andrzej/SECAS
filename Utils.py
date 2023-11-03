@@ -1,4 +1,4 @@
-import DataHandler
+import Data
 import discord
 import inspect
 
@@ -158,3 +158,10 @@ class Utils:
         return discord.Embed(title=title,
                              description=description,
                              color=color)
+
+    async def get_line_as_str(self) -> str:
+        await self.log_new_inst(inspect.getframeinfo(inspect.currentframe()))
+        to_return = " ".join(self.data.line)
+        await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
+                                  to_return)
+        return to_return

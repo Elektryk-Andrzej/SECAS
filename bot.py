@@ -4,7 +4,7 @@ from discord.ext import commands
 import os
 import IOHandler
 from TOKEN import TOKEN
-import DataHandler
+import Data
 
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 

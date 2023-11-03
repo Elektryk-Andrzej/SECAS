@@ -1,10 +1,10 @@
-import DataHandler
+import Data
 import Utils
 import inspect
 
 
 class VerdictHandler:
-    def __init__(self, data: DataHandler.Data):
+    def __init__(self, data: Data.Data):
         self.data = data
         self.utils = Utils.Utils(data)
 
@@ -99,7 +99,7 @@ class VerdictHandler:
         return True
 
     async def line_verdict(self,
-                           verdict_type: DataHandler.Data.LineVerdictType,
+                           verdict_type: Data.Data.LineVerdictType,
                            line_to_print: str | None = None,
                            reason: str | None = None) -> bool:
         """
@@ -123,7 +123,7 @@ class VerdictHandler:
 
         if verdict_type is self.data.LineVerdictType.PASSED:
             self.data.processed_lines.append([
-                "🟩", normal_line, line_to_print, reason
+                "🟩", normal_line, line_to_print, reason, self.data.code_index
             ])
 
         await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),

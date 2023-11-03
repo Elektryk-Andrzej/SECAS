@@ -71,18 +71,18 @@ class Utils:
         try:
             log_depth: str = self.data.log_depth_char * self.data.log_depth
 
-            with open(self.data.log_file_name, "a") as file:
+            with open(self.data.log_file_name, "a", encoding="utf-8") as file:
                 file.write(f"{log_depth} {context.function} (@ {context.lineno}) - {reason} \n")
 
         except AttributeError as e:
             log_depth: str = self.data.log_depth_char * self.data.log_depth
 
-            with open(self.data.log_file_name, "a") as file:
+            with open(self.data.log_file_name, "a", encoding="utf-8") as file:
                 file.write(f"{log_depth} {reason} (AttributeError - {e})\n")
 
         except Exception as e:
             print(f"---> ERROR ({e})")
-            with open(self.data.log_file_name, "a") as file:
+            with open(self.data.log_file_name, "a", encoding="utf-8") as file:
                 file.write(f"---> ERROR ({e})\n")
 
     async def log_new_inst(self, context, **kwargs) -> None:
@@ -108,17 +108,17 @@ class Utils:
 
                 kwargs_formatted += f"{log_depth} -> {arg}: {val} ({val_type_formatted})\n"
 
-            with open(self.data.log_file_name, "a") as file:
+            with open(self.data.log_file_name, "a", encoding="utf-8") as file:
                 file.write(f"{log_depth} new instance {context.function} with args:\n")
                 file.write(f"{kwargs_formatted}")
 
         except AttributeError as e:
-            with open(self.data.log_file_name, "a") as file:
+            with open(self.data.log_file_name, "a", encoding="utf-8") as file:
                 file.write(f"{log_depth} new inst (AttributeError - {e})\n")
 
         except Exception as e:
             print(f"---> ERROR ({e})")
-            with open(self.data.log_file_name, "a") as file:
+            with open(self.data.log_file_name, "a", encoding="utf-8") as file:
                 file.write(f"---> ERROR ({e})\n")
 
     async def log_close_inst(self, context, output):
@@ -136,17 +136,17 @@ class Utils:
         log_depth: str = self.data.log_depth_char * self.data.log_depth
 
         try:
-            with open(self.data.log_file_name, "a") as file:
+            with open(self.data.log_file_name, "a", encoding="utf-8") as file:
                 file.write(f"{log_depth} closed instance {context.function} (@ {context.lineno}) with {output}\n")
                 return output
 
         except AttributeError as e:
-            with open(self.data.log_file_name, "a") as file:
+            with open(self.data.log_file_name, "a", encoding="utf-8") as file:
                 file.write(f"{log_depth} returned {output} (clsd inst | AttributeError - {e})\n")
 
         except Exception as e:
             print(f"---> ERROR ({e})")
-            with open(self.data.log_file_name, "a") as file:
+            with open(self.data.log_file_name, "a", encoding="utf-8") as file:
                 file.write(f"---> ERROR ({e})\n")
 
         finally:

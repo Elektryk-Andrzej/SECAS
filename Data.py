@@ -1,10 +1,11 @@
 class Data:
     class LineVerdictType:
-        ERRORED = "5"
-        PASSED = "line passed"
-        COMMENT = "line is a comment"
-        LABEL = "line is a label"
-        FLAG = "line is a flag"
+        ERRORED = "ERRORED"
+        PASSED = "PASSED"
+        COMMENT = "COMMENT"
+        LABEL = "LABEL"
+        FLAG = "FLAG"
+        EMPTY = "EMPTY"
 
     class RoomType:
         room_types: list[str] = [
@@ -74,7 +75,8 @@ class Data:
             "KeycardNTFLieutenant", "7",
             "KeycardNTFCommander", "8",
             "KeycardFacilityManager", "9",
-            "KeycardChaosInsurgency", "10",            "KeycardO5", "11",
+            "KeycardChaosInsurgency", "10",
+            "KeycardO5", "11",
             "Radio", "12",
             "GunCOM15", "13",
             "Medkit", "14",
@@ -383,21 +385,22 @@ class Data:
             "WORKSTATIONS"
         ]
 
-    code: list or str = []
-    code_index: int = 0
-    line: list = []
-    processed_lines: list = []
-    errored: bool = False
-    line_verdict_set: bool = False
-    labels: list = ["NEXT", "START", "STOP"]
-    custom_variables: list[list] = []
-    andrzej_ping: str = "<@762016625096261652>"
-    log_file_name: str = ""
-    log_depth: int = 1
-    log_depth_char: str = ">"
+    def __init__(self):
+        self.code: list or str = []
+        self.code_index: int = 0
+        self.line: list = []
+        self.processed_lines: list = []
+        self.errored: bool = False
+        self.line_verdict_set: bool = False
+        self.labels: list = ["NEXT", "START", "STOP"]
+        self.custom_variables: list[list] = []
+        self.andrzej_ping: str = "<@762016625096261652>"
+        self.log_file_name: str = ""
+        self.log_depth: int = 0
+        self.log_depth_char: str = ">"
 
-    for role in RoleType.role_types:
-        SEVariable.se_variables.append([role.upper(), int, True])
+        for role in self.RoleType.role_types:
+            self.SEVariable.se_variables.append([role.upper(), int, True])
 
-    for room in RoomType().room_types:
-        SEVariable.se_variables.append([room.upper(), int, True])
+        for room in self.RoomType().room_types:
+            self.SEVariable.se_variables.append([room.upper(), int, True])

@@ -32,18 +32,14 @@ class IOHandler:
         await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
                              f"Will be formatting: {self.data.code}")
 
-        new_code = self.data.code.split("\n")
+        lines = self.data.code.splitlines()
 
-        for index, line in enumerate(self.data.code):
-            if index == 0 and not count_first_line:
-                continue
+        self.data.code = [line for line in lines]
 
-            if "\n" in line:
-                line.replace("\n", "")
+        self.data.code = [line.split(" ") for line in lines]
 
-            new_code.append(line.split(" "))
-
-        self.data.code = new_code
+        if not count_first_line:
+            self.data.code.pop(0)
 
         await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
                              f"Formatted to: {self.data.code}")
@@ -75,7 +71,10 @@ class IOHandler:
 
             line: list
             for line in self.data.code:
+                print(line)
                 self.data.code_index += 1
+                self.data.line = line
+                self.data.line_verdict_set = False
 
                 if (action_name := line[0]) in self.action_handler.actions:
                     action_done = await self.action_handler.actions[action_name]()
@@ -94,10 +93,10 @@ class IOHandler:
                 elif "#" in line[0]:
                     await self.verdict_handler.line_verdict(self.data.LineVerdictType.COMMENT)
 
-                elif ":" in self.data.line[-1] and len(self.data.line) == 1:
+                elif ":" in line[-1] and len(line) == 1:
                     await self.verdict_handler.line_verdict(self.data.LineVerdictType.LABEL)
 
-                elif "!--" in self.data.line[0] and len(self.data.line) == 2:
+                elif "!--" in line[0] and len(self.data.line) == 2:
                     await self.verdict_handler.line_verdict(self.data.LineVerdictType.FLAG)
 
                 else:
@@ -114,7 +113,7 @@ class IOHandler:
                                      f"`{e}`",
                                      mention_author=False)'''
 
-        self.data.custom_variables.clear()
+        await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()), None)
 
     async def format_processed_lines_to_overview(self) -> list:
         await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()))
@@ -123,7 +122,7 @@ class IOHandler:
 
         overview_lines = []
         for element in self.data.processed_lines:
-            overview_lines.append(f"{element[4]}{element[0]} `{element[1]}`\n")
+            overview_lines.append(f"`{element[4]}`{element[0]} `{element[1]}`\n")
 
         devided_overview_lines = []
         current_list = []
@@ -150,7 +149,10 @@ class IOHandler:
 
         error_summary_lines = []
         for element in self.data.processed_lines:
-            error_summary_lines.append(f"### > {element[3]}\n{element[4]}{element[0]} `{element[2]}`\n")
+            if not element[3] or not element[2]:
+                continue
+
+            error_summary_lines.append(f"### > {element[3]}\n`{element[4]}`{element[0]} `{element[2]}`\n")
 
         devided_error_summary_lines = []
         current_list = []
@@ -174,13 +176,14 @@ class IOHandler:
         await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()))
         color_error = 0xdd2e44
         color_no_error = 0x77b255
+        print(f"{self.data.processed_lines = }")
 
         if self.data.errored:
             for embed_content_list in await self.format_processed_lines_to_overview():
                 embed_content = "".join(embed_content_list)
 
                 await self.ctx.channel.send(
-                    discord.Embed(
+                    embed=discord.Embed(
                         title=None,
                         description=embed_content,
                         color=color_error
@@ -190,8 +193,7 @@ class IOHandler:
             for embed_content_list in await self.format_processed_lines_to_error_summary():
                 embed_content = "".join(embed_content_list)
 
-                await self.ctx.channel.send(
-                    discord.Embed(
+                await self.ctx.channel.send(embed=discord.Embed(
                         title=None,
                         description=embed_content,
                         color=color_error
@@ -202,8 +204,7 @@ class IOHandler:
             for embed_content_list in await self.format_processed_lines_to_overview():
                 embed_content = "".join(embed_content_list)
 
-                await self.ctx.channel.send(
-                    discord.Embed(
+                await self.ctx.channel.send(embed=discord.Embed(
                         title=None,
                         description=embed_content,
                         color=color_no_error
@@ -212,3 +213,5 @@ class IOHandler:
 
         await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
                                         None)
+
+        await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()), None)

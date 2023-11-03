@@ -28,7 +28,7 @@ class VerdictHandler:
         line_copy[line_index] = f"▶ {line_copy[line_index]} ◀"
         line_to_print = ' '.join(line_copy)
 
-        await self.line_verdict(self.data.LineVerdictType.ERRORED,
+        await self.line_verdict(self.data.LineVerdictType().ERRORED,
                                 line_to_print,
                                 reason)
 
@@ -58,7 +58,7 @@ class VerdictHandler:
         line_copy = self.data.line.copy()
         line_to_print = f"{' '.join(line_copy)} ▶ {missing_arguments}◀"
 
-        await self.line_verdict(self.data.LineVerdictType.ERRORED,
+        await self.line_verdict(self.data.LineVerdictType().ERRORED,
                                 line_to_print,
                                 reason)
 
@@ -90,7 +90,7 @@ class VerdictHandler:
 
         line_to_print = ' '.join(line_copy)
 
-        await self.line_verdict(self.data.LineVerdictType.ERRORED,
+        await self.line_verdict(self.data.LineVerdictType().ERRORED,
                                 line_to_print,
                                 reason=reason)
 
@@ -112,7 +112,7 @@ class VerdictHandler:
 
         if self.data.line_verdict_set:
             await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
-                           "Request denied, a verdict has already been set for this line.")
+                           f"Request denied, a verdict has already been set for line {self.data.line}")
             await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
                                 False)
             return False
@@ -121,10 +121,36 @@ class VerdictHandler:
 
         normal_line = " ".join(self.data.line)
 
-        if verdict_type is self.data.LineVerdictType.PASSED:
-            self.data.processed_lines.append([
-                "🟩", normal_line, line_to_print, reason, self.data.code_index
-            ])
+        color: str
+
+        if verdict_type is self.data.LineVerdictType().ERRORED:
+            color = "🟥"
+
+        elif verdict_type is self.data.LineVerdictType().PASSED:
+            color = "🟩"
+
+        elif verdict_type is self.data.LineVerdictType().FLAG:
+            color = "⬜"
+
+        elif verdict_type is self.data.LineVerdictType().COMMENT:
+            color = "🟦"
+
+        elif verdict_type is self.data.LineVerdictType().LABEL:
+            color = "🟪"
+
+        elif verdict_type is self.data.LineVerdictType().EMPTY:
+            color = "⬛"
+
+        else:
+            await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
+                                            "No verdict type provided")
+            color = "🟧"
+            line_to_print = "ERROR"
+            reason = "ERROR"
+
+        self.data.processed_lines.append([
+            color, normal_line, line_to_print, reason, self.data.code_index
+        ])
 
         await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
                                         True)

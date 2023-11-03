@@ -164,6 +164,8 @@ class ParamHandler:
 
         if not await self.utils.is_containing_brackets(line_index):
             await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()), False)
+
+            await self.verdict_handler.error_template(line_index, "No brackets provided")
             return False
 
         variable = await self.utils.get_str_from_line(line_index)

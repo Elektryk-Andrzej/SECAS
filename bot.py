@@ -110,6 +110,8 @@ async def on_message(message):
             await asyncio.sleep(1.5)
             data = Data.Data()
 
+        print(f"{data.processed_lines = }")
+
         count_first_line: bool
         if message.attachments and message.attachments[0].filename.endswith('.txt'):
             attachment = message.attachments[0]
@@ -121,6 +123,8 @@ async def on_message(message):
             count_first_line = False
 
         await io_handler.proccess_verify_request(count_first_line=count_first_line)
+
+        del data
 
     elif message.content.upper().startswith(".H"):
         embed = \

@@ -309,7 +309,7 @@ class ParamHandler:
 
     async def is_number(self,
                         line_index: int,
-                        var_type: int | float,
+                        var_type: type[float] | type[int],
                         *,
                         math_supported: bool = False,
                         required: bool = True,

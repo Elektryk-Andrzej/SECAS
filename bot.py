@@ -103,12 +103,12 @@ async def on_message(message):
         return
 
     elif message.content.upper().startswith(".V"):
-        data = DataHandler.Data()
+        data = Data.Data()
         io_handler = IOHandler.IOHandler(data, message, bot)
 
         if os.path.exists(f"LOGS/{data.log_file_name}") or os.path.exists(f"LOGS\\{data.log_file_name}"):
             await asyncio.sleep(1.5)
-            data = DataHandler.Data()
+            data = Data.Data()
 
         count_first_line: bool
         if message.attachments and message.attachments[0].filename.endswith('.txt'):

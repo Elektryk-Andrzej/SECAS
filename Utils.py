@@ -68,11 +68,13 @@ class Utils:
         :return: None
         """
 
-        try:
-            log_depth: str = self.data.log_depth_char * self.data.log_depth
+        log_depth: str = self.data.log_depth_char * self.data.log_depth
+        line_number: str = f"@ {context.lineno}"
+        prefix: str = f"{line_number} {' ' * int(5 - len(line_number))} {log_depth}"
 
+        try:
             with open(self.data.log_file_name, "a", encoding="utf-8") as file:
-                file.write(f"{log_depth} {context.function} (@ {context.lineno}) - {reason} \n")
+                file.write(f"{prefix} \"{context.function}\" - {reason}\n")
 
         except AttributeError as e:
             log_depth: str = self.data.log_depth_char * self.data.log_depth
@@ -96,9 +98,10 @@ class Utils:
         :param kwargs: all args provided
         :return: None
         """
-
-        self.data.log_depth += 1
         log_depth: str = self.data.log_depth_char * self.data.log_depth
+        line_number: str = f"@ {context.lineno}"
+        prefix: str = f"{line_number} {' ' * int(5-len(line_number))} {log_depth}"
+
         kwargs_formatted: str = ""
 
         try:
@@ -106,11 +109,14 @@ class Utils:
                 arg, val = i
                 val_type_formatted: str = str(type(val)).strip('<class ').strip('>')
 
-                kwargs_formatted += f"{log_depth} -> {arg}: {val} ({val_type_formatted})\n"
+                kwargs_formatted += f"{prefix} -> {arg}: {val} ({val_type_formatted})\n"
 
             with open(self.data.log_file_name, "a", encoding="utf-8") as file:
-                file.write(f"{log_depth} new instance {context.function} with args:\n")
-                file.write(f"{kwargs_formatted}")
+                if kwargs != {}:
+                    file.write(f"{prefix} NEW \"{context.function}\" with parameters:\n")
+                    file.write(f"{kwargs_formatted}")
+                else:
+                    file.write(f"{prefix} NEW \"{context.function}\"\n")
 
         except AttributeError as e:
             with open(self.data.log_file_name, "a", encoding="utf-8") as file:
@@ -120,6 +126,8 @@ class Utils:
             print(f"---> ERROR ({e})")
             with open(self.data.log_file_name, "a", encoding="utf-8") as file:
                 file.write(f"---> ERROR ({e})\n")
+
+        self.data.log_depth += 1
 
     async def log_close_inst(self, context, output):
         """
@@ -134,10 +142,12 @@ class Utils:
         """
 
         log_depth: str = self.data.log_depth_char * self.data.log_depth
+        line_number: str = f"@ {context.lineno}"
+        prefix: str = f"{line_number} {' ' * int(5 - len(line_number))} {log_depth}"
 
         try:
             with open(self.data.log_file_name, "a", encoding="utf-8") as file:
-                file.write(f"{log_depth} closed instance {context.function} (@ {context.lineno}) with {output}\n")
+                file.write(f"{prefix} CLOSE \"{context.function}\" with {output = }\n")
                 return output
 
         except AttributeError as e:

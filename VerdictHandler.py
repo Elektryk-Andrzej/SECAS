@@ -100,8 +100,8 @@ class VerdictHandler:
 
     async def line_verdict(self,
                            verdict_type: Data.Data.LineVerdictType,
-                           line_to_print: str | None = None,
-                           reason: str | None = None) -> bool:
+                           line_to_print: str or None = None,
+                           reason: str or None = None) -> bool:
         """
         Set a verdict for the line with LineVerdictType attributes and format it for later use
 
@@ -122,7 +122,6 @@ class VerdictHandler:
         normal_line = " ".join(self.data.line)
 
         color: str
-
         if verdict_type is self.data.LineVerdictType().ERRORED:
             color = "🟥"
 
@@ -142,8 +141,8 @@ class VerdictHandler:
             color = "⬛"
 
         else:
-            await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                            "No verdict type provided")
+            await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
+                                 "No verdict type provided")
             color = "🟧"
             line_to_print = "ERROR"
             reason = "ERROR"

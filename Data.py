@@ -288,7 +288,7 @@ class Data:
         ]
 
     class SEVariable:
-        se_variables: list[list[str, bool | None, bool]] = [
+        se_variables: list[list[str, bool or None, bool]] = [
             ["DEBUG_SE_VARIABLE", None, False],
             ["CASSIESPEAKING", bool, False],
             ["DECONTAMINATED", bool, False],
@@ -396,7 +396,7 @@ class Data:
         self.custom_variables: list[list] = []
         self.andrzej_ping: str = "<@762016625096261652>"
         self.log_file_name: str = ""
-        self.log_depth: int = 0
+        self.log_depth: int = 1
         self.log_depth_char: str = ">"
 
         for role in self.RoleType.role_types:

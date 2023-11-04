@@ -27,10 +27,8 @@ class IOHandler:
         with open(self.data.log_file_name, "x") as file:
             file.close()
 
-    async def format_code(self, count_first_line: bool) -> None:
+    async def format_code(self, count_first_line: bool) -> list:
         await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()))
-        await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
-                             f"Will be formatting: {self.data.code}")
 
         lines = self.data.code.splitlines()
 
@@ -41,21 +39,21 @@ class IOHandler:
         if not count_first_line:
             self.data.code.pop(0)
 
-        await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
-                             f"Formatted to: {self.data.code}")
         await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                        None)
+                                        self.data.code)
+
+        return self.data.code
 
     async def get_labels(self) -> None:
         await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()))
 
         for index, line in enumerate(self.data.code):
-            if len(line) == 1 and (label := str(line[0]).endswith(":")):
-
+            if len(line) == 1 and str(line[0]).endswith(":"):
+                label = str(line[0]).strip(":")
                 self.data.labels.append(label)
 
                 await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
-                                     f"Registered a new label: {label}")
+                                     f"Registered a new label: \"{label}\"")
 
         await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
                                         None)
@@ -71,7 +69,6 @@ class IOHandler:
 
             line: list
             for line in self.data.code:
-                print(line)
                 self.data.code_index += 1
                 self.data.line = line
                 self.data.line_verdict_set = False
@@ -99,6 +96,9 @@ class IOHandler:
                 elif "!--" in line[0] and len(self.data.line) == 2:
                     await self.verdict_handler.line_verdict(self.data.LineVerdictType.FLAG)
 
+                elif line == ['']:
+                    await self.verdict_handler.line_verdict(self.data.LineVerdictType.EMPTY)
+
                 else:
                     await self.verdict_handler.error_template(0, "Invalid action")
 
@@ -122,7 +122,10 @@ class IOHandler:
 
         overview_lines = []
         for element in self.data.processed_lines:
-            overview_lines.append(f"`{element[4]}`{element[0]} `{element[1]}`\n")
+            if not element[0] == "⬛":
+                overview_lines.append(f"`{element[4]}`{element[0]} `{element[1]}`\n")
+            else:
+                overview_lines.append(f"`{element[4]}`{element[0]}\n")
 
         devided_overview_lines = []
         current_list = []
@@ -176,7 +179,6 @@ class IOHandler:
         await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()))
         color_error = 0xdd2e44
         color_no_error = 0x77b255
-        print(f"{self.data.processed_lines = }")
 
         if self.data.errored:
             for embed_content_list in await self.format_processed_lines_to_overview():

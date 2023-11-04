@@ -101,32 +101,34 @@ async def on_message(message):
         return
 
     elif message.content.upper().startswith(".V"):
-        data = Data.Data()
-        io_handler = IOHandler.IOHandler(data, message, bot)
-
-        if os.path.exists(f"LOGS/{data.log_file_name}") or os.path.exists(f"LOGS\\{data.log_file_name}"):
-            await asyncio.sleep(1.5)
+        try:
             data = Data.Data()
+            io_handler = IOHandler.IOHandler(data, message, bot)
 
-        print(f"{data.processed_lines = }")
+            if os.path.exists(f"LOGS/{data.log_file_name}") or os.path.exists(f"LOGS\\{data.log_file_name}"):
+                await asyncio.sleep(1.5)
+                data = Data.Data()
 
-        count_first_line: bool
-        if message.attachments and message.attachments[0].filename.endswith('.txt'):
-            attachment = message.attachments[0]
-            message_content = await attachment.read()
-            data.code = message_content.decode("utf-8")
-            count_first_line = True
-        else:
-            data.code = message.content
-            count_first_line = False
+            count_first_line: bool
+            if message.attachments and message.attachments[0].filename.endswith('.txt'):
+                attachment = message.attachments[0]
+                message_content = await attachment.read()
+                data.code = message_content.decode("utf-8")
+                count_first_line = True
+            else:
+                data.code = message.content
+                count_first_line = False
 
-        await io_handler.proccess_verify_request(count_first_line=count_first_line)
+            await io_handler.proccess_verify_request(count_first_line=count_first_line)
 
-        if message.content.upper().startswith(".VD"):
-            with open(data.log_file_name, "rb") as file:
-                await message.channel.send("Your file is:", file=discord.File(file, "result.txt"))
+            if message.content.upper().startswith(".VD"):
+                with open(data.log_file_name, "rb") as file:
+                    await message.channel.send(file=discord.File(file, "result.txt"))
 
-        del data
+            del data
+
+        except:
+            await message.channel.reply("secas has suffered ")
 
     elif message.content.upper().startswith(".H"):
         embed = \

@@ -98,6 +98,8 @@ class Utils:
         :param kwargs: all args provided
         :return: None
         """
+        self.data.log_depth += 1
+
         log_depth: str = self.data.log_depth_char * self.data.log_depth
         line_number: str = f"@ {context.lineno}"
         prefix: str = f"{line_number} {' ' * int(5-len(line_number))} {log_depth}"
@@ -127,8 +129,6 @@ class Utils:
             with open(self.data.log_file_name, "a", encoding="utf-8") as file:
                 file.write(f"---> ERROR ({e})\n")
 
-        self.data.log_depth += 1
-
     async def log_close_inst(self, context, output):
         """
         Use in the return statement of a method.
@@ -140,6 +140,8 @@ class Utils:
         :param output: the value returned by the method
         :return: provided output
         """
+
+        self.data.log_depth -= 1
 
         log_depth: str = self.data.log_depth_char * self.data.log_depth
         line_number: str = f"@ {context.lineno}"
@@ -160,7 +162,6 @@ class Utils:
                 file.write(f"---> ERROR ({e})\n")
 
         finally:
-            self.data.log_depth -= 1
             return output
 
     @staticmethod

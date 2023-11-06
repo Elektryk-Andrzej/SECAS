@@ -101,10 +101,10 @@ async def on_message(message):
         return
 
     elif message.content.upper().startswith(".V"):
-        try:
-            data = Data.Data()
-            io_handler = IOHandler.IOHandler(data, message, bot)
+        data = Data.Data()
+        io_handler = IOHandler.IOHandler(data, message, bot)
 
+        try:
             if os.path.exists(f"LOGS/{data.log_file_name}") or os.path.exists(f"LOGS\\{data.log_file_name}"):
                 await asyncio.sleep(1.5)
                 data = Data.Data()
@@ -123,36 +123,15 @@ async def on_message(message):
 
             if message.content.upper().startswith(".VD"):
                 with open(data.log_file_name, "rb") as file:
+                    # noinspection PyTypeChecker
                     await message.channel.send(file=discord.File(file, "result.txt"))
 
-            del data
+        except Exception as e:
+            await message.reply(f"ERROR: `{e}`")
 
-        except:
-            await message.channel.reply("secas has suffered ")
-
-    elif message.content.upper().startswith(".H"):
-        embed = \
-            discord.Embed(title=f"About getting help from others",
-                          description="""
-                          1. If you want someone to help you (which is the thing you're doing), 
-                          you want your question to be as easy to understand as possible.
-                          No one is going to try and decipher what you are asking for.
-                              
-                          2. It's in your best intrest to respect people helping you, because
-                          they're doing it for free, and they can and will refuse to help you if
-                          you don't treat them like human beings.
-                              
-                          3. Ask about certian things __AFTER__ reading the documentation
-                          and trying something out for yourself. This way you'll learn to not
-                          be reliant on other people only.
-                          
-                          """)
-        embed.add_field(name="1:",
-                        value="If you want someone to help you (which is the thing you're doing), "
-                              "you want your question to be as easy to understand as possible.\n"
-                              "No one is going to try and decipher what you are asking for.")
-
-        await message.reply(embed=embed)
+            with open(data.log_file_name, "rb") as file:
+                # noinspection PyTypeChecker
+                await message.channel.send(file=discord.File(file, "result.txt"))
 
 
 if __name__ == "__main__":

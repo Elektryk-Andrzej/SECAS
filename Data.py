@@ -6,6 +6,7 @@ class Data:
         LABEL = "LABEL"
         FLAG = "FLAG"
         EMPTY = "EMPTY"
+        NOT_CHECKABLE = "NOT CHECKABLE"
 
     class RoomType:
         room_types: list[str] = [
@@ -288,8 +289,7 @@ class Data:
         ]
 
     class SEVariable:
-        se_variables: list[list[str, bool or None, bool]] = [
-            ["DEBUG_SE_VARIABLE", None, False],
+        se_variables: list[list[str, type, bool]] = [
             ["CASSIESPEAKING", bool, False],
             ["DECONTAMINATED", bool, False],
             ["ISRUNNING", bool, False],
@@ -396,7 +396,7 @@ class Data:
         self.custom_variables: list[list] = []
         self.andrzej_ping: str = "<@762016625096261652>"
         self.log_file_name: str = ""
-        self.log_depth: int = 1
+        self.log_depth: int = 0
         self.log_depth_char: str = ">"
 
         for role in self.RoleType.role_types:

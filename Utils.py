@@ -7,12 +7,12 @@ class Utils:
     def __init__(self, data: Data.Data):
         """
         Contains the most basic and universal functions,
-        ment to be accessed from anywhere with no problems.
+        meant to be accessed from anywhere with no problems.
         """
 
         self.data = data
 
-    async def get_str_from_line(self, line_index) -> str:
+    async def get_str_from_line_index(self, line_index) -> str:
         """
         Safely get a value form code with provided index, return the last index if out of range
 
@@ -26,7 +26,6 @@ class Utils:
                                 line_index=line_index)
 
         output: str
-
         try:
             output = str(self.data.line[line_index])
 
@@ -181,7 +180,7 @@ class Utils:
 
         await self.log_new_inst(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
 
-        variable = await self.get_str_from_line(line_index)
+        variable = await self.get_str_from_line_index(line_index)
 
         if not (variable[0] == "{" and variable[-1] == "}"):
             await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()), False)

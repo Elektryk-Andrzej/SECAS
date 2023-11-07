@@ -68,7 +68,9 @@ class IOHandler:
             await self.get_labels()
 
             line: list
-            for line in self.data.code:
+            for index, line in enumerate(self.data.code):
+                await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
+                                     f"Checking line {index+1} with value {line}")
                 self.data.code_index += 1
                 self.data.line = line
                 self.data.line_verdict_set = False

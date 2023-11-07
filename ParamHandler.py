@@ -24,14 +24,14 @@ class ParamHandler:
                                       player_var=player_var,
                                       everything_in_range=everything_in_range)
 
-        variable_name = await self.utils.get_str_from_line(name_index)
+        variable_name = await self.utils.get_str_from_line_index(name_index)
         variable_name = await self.utils.strip_brackets(variable_name)
         variable_value = ""
 
         if everything_in_range:
             variable_value = " ".join(self.data.line[value_index:])
         else:
-            variable_value = await self.utils.get_str_from_line(value_index)
+            variable_value = await self.utils.get_str_from_line_index(value_index)
 
         if not await self.utils.is_containing_brackets(name_index):
             await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()), False)
@@ -75,15 +75,19 @@ class ParamHandler:
     # Requires to specify a list which is to be checked
     async def is_special_var(self,
                              line_index: int, *,
-                             var_type,
+                             var_type:
+                             Data.Data.RoomType or Data.Data.ItemType or Data.Data.EffectType or Data.Data.RoleType or
+                             Data.Data.DoorType,
                              required: bool = True,
                              star_allowed: bool = False) -> bool:
 
-        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
-                                      line_index=line_index,
-                                      var_type=var_type,
-                                      required=required,
-                                      star_allowed=star_allowed)
+        await self.utils.log_new_inst(
+            inspect.getframeinfo(inspect.currentframe()),
+            line_index=line_index,
+            var_type=var_type,
+            required=required,
+            star_allowed=star_allowed
+        )
 
         if not required:
             if len(self.data.line) - 1 < line_index:
@@ -91,58 +95,69 @@ class ParamHandler:
                 await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()), True)
                 return True
 
-        variable = await self.utils.get_str_from_line(line_index)
-        variable = variable.casefold()
+        variable = await self.utils.get_str_from_line_index(line_index)
 
-        if hasattr(Data.Data.RoomType, var_type):
+        if var_type is Data.Data.RoomType:
             reason = "Invalid room variable"
             brackets_required = False
+            group = Data.Data.RoomType.room_types
+            other_allowed_syntax = "all"
 
-        elif hasattr(Data.Data.ItemType, var_type):
+        elif var_type is Data.Data.ItemType:
             reason = "Invalid item variable"
             brackets_required = False
+            group = Data.Data.ItemType.item_types
+            other_allowed_syntax = None
 
-        elif hasattr(Data.Data.EffectType, var_type):
+        elif var_type is Data.Data.EffectType:
             reason = "Invalid effect variable"
             brackets_required = False
+            group = Data.Data.EffectType.effect_types
+            other_allowed_syntax = None
 
-        elif hasattr(Data.Data.RoomType, var_type):
+        elif var_type is Data.Data.RoleType:
             reason = "Invalid role variable"
             brackets_required = False
+            group = Data.Data.RoleType.role_types
+            other_allowed_syntax = None
 
-        elif hasattr(Data.Data.DoorType, var_type):
+        elif var_type is Data.Data.DoorType:
             reason = "Invalid door variable"
             brackets_required = False
+            group = Data.Data.DoorType.door_types
+            other_allowed_syntax = None
 
         else:
             reason = "Unknown variable"
+            group = [None]
             brackets_required = False
+            other_allowed_syntax = None
 
         if star_allowed and variable == "*":
             await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()), True)
             return True
 
-        elif not star_allowed and variable == "*":
-            await self.verdict_handler.error_template(line_index, "\"*\" usage forbidden")
-
-            await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()), False)
-            return False
-
-        if brackets_required and "{" in variable and "}" in variable:
+        if brackets_required and await self.utils.is_containing_brackets(line_index):
             variable = await self.utils.strip_brackets(variable)
 
         elif brackets_required:
-            await self.verdict_handler.error_template(line_index, "`{}` required")
+            await self.verdict_handler.error_template(line_index, "brackets (`{}`) required")
 
             await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()), False)
             return False
 
-        if variable in var_type:
+        if other_allowed_syntax and variable.casefold() in other_allowed_syntax:
+
+            await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()), True)
+            return True
+
+        if variable in group or any(variable in _ for _ in group):
 
             await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()), True)
             return True
 
         if ":" in variable:
+            await self.verdict_handler.line_verdict(self.data.LineVerdictType.NOT_CHECKABLE)
 
             await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()), True)
             return True
@@ -168,7 +183,7 @@ class ParamHandler:
             await self.verdict_handler.error_template(line_index, "No brackets provided")
             return False
 
-        variable = await self.utils.get_str_from_line(line_index)
+        variable = await self.utils.get_str_from_line_index(line_index)
         variable = await self.utils.strip_brackets(variable)
 
         if ":" in variable:
@@ -190,7 +205,7 @@ class ParamHandler:
 
     async def is_bool(self, line_index, *, required: bool = True) -> bool:
 
-        variable = await self.utils.get_str_from_line(line_index)
+        variable = await self.utils.get_str_from_line_index(line_index)
 
         if not required and not await self.is_variable_present(line_index):
             await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()), True)
@@ -218,7 +233,7 @@ class ParamHandler:
         )
 
         try:
-            iterator = await self.utils.get_str_from_line(line_index)
+            iterator = await self.utils.get_str_from_line_index(line_index)
 
             if iterator in self.data.labels:
                 await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()), True)
@@ -264,7 +279,7 @@ class ParamHandler:
         if var_list == self.data.SEVariable.se_variables:
             var_list = self.data.SEVariable.se_variables + self.data.custom_variables
 
-        var_name = await self.utils.get_str_from_line(line_index)
+        var_name = await self.utils.get_str_from_line_index(line_index)
         var_name = await self.utils.strip_brackets(var_name)
 
         for se_var in var_list:
@@ -298,7 +313,7 @@ class ParamHandler:
             line_index=line_index
         )
 
-        variable = await self.utils.get_str_from_line(line_index)
+        variable = await self.utils.get_str_from_line_index(line_index)
 
         try:
             var_type(variable)
@@ -349,7 +364,7 @@ class ParamHandler:
             await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()), True)
             return True
 
-        to_be_number = await self.utils.get_str_from_line(line_index)
+        to_be_number = await self.utils.get_str_from_line_index(line_index)
 
         try:
             # noinspection PyCallingNonCallable

@@ -127,6 +127,9 @@ class ParamHandler:
             group = Data.Data.DoorType.door_types
             other_allowed_syntax = None
 
+        elif var_type is Data.Data.SpawnPositions:
+            pass
+
         else:
             reason = "Unknown variable"
             group = [None]

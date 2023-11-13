@@ -16,14 +16,15 @@ class ActionHandler:
         self.verdict_handler: VerdictHandler.VerdictHandler = VerdictHandler.VerdictHandler(data)
 
         self.actions: dict = {
-            "HINT": self.HINT,
             "HINTPLAYER": self.HINTPLAYER,
+            "HINT": self.HINT,
             "COUNTDOWN": self.COUNTDOWN,
             "BROADCASTPLAYER": self.BROADCASTPLAYER,
             "BROADCAST": self.BROADCAST,
             "CLEARCASSIE": self.CLEARCASSIE,
             "SILENTCASSIE": self.SILENTCASSIE,
             "CASSIE": self.CASSIE,
+            "GIVECANDY": self.GIVECANDY,
             "CLEARINVENTORY": self.CLEARINVENTORY,
             "REMOVEITEM": self.REMOVEITEM,
             "GIVE": self.GIVE,
@@ -38,19 +39,19 @@ class ActionHandler:
             "DOOR": self.DOOR,
             "TESLA": self.TESLA,
             "WARHEAD": self.WARHEAD,
+            "HTTPPOST": self.HTTPPOST,
+            "HTTPGET": self.HTTPGET,
             "EXECUTESCRIPT": self.EXECUTESCRIPT,
             "HELP": self.HELP,
             "COMMAND": self.COMMAND,
             "LOG": self.LOG,
             "CUSTOMINFO": self.CUSTOMINFO,
-            "DAMAGE": self.DAMAGE,
             "EFFECTPERM": self.EFFECTPERM,
             "RADIORANGE": self.RADIORANGE,
-            "KILL": self.KILL,
-            "AHP": self.AHP,
-            "MAXHP": self.MAXHP,
-            "HP": self.HP,
+            "RESKIN": self.RESKIN,
+            "ADVSETROLE": self.ADVSETROLE,
             "TPDOOR": self.TPDOOR,
+            "TPSPAWN": self.TPSPAWN,
             "TPROOM": self.TPROOM,
             "TPX": self.TPX,
             "SIZE": self.SIZE,
@@ -60,21 +61,18 @@ class ActionHandler:
             "START": self.START,
             "DECONTAMINATE": self.DECONTAMINATE,
             "ROUNDLOCK": self.ROUNDLOCK,
+            "DAMAGERULE": self.DAMAGERULE,
+            "DELINFECTRULE": self.DELINFECTRULE,
             "ENABLE": self.ENABLE,
             "DISABLE": self.DISABLE,
             "INFECTRULE": self.INFECTRULE,
             "SPAWNRULE": self.SPAWNRULE,
+            "PLAYERVAR": self.PLAYERVAR,
             "DELVARIABLE": self.DELVARIABLE,
-            "DELPLAYERVARIABLE": self.DELPLAYERVARIABLE,
-            "SAVEPLAYERS": self.SAVEPLAYERS,
             "SAVE": self.SAVE,
+            "WAITMIL": self.WAITMIL,
             "WAITSEC": self.WAITSEC,
             "WAITUNTIL": self.WAITUNTIL,
-            "RESKIN": self.RESKIN,
-            "ADVSETROLE": self.ADVSETROLE,
-            "ADVAHP": self.ADVAHP,
-            "HTTPGET": self.HTTPGET,
-            "HTTPPOST": self.HTTPPOST,
         }
 
     async def HINT(self) -> bool:
@@ -145,6 +143,21 @@ class ActionHandler:
 
     async def CASSIE(self) -> bool:
         if not await self.param_handler.is_required_len(1, None):
+            return False
+
+        return True
+
+    async def GIVECANDY(self) -> bool:
+        if not await self.param_handler.is_required_len(2, 3):
+            return False
+
+        if not await self.param_handler.is_se_var(1):
+            return False
+
+        """if not await self.param_handler.is_special_var(2, self.data.CandyType):
+            return False"""
+
+        if not await self.param_handler.is_number(3, int, required=False, min_value=1):
             return False
 
         return True
@@ -485,6 +498,18 @@ class ActionHandler:
 
         return True
 
+    async def TPSPAWN(self) -> bool:
+        if not await self.param_handler.is_required_len(2, 2):
+            return False
+
+        if not await self.param_handler.is_se_var(1):
+            return False
+
+        if not await self.param_handler.is_special_var(2, var_type=self.data.SpawnPositions):
+            return False
+
+        return True
+
     async def TPROOM(self) -> bool:
         if not await self.param_handler.is_required_len(2, 2):
             return False
@@ -643,6 +668,30 @@ class ActionHandler:
 
         return True
 
+    async def DAMAGERULE(self) -> bool:
+        if not await self.param_handler.is_required_len(4, 4):
+            return False
+
+        if not await self.param_handler.is_se_var(1):
+            return False
+
+        if not await self.param_handler.is_se_var(2):
+            return False
+
+        if not await self.param_handler.is_number(3, float):
+            return False
+
+        return True
+
+    async def DELINFECTRULE(self) -> bool:
+        if not await self.param_handler.is_required_len(2, 2):
+            return False
+
+        if not await self.param_handler.is_se_var(2):
+            return False
+
+        return True
+
     async def ENABLE(self) -> bool:
         if not await self.param_handler.is_required_len(1, 1):
             return False
@@ -729,8 +778,16 @@ class ActionHandler:
 
         return True
 
-    async def SAVEPLAYERS(self) -> bool:
+    async def PLAYERVAR(self) -> bool:
         if not await self.param_handler.is_required_len(2, 3):
+            return False
+
+        modes = ("save", "delete", "add", "remove")
+        mode_selected = await self.utils.get_str_from_line_index(1)
+
+        if mode_selected.casefold() not in modes:
+            await self.verdict_handler.error_template(1, "Invalid mode | "
+                                                         "SAVE/DELETE/ADD/REMOVE")
             return False
 
         if not await self.param_handler.register_var(1, 2, player_var=True):
@@ -755,6 +812,15 @@ class ActionHandler:
         return True
 
     async def WAITSEC(self) -> bool:
+        if not await self.param_handler.is_required_len(1, None):
+            return False
+
+        if not await self.param_handler.is_number(1, float, math_supported=True):
+            return False
+
+        return True
+
+    async def WAITMIL(self) -> bool:
         if not await self.param_handler.is_required_len(1, None):
             return False
 

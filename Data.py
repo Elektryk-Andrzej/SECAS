@@ -288,6 +288,9 @@ class Data:
             "SURFACE_NUKE"
         ]
 
+    class SpawnPositions:
+        pass
+
     class SEVariable:
         se_variables: list[list[str, type, bool]] = [
             ["CASSIESPEAKING", bool, False],

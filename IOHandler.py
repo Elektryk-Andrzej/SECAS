@@ -104,7 +104,7 @@ class IOHandler:
                 else:
                     await self.verdict_handler.error_template(0, "Invalid action")
 
-            if self.data.code_index == 1:
+            if self.data.code_index == 0:
                 await self.ctx.reply("No code found! First line is always ignored.")
             else:
                 await self.send_result_embed()

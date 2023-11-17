@@ -505,7 +505,7 @@ class ActionHandler:
         if not await self.param_handler.is_se_var(1):
             return False
 
-        if not await self.param_handler.is_special_var(2, var_type=self.data.SpawnPositions):
+        if not await self.param_handler.is_special_var(2, var_type=self.data.SpawnPosition):
             return False
 
         return True

@@ -288,8 +288,10 @@ class Data:
             "SURFACE_NUKE"
         ]
 
-    class SpawnPositions:
-        pass
+    class SpawnPosition:
+        spawn_positions = [
+            None
+        ]
 
     class SEVariable:
         se_variables: list[list[str, type, bool]] = [

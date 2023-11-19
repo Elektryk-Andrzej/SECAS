@@ -1,5 +1,4 @@
 import Data
-import discord
 import inspect
 
 
@@ -22,8 +21,7 @@ class Utils:
         :return: str value of the provided line index
         """
 
-        await self.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
-                                line_index=line_index)
+        await self.log_new_inst(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
 
         output: str
         try:
@@ -31,49 +29,27 @@ class Utils:
 
         except IndexError:
             output = str(self.data.line[-1])
-            await self.log(inspect.getframeinfo(inspect.currentframe()),
-                           "Specified line index is out of range, returned the last index")
+            await self.log("Specified line index is out of range, returned the last index")
 
-        return await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                         output)
+        await self.log_return(output)
+        return output
 
-    async def strip_brackets(self, val: str) -> str:
-        """
-        Strip brackets form the provided value.
-
-        - no changes needed
-
-        :param val: str value to remove brackets from
-        :return: str value without brackets
-        """
-
-        await self.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
-                                val=val)
-
-        output = val.replace("{", "").replace("}", "")
-
-        return await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                         output)
-
-    async def log(self, context: inspect.getframeinfo(inspect.currentframe()), reason: str) -> None:
+    async def log(self, reason: str) -> None:
         """
         Basic log method.
         Must be used after a log_new_inst method for log indent to be correct.
 
         - no changes needed
 
-        :param context: inspect.getframeinfo(inspect.currentframe())
         :param reason: Reason of the log
         :return: None
         """
 
-        log_depth: str = self.data.log_depth_char * self.data.log_depth
-        line_number: str = f"@ {context.lineno}"
-        prefix: str = f"{line_number} {' ' * int(5 - len(line_number))} {log_depth}"
+        prefix: str = self.data.log_depth_char * self.data.log_depth
 
         try:
             with open(self.data.log_file_name, "a", encoding="utf-8") as file:
-                file.write(f"{prefix} \"{context.function}\" - {reason}\n")
+                file.write(f"{prefix} - {reason}\n")
 
         except AttributeError as e:
             log_depth: str = self.data.log_depth_char * self.data.log_depth
@@ -98,10 +74,7 @@ class Utils:
         :return: None
         """
         self.data.log_depth += 1
-
-        log_depth: str = self.data.log_depth_char * self.data.log_depth
-        line_number: str = f"@ {context.lineno}"
-        prefix: str = f"{line_number} {' ' * int(5-len(line_number))} {log_depth}"
+        prefix: str = self.data.log_depth_char * self.data.log_depth
 
         kwargs_formatted: str = ""
 
@@ -121,76 +94,41 @@ class Utils:
 
         except AttributeError as e:
             with open(self.data.log_file_name, "a", encoding="utf-8") as file:
-                file.write(f"{log_depth} new inst (AttributeError - {e})\n")
+                file.write(f"{prefix} new inst (AttributeError - {e})\n")
 
         except Exception as e:
             print(f"---> ERROR ({e})")
             with open(self.data.log_file_name, "a", encoding="utf-8") as file:
                 file.write(f"---> ERROR ({e})\n")
 
-    async def log_close_inst(self, context, output):
+    async def log_return(self, output):
         """
         Use in the return statement of a method.
         Will change log depth accordingly for better readability.
 
         - no changes needed
 
-        :param context: inspect.getframeinfo(inspect.currentframe())
         :param output: the value returned by the method
         :return: provided output
         """
 
         self.data.log_depth -= 1
 
-        log_depth: str = self.data.log_depth_char * self.data.log_depth
-        line_number: str = f"@ {context.lineno}"
-        prefix: str = f"{line_number} {' ' * int(5 - len(line_number))} {log_depth}"
+        prefix: str = self.data.log_depth_char * self.data.log_depth
 
         try:
             with open(self.data.log_file_name, "a", encoding="utf-8") as file:
-                file.write(f"{prefix} CLOSE \"{context.function}\" with {output = }\n")
+                file.write(f"{prefix} CLOSED method with output \"{output}\"({type(output)})\"\n")
                 return output
 
         except AttributeError as e:
             with open(self.data.log_file_name, "a", encoding="utf-8") as file:
-                file.write(f"{log_depth} returned {output} (clsd inst | AttributeError - {e})\n")
+                file.write(f"{prefix} returned {output} (clsd inst | AttributeError - {e})\n")
 
         except Exception as e:
             print(f"---> ERROR ({e})")
             with open(self.data.log_file_name, "a", encoding="utf-8") as file:
                 file.write(f"---> ERROR ({e})\n")
 
-        finally:
-            return output
+        return output
 
-    @staticmethod
-    async def create_embed(title, description, color) -> discord.Embed:
-        return discord.Embed(title=title,
-                             description=description,
-                             color=color)
-
-    async def get_line_as_str(self) -> str:
-        await self.log_new_inst(inspect.getframeinfo(inspect.currentframe()))
-        to_return = " ".join(self.data.line)
-        await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                  to_return)
-        return to_return
-
-    async def is_containing_brackets(self, line_index: int) -> bool:
-
-        await self.log_new_inst(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
-
-        variable = await self.get_str_from_line_index(line_index)
-
-        if not (variable[0] == "{" and variable[-1] == "}"):
-            await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()), False)
-            return False
-
-        variable = variable.removeprefix("{").removesuffix("}")
-
-        if "{" in variable or "}" in variable:
-            await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()), False)
-            return False
-
-        await self.log_close_inst(inspect.getframeinfo(inspect.currentframe()), True)
-        return True

@@ -210,5 +210,4 @@ class IOHandler:
                 )
 
         await self.utils.log_return(None)
-
-        await self.utils.log_return(None)
+        return

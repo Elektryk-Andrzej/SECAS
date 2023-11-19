@@ -32,8 +32,7 @@ class VerdictHandler:
                                 line_to_print,
                                 reason)
 
-        await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                        True)
+        await self.utils.log_return(True)
         return True
 
     async def error_invalid_min_length(self, number_missing: int) -> bool:
@@ -62,8 +61,7 @@ class VerdictHandler:
                                 line_to_print,
                                 reason)
 
-        await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                        True)
+        await self.utils.log_return(True)
         return True
 
     async def error_invalid_max_length(self, past_max_length: int) -> bool:
@@ -79,7 +77,7 @@ class VerdictHandler:
         self.data.line_errored = True
 
         if past_max_length == 1:
-            await self.error_template(-1, "Unexpected arguments | 1")
+            await self.error_template(-1, "Unexpected arguments")
 
         line_copy = self.data.line.copy()
         reason = f"Unknown arguments | {past_max_length}"
@@ -94,8 +92,7 @@ class VerdictHandler:
                                 line_to_print,
                                 reason=reason)
 
-        await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                        True)
+        await self.utils.log_return(True)
         return True
 
     async def line_verdict(self,
@@ -108,13 +105,11 @@ class VerdictHandler:
         :return: None
         """
         await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
-                                verdict_type=verdict_type)
+                                      verdict_type=verdict_type)
 
         if self.data.line_verdict_set:
-            await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
-                           f"Request denied, a verdict has already been set for line {self.data.line}")
-            await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                False)
+            await self.utils.log(f"Request denied, a verdict has already been set for line {self.data.line}")
+            await self.utils.log_return(False)
             return False
 
         self.data.line_verdict_set = True
@@ -141,8 +136,7 @@ class VerdictHandler:
             color = "⬛"
 
         else:
-            await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
-                                 "No verdict type provided")
+            await self.utils.log("No verdict type provided")
             color = "🟧"
             line_to_print = "ERROR"
             reason = "ERROR"
@@ -151,6 +145,5 @@ class VerdictHandler:
             color, normal_line, line_to_print, reason, self.data.code_index
         ])
 
-        await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                        True)
+        await self.utils.log_return(True)
         return True

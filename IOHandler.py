@@ -39,8 +39,7 @@ class IOHandler:
         if not count_first_line:
             self.data.code.pop(0)
 
-        await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                        self.data.code)
+        await self.utils.log_return(self.data.code)
 
         return self.data.code
 
@@ -52,15 +51,13 @@ class IOHandler:
                 label = str(line[0]).strip(":")
                 self.data.labels.append(label)
 
-                await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
-                                     f"Registered a new label: \"{label}\"")
+                await self.utils.log(f"Registered a new label: \"{label}\"")
 
-        await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                        None)
+        await self.utils.log_return(None)
 
     async def proccess_verify_request(self, count_first_line: bool) -> None:
         await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
-                                count_first_line=count_first_line)
+                                      count_first_line=count_first_line)
 
         async with self.ctx.channel.typing():
             await self.format_code(count_first_line=count_first_line)
@@ -69,8 +66,7 @@ class IOHandler:
 
             line: list
             for index, line in enumerate(self.data.code):
-                await self.utils.log(inspect.getframeinfo(inspect.currentframe()),
-                                     f"Checking line {index+1} with value {line}")
+                await self.utils.log(f"Checking line {index+1} with value {line}")
                 self.data.code_index += 1
                 self.data.line = line
                 self.data.line_verdict_set = False
@@ -85,7 +81,7 @@ class IOHandler:
                         if not self.data.line_verdict_set:
                             await self.verdict_handler.line_verdict(
                                 self.data.LineVerdictType.ERRORED,
-                                await self.utils.get_line_as_str(),
+                                " ".join(self.data.line),
                                 "No reason specifed, consider this a SECAS error"
                             )
 
@@ -115,7 +111,7 @@ class IOHandler:
                                      f"`{e}`",
                                      mention_author=False)'''
 
-        await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()), None)
+        await self.utils.log_return(None)
 
     async def format_processed_lines_to_overview(self) -> list:
         await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()))
@@ -143,8 +139,7 @@ class IOHandler:
         if current_list:
             devided_overview_lines.append(current_list)
 
-        await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                        devided_overview_lines)
+        await self.utils.log_return(devided_overview_lines)
         return devided_overview_lines
 
     async def format_processed_lines_to_error_summary(self) -> list:
@@ -173,8 +168,7 @@ class IOHandler:
         if current_list:
             devided_error_summary_lines.append(current_list)
 
-        await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                    devided_error_summary_lines)
+        await self.utils.log_return(devided_error_summary_lines)
         return devided_error_summary_lines
 
     async def send_result_embed(self) -> None:
@@ -215,7 +209,6 @@ class IOHandler:
                     )
                 )
 
-        await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()),
-                                        None)
+        await self.utils.log_return(None)
 
-        await self.utils.log_close_inst(inspect.getframeinfo(inspect.currentframe()), None)
+        await self.utils.log_return(None)

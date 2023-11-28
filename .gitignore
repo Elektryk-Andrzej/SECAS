@@ -1,6 +1,6 @@
-logs
+Logs
 venv
-TOKEN.py
+Bot/TOKEN.py
 test.py
 .idea
 SECAS.tar

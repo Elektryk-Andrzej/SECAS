@@ -3,14 +3,8 @@ import discord
 from discord.ext import commands
 import os
 
-import ActionHandler
-import IOHandler
-import LogHandler
-import ParamHandler
-import Utils
-import VerdictHandler
+from Code_Validator import VerdictHandler, LogHandler, IOHandler, ParamHandler, ActionHandler, Utils, Data
 from TOKEN import TOKEN
-import Data
 
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
@@ -116,7 +110,7 @@ async def on_message(message):
         data.verdict_handler_object = VerdictHandler.VerdictHandler(data)
 
         try:
-            if os.path.exists(f"LOGS/{data.log_file_name}") or os.path.exists(f"LOGS\\{data.log_file_name}"):
+            if os.path.exists(f".\\Logs\\{data.log_file_name}"):
                 await asyncio.sleep(1.5)
                 data = Data.Data()
 

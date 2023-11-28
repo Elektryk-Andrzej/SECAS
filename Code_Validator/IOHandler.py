@@ -20,11 +20,11 @@ class IOHandler:
         self.logs: LogHandler.LogHandler = data.log_handler_object
 
         date = datetime.now()
-        self.data.log_file_name = (f"logs/{datetime.strftime(date, '%d;%m %H-%M-%S')} "
+        self.data.log_file_name = (f"Logs/{datetime.strftime(date, '%d;%m %H-%M-%S')} "
                                    f"@ {ctx.author.display_name}")
 
-        if not os.path.exists("logs"):
-            os.makedirs("logs")
+        if not os.path.exists("../Logs"):
+            os.makedirs("../Logs")
             
         with open(self.data.log_file_name, "w") as file:
             file.close()

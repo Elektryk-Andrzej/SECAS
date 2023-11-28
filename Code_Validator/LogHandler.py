@@ -41,26 +41,28 @@ class LogHandler:
         - no changes needed
 
         :param context: inspect.getframeinfo(inspect.currentframe())
+        :param name: name of function, if proivided, "context" argument won't be used
         :param kwargs: all args provided
         :return: None
         """
         self.data.log_depth += 1
         prefix: str = self.data.log_depth_char * self.data.log_depth
         kwargs_formatted: str = ""
+        func_name = name if name else context.function
 
         try:
             for i in kwargs.items():
                 arg, val = i
 
-                val_type_formatted: str = str(type(val)).strip('<class ').strip('>')
+                val_type_formatted: str = str(type(val)).strip('<class ').strip('\'>')
                 kwargs_formatted += f"{prefix} -> {arg}: {val} ({val_type_formatted})\n"
 
             with open(self.data.log_file_name, "a", encoding="utf-8") as file:
                 if kwargs != {}:
-                    file.write(f"{prefix} NEW \"{context.function}\" with parameters:\n")
+                    file.write(f"{prefix} NEW \"{func_name}\" with parameters:\n")
                     file.write(f"{kwargs_formatted}")
                 else:
-                    file.write(f"{prefix} NEW \"{context.function}\"\n")
+                    file.write(f"{prefix} NEW \"{func_name}\"\n")
 
         except AttributeError as e:
             with open(self.data.log_file_name, "a", encoding="utf-8") as file:
@@ -82,8 +84,6 @@ class LogHandler:
         :return: provided output
         """
 
-        self.data.log_depth -= 1
-
         prefix: str = self.data.log_depth_char * self.data.log_depth
 
         try:
@@ -100,6 +100,7 @@ class LogHandler:
             with open(self.data.log_file_name, "a", encoding="utf-8") as file:
                 file.write(f"---> ERROR ({e})\n")
 
+        self.data.log_depth -= 1
         return output
 
     '''def log_action(self, f):

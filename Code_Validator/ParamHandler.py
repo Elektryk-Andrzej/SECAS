@@ -1,6 +1,5 @@
 import Data
 import inspect
-
 import LogHandler
 import Utils
 import VerdictHandler
@@ -112,8 +111,8 @@ class ParamHandler:
                                  line_index: int,
                                  *,
                                  var_type: Data.Data.RoomType or Data.Data.ItemType or
-                                 Data.Data.EffectType or Data.Data.RoleType or
-                                 Data.Data.DoorType,
+                                           Data.Data.EffectType or Data.Data.RoleType or
+                                           Data.Data.DoorType,
                                  required: bool = True,
                                  star_allowed: bool = False) -> bool:
 

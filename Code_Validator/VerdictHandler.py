@@ -1,7 +1,5 @@
-import Data
+from Code_Validator import Data, LogHandler, Utils
 import inspect
-import LogHandler
-import Utils
 
 
 class VerdictHandler:

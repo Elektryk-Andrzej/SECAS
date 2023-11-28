@@ -1,12 +1,8 @@
+from Code_Validator import Data, VerdictHandler, ActionHandler, Utils, LogHandler
 from datetime import *
 import discord
 import inspect
 import os
-import Data
-import LogHandler
-import Utils
-import VerdictHandler
-import ActionHandler
 
 
 class IOHandler:
@@ -16,17 +12,18 @@ class IOHandler:
         self.ctx = ctx
         self.verdict_handler: VerdictHandler.VerdictHandler = data.verdict_handler_object
         self.action_handler: ActionHandler.ActionHandler = data.action_handler_object
+        print("action handler required")
         self.utils: Utils.Utils = data.utils_object
         self.logs: LogHandler.LogHandler = data.log_handler_object
 
         date = datetime.now()
-        self.data.log_file_name = (f"Logs/{datetime.strftime(date, '%d;%m %H-%M-%S')} "
+        self.data.log_file_name = (f"../Logs/{datetime.strftime(date, '%d;%m %H-%M-%S')} "
                                    f"@ {ctx.author.display_name}")
 
         if not os.path.exists("../Logs"):
             os.makedirs("../Logs")
             
-        with open(self.data.log_file_name, "w") as file:
+        with open(self.data.log_file_name, "x") as file:
             file.close()
 
     async def format_code(self, count_first_line: bool) -> list:

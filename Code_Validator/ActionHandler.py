@@ -1,7 +1,4 @@
-import Data
-import ParamHandler
-import Utils
-import VerdictHandler
+from Code_Validator import Data, ParamHandler, Utils, VerdictHandler
 
 
 # noinspection PyPep8Naming

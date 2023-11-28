@@ -1,4 +1,4 @@
-import Data
+from Code_Validator import Data
 
 
 class LogHandler:
@@ -85,20 +85,10 @@ class LogHandler:
         """
 
         prefix: str = self.data.log_depth_char * self.data.log_depth
+        output_type: str = str(type(output)).strip('<class ').strip('\'>')
 
-        try:
-            with open(self.data.log_file_name, "a", encoding="utf-8") as file:
-                file.write(f"{prefix} CLOSED method with output \"{output}\"({type(output)})\"\n")
-                return output
-
-        except AttributeError as e:
-            with open(self.data.log_file_name, "a", encoding="utf-8") as file:
-                file.write(f"{prefix} returned {output} (clsd inst | AttributeError - {e})\n")
-
-        except Exception as e:
-            print(f"---> ERROR ({e})")
-            with open(self.data.log_file_name, "a", encoding="utf-8") as file:
-                file.write(f"---> ERROR ({e})\n")
+        with open(self.data.log_file_name, "a", encoding="utf-8") as file:
+            file.write(f"{prefix} CLOSED method with \"{output}\" ({output_type})\"\n\n")
 
         self.data.log_depth -= 1
         return output

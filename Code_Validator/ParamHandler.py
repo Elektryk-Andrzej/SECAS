@@ -1,8 +1,5 @@
-import Data
+from Code_Validator import Data, LogHandler, Utils, VerdictHandler
 import inspect
-import LogHandler
-import Utils
-import VerdictHandler
 
 
 class ParamHandler:
@@ -141,6 +138,7 @@ class ParamHandler:
                 return True
 
         variable = await self.utils.get_str_from_line_index(line_index)
+        print(variable)
 
         if var_type is Data.Data.RoomType:
             reason = "Invalid room variable"
@@ -179,10 +177,9 @@ class ParamHandler:
             other_allowed_syntax = None
 
         else:
-            reason = "Unknown variable"
-            group = [None]
-            brackets_required = False
-            other_allowed_syntax = None
+            await self.verdict.error_template(line_index, "SECAS ERROR - Could not get variable type")
+            await self.logs.close(False)
+            return False
 
         if star_allowed and variable == "*":
             await self.logs.close(True)
@@ -200,7 +197,7 @@ class ParamHandler:
             await self.logs.close(True)
             return True
 
-        if variable in group or any(variable in _ for _ in group):
+        if variable and variable in group or any(variable in _ for _ in group):
             await self.logs.close(True)
             return True
 

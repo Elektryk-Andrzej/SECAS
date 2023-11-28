@@ -2,6 +2,7 @@ import asyncio
 import discord
 from discord.ext import commands
 import os
+import time
 
 from Code_Validator import VerdictHandler, LogHandler, IOHandler, ParamHandler, ActionHandler, Utils, Data
 from TOKEN import TOKEN
@@ -80,6 +81,9 @@ async def info_embed(message):
     select_menu = SelectMenu(message)
     await message.channel.send(embed=(await select_menu.send_initial_embed()), view=select_menu)
 
+async def command_trigger(value: str, key: str) -> bool:
+    return True if value.strip().casefold().startswith("." + key) else False
+
 
 @bot.event
 async def on_ready():
@@ -96,47 +100,69 @@ async def on_message(message):
     if message.author.id == bot.user.id:
         return
 
-    if str(message.content).strip().casefold().startswith(".i") or str(bot.user.id) in str(message.content):
+    if await command_trigger(message.content, "i") or str(bot.user.id) in str(message.content):
         await info_embed(message)
         return
 
-    elif str(message.content).strip().casefold().startswith(".v"):
+    elif await command_trigger(message.content, "vl"):
+        await message.reply("Verify labels!")
+
+    elif await command_trigger(message.content, "vs"):
         data = Data.Data()
-        data.io_handler_object = IOHandler.IOHandler(data, message, bot)
-        data.action_handler_object = ActionHandler.ActionHandler(data)
+        time.sleep(.1)
+
         data.log_handler_object = LogHandler.LogHandler(data)
-        data.param_handler_object = ParamHandler.ParamHandler(data)
+        time.sleep(.1)
+
         data.utils_object = Utils.Utils(data)
+        time.sleep(.1)
+
         data.verdict_handler_object = VerdictHandler.VerdictHandler(data)
+        time.sleep(.1)
 
-        try:
-            if os.path.exists(f".\\Logs\\{data.log_file_name}"):
-                await asyncio.sleep(1.5)
-                data = Data.Data()
+        data.param_handler_object = ParamHandler.ParamHandler(data)
+        time.sleep(.1)
 
-            count_first_line: bool
-            if message.attachments and message.attachments[0].filename.endswith('.txt'):
-                attachment = message.attachments[0]
-                message_content = await attachment.read()
-                data.code = message_content.decode("utf-8")
-                count_first_line = True
-            else:
-                data.code = message.content
-                count_first_line = False
+        data.action_handler_object = ActionHandler.ActionHandler(data)
+        time.sleep(.1)
 
-            await data.io_handler_object.proccess_verify_request(count_first_line=count_first_line)
+        data.io_handler_object = IOHandler.IOHandler(data, message, bot)
 
-            if message.content.upper().startswith(".VD"):
-                with open(data.log_file_name, "rb") as file:
-                    # noinspection PyTypeChecker
-                    await message.channel.send(file=discord.File(file, "result.txt"))
+        """try:"""
+        if os.path.exists(f".\\Logs\\{data.log_file_name}"):
+            await asyncio.sleep(1.5)
+            data = Data.Data()
 
-        except Exception as e:
+        count_first_line: bool
+        if message.attachments and message.attachments[0].filename.endswith('.txt'):
+            attachment = message.attachments[0]
+            message_content = await attachment.read()
+            data.code = message_content.decode("utf-8")
+            count_first_line = True
+        else:
+            data.code = message.content
+            count_first_line = False
+
+        await data.io_handler_object.proccess_verify_request(count_first_line=count_first_line)
+
+        if await command_trigger(message.content, "vsd"):
+            with open(data.log_file_name, "rb") as file:
+                # noinspection PyTypeChecker
+                await message.channel.send(file=discord.File(file, "result.txt"))
+
+
+        """except Exception as e:
             await message.reply(f"ERROR: `{e}`")
 
             with open(data.log_file_name, "rb") as file:
                 # noinspection PyTypeChecker
-                await message.channel.send(file=discord.File(file, "result.txt"))
+                await message.channel.send(file=discord.File(file, "result.txt"))"""
+
+    elif await command_trigger(message.content, "v"):
+        await message.reply(
+            "Command `.v` (verify) is no longer a valid command.\n"
+            "From now it's `.vs` (verify script) instead."
+        )
 
 
 if __name__ == "__main__":

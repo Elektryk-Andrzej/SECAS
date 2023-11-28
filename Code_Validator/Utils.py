@@ -1,6 +1,5 @@
-import Data
+from Code_Validator import Data, LogHandler
 import inspect
-import LogHandler
 
 
 class Utils:

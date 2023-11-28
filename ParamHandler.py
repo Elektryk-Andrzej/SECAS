@@ -10,7 +10,7 @@ class ParamHandler:
     def __init__(self, data: Data.Data):
         self.data: Data.Data = data
         self.utils: Utils.Utils = data.utils_object
-        self.verdict_handler: VerdictHandler.VerdictHandler = data.verdict_handler_object
+        self.verdict: VerdictHandler.VerdictHandler = data.verdict_handler_object
         self.logs: LogHandler.LogHandler = data.log_handler_object
 
     # Register a certain value to an SE variable
@@ -104,7 +104,7 @@ class ParamHandler:
             return True
 
         else:
-            await self.verdict_handler.error_template(line_index, "Invalid mode")
+            await self.verdict.error_template(line_index, "Invalid mode")
             await self.logs.close(False)
             return False
 
@@ -193,7 +193,7 @@ class ParamHandler:
             variable = await self._strip_brackets(variable)
 
         elif brackets_required and not await self._is_containing_brackets(line_index):
-            await self.verdict_handler.error_template(line_index, "Brackets absent or malformed")
+            await self.verdict.error_template(line_index, "Brackets absent or malformed")
             await self.logs.close(False)
             return False
 
@@ -206,12 +206,12 @@ class ParamHandler:
             return True
 
         if ":" in variable:
-            await self.verdict_handler.line_verdict(self.data.LineVerdictType.NOT_CHECKABLE)
+            await self.verdict.line_verdict(self.data.LineVerdictType.NOT_CHECKABLE)
 
             await self.logs.close(True)
             return True
 
-        await self.verdict_handler.error_template(line_index, reason)
+        await self.verdict.error_template(line_index, reason)
 
         await self.logs.close(False)
         return False
@@ -243,7 +243,7 @@ class ParamHandler:
         if not await self._is_containing_brackets(line_index):
             await self.logs.close(False)
 
-            await self.verdict_handler.error_template(line_index, "Brackets absent or malformed")
+            await self.verdict.error_template(line_index, "Brackets absent or malformed")
             return False
 
         variable = await self.utils.get_str_from_line_index(line_index)
@@ -262,7 +262,7 @@ class ParamHandler:
             await self.logs.close(True)
             return True
 
-        await self.verdict_handler.error_template(line_index, "Invalid SE variable")
+        await self.verdict.error_template(line_index, "Invalid SE variable")
         await self.logs.close(False)
         return False
 
@@ -284,7 +284,7 @@ class ParamHandler:
                 await self.logs.close(True)
                 return True
 
-        await self.verdict_handler.error_template(line_index, "Invalid TRUE/FALSE argument")
+        await self.verdict.error_template(line_index, "Invalid TRUE/FALSE argument")
         await self.logs.close(False)
         return False
 
@@ -301,7 +301,7 @@ class ParamHandler:
             await self.logs.close(True)
             return True
 
-        await self.verdict_handler.error_template(line_index, "Invalid label")
+        await self.verdict.error_template(line_index, "Invalid label")
         await self.logs.close(False)
         return False
 
@@ -430,7 +430,7 @@ class ParamHandler:
         except ValueError:
             pass
 
-        await self.verdict_handler.error_template(line_index, "Invalid number")
+        await self.verdict.error_template(line_index, "Invalid number")
         await self.logs.close(False)
         return False
 
@@ -444,7 +444,7 @@ class ParamHandler:
         action_len = len(self.data.line) - 1
 
         if not min_len <= action_len:
-            await self.verdict_handler.error_invalid_min_length(abs(action_len - min_len))
+            await self.verdict.error_invalid_min_length(abs(action_len - min_len))
 
             await self.logs.close(False)
             return False
@@ -454,7 +454,7 @@ class ParamHandler:
             return True
 
         if not action_len <= max_len:
-            await self.verdict_handler.error_invalid_max_length(action_len - max_len)
+            await self.verdict.error_invalid_max_length(action_len - max_len)
 
             await self.logs.close(False)
             return False

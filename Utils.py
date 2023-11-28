@@ -10,7 +10,7 @@ class Utils:
         meant to be accessed from anywhere with no problems.
         """
 
-        self.data = data
+        self.data: Data.Data = data
         self.logs: LogHandler.LogHandler = data.log_handler_object
 
     async def get_str_from_line_index(self, line_index) -> str:

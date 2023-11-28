@@ -1,11 +1,14 @@
 import Data
 import inspect
+import LogHandler
+import Utils
 
 
 class VerdictHandler:
     def __init__(self, data: Data.Data):
-        self.data = data
-        self.utils = data.utils_object
+        self.data: Data.Data = data
+        self.utils: Utils.Utils = data.utils_object
+        self.logs: LogHandler.LogHandler = data.log_handler_object
 
     async def error_template(self, line_index: int, reason: str) -> bool:
         """
@@ -17,7 +20,7 @@ class VerdictHandler:
         """
         self.data.errored = True
 
-        await self.utils.log_new_inst(
+        await self.logs.open(
             inspect.getframeinfo(inspect.currentframe()),
             line_index=line_index,
             reason=reason
@@ -31,7 +34,7 @@ class VerdictHandler:
                                 line_to_print,
                                 reason)
 
-        await self.utils.log_return(True)
+        await self.logs.close(True)
         return True
 
     async def error_invalid_min_length(self, number_missing: int) -> bool:
@@ -41,8 +44,10 @@ class VerdictHandler:
         :param number_missing: number of parameters missing
         :return: bool
         """
-        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
-                                      number_missing=number_missing)
+        await self.logs.open(
+            inspect.getframeinfo(inspect.currentframe()),
+            number_missing=number_missing
+        )
 
         self.data.line_errored = True
 
@@ -60,7 +65,7 @@ class VerdictHandler:
                                 line_to_print,
                                 reason)
 
-        await self.utils.log_return(True)
+        await self.logs.close(True)
         return True
 
     async def error_invalid_max_length(self, past_max_length: int) -> bool:
@@ -70,8 +75,10 @@ class VerdictHandler:
         :param past_max_length: number of parameters that exceed the maximum amount possible
         :return: bool
         """
-        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
-                                      past_max_length=past_max_length)
+        await self.logs.open(
+            inspect.getframeinfo(inspect.currentframe()),
+            past_max_length=past_max_length
+        )
 
         self.data.line_errored = True
 
@@ -91,7 +98,7 @@ class VerdictHandler:
                                 line_to_print,
                                 reason=reason)
 
-        await self.utils.log_return(True)
+        await self.logs.close(True)
         return True
 
     async def line_verdict(self,
@@ -103,12 +110,14 @@ class VerdictHandler:
 
         :return: None
         """
-        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
-                                      verdict_type=verdict_type)
+        await self.logs.open(
+            inspect.getframeinfo(inspect.currentframe()),
+            verdict_type=verdict_type
+        )
 
         if self.data.line_verdict_set:
-            await self.utils.log(f"Request denied, a verdict has already been set for line {self.data.line}")
-            await self.utils.log_return(False)
+            await self.logs.log(f"Request denied, a verdict has already been set for line {self.data.line}")
+            await self.logs.close(False)
             return False
 
         self.data.line_verdict_set = True
@@ -135,7 +144,7 @@ class VerdictHandler:
             color = "⬛"
 
         else:
-            await self.utils.log("No verdict type provided")
+            await self.logs.log("No verdict type provided")
             color = "🟧"
             line_to_print = "ERROR"
             reason = "ERROR"
@@ -144,5 +153,5 @@ class VerdictHandler:
             color, normal_line, line_to_print, reason, self.data.code_index
         ])
 
-        await self.utils.log_return(True)
+        await self.logs.close(True)
         return True

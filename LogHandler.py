@@ -3,7 +3,7 @@ import Data
 
 class LogHandler:
     def __init__(self, data: Data.Data):
-        self.data = data
+        self.data: Data.Data = data
 
     async def log(self, reason: str) -> None:
         """

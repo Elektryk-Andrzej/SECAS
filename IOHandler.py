@@ -1,8 +1,12 @@
 from datetime import *
 import discord
-import Data
 import inspect
 import os
+import Data
+import LogHandler
+import Utils
+import VerdictHandler
+import ActionHandler
 
 
 class IOHandler:
@@ -10,10 +14,10 @@ class IOHandler:
         self.data: Data.Data = data
         self.bot = bot
         self.ctx = ctx
-        self.verdict_handler = data.verdict_handler_object
-        self.action_handler = data.action_handler_object
-        self.utils = data.utils_object
-        self.logs = data.log_handler_object
+        self.verdict_handler: VerdictHandler.VerdictHandler = data.verdict_handler_object
+        self.action_handler: ActionHandler.ActionHandler = data.action_handler_object
+        self.utils: Utils.Utils = data.utils_object
+        self.logs: LogHandler.LogHandler = data.log_handler_object
 
         date = datetime.now()
         self.data.log_file_name = (f"logs/{datetime.strftime(date, '%d;%m %H-%M-%S')} "
@@ -37,25 +41,27 @@ class IOHandler:
         if not count_first_line:
             self.data.code.pop(0)
 
-        await self.utils.log_return(self.data.code)
+        await self.logs.close(self.data.code)
 
         return self.data.code
 
     async def get_labels(self) -> None:
-        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()))
+        await self.logs.open(inspect.getframeinfo(inspect.currentframe()))
 
         for index, line in enumerate(self.data.code):
             if len(line) == 1 and str(line[0]).endswith(":"):
                 label = str(line[0]).strip(":")
                 self.data.labels.append(label)
 
-                await self.utils.log.log(f"Registered a new label: \"{label}\"")
+                await self.logs.log(f"Registered a new label: \"{label}\"")
 
-        await self.utils.log_return(None)
+        await self.logs.close(None)
 
     async def proccess_verify_request(self, count_first_line: bool) -> None:
-        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
-                                      count_first_line=count_first_line)
+        await self.logs.open(
+            inspect.getframeinfo(inspect.currentframe()),
+            count_first_line=count_first_line
+        )
 
         async with self.ctx.channel.typing():
             await self.format_code(count_first_line=count_first_line)
@@ -64,7 +70,8 @@ class IOHandler:
 
             line: list
             for index, line in enumerate(self.data.code):
-                await self.utils.log.log(f"Checking line {index+1} with value {line}")
+                await self.logs.log(f"Checking line {index+1} with value {line}")
+
                 self.data.code_index += 1
                 self.data.line = line
                 self.data.line_verdict_set = False
@@ -109,10 +116,10 @@ class IOHandler:
                                      f"`{e}`",
                                      mention_author=False)'''
 
-        await self.utils.log_return(None)
+        await self.logs.close(None)
 
     async def format_processed_lines_to_overview(self) -> list:
-        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()))
+        await self.logs.open(inspect.getframeinfo(inspect.currentframe()))
 
         character_limit = 2000
 
@@ -137,11 +144,11 @@ class IOHandler:
         if current_list:
             devided_overview_lines.append(current_list)
 
-        await self.utils.log_return(devided_overview_lines)
+        await self.logs.close(devided_overview_lines)
         return devided_overview_lines
 
     async def format_processed_lines_to_error_summary(self) -> list:
-        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()))
+        await self.logs.open(inspect.getframeinfo(inspect.currentframe()))
 
         character_limit = 2000
 
@@ -166,11 +173,11 @@ class IOHandler:
         if current_list:
             devided_error_summary_lines.append(current_list)
 
-        await self.utils.log_return(devided_error_summary_lines)
+        await self.logs.close(devided_error_summary_lines)
         return devided_error_summary_lines
 
     async def send_result_embed(self) -> None:
-        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()))
+        await self.logs.open(inspect.getframeinfo(inspect.currentframe()))
         color_error = 0xdd2e44
         color_no_error = 0x77b255
 
@@ -207,5 +214,5 @@ class IOHandler:
                     )
                 )
 
-        await self.utils.log_return(None)
+        await self.logs.close(None)
         return

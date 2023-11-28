@@ -1,14 +1,17 @@
 import Data
-import VerdictHandler
-import Utils
 import inspect
+
+import LogHandler
+import Utils
+import VerdictHandler
 
 
 class ParamHandler:
     def __init__(self, data: Data.Data):
-        self.data = data
-        self.utils = Utils.Utils(data)
-        self.verdict_handler = VerdictHandler.VerdictHandler(data)
+        self.data: Data.Data = data
+        self.utils: Utils.Utils = data.utils_object
+        self.verdict_handler: VerdictHandler.VerdictHandler = data.verdict_handler_object
+        self.logs: LogHandler.LogHandler = data.log_handler_object
 
     # Register a certain value to an SE variable
     async def register_var(self,
@@ -18,11 +21,13 @@ class ParamHandler:
                            player_var: bool,
                            everything_in_range: bool = False) -> bool:
 
-        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
-                                      name_index=name_index,
-                                      value_index=value_index,
-                                      player_var=player_var,
-                                      everything_in_range=everything_in_range)
+        await self.logs.open(
+            inspect.getframeinfo(inspect.currentframe()),
+            name_index=name_index,
+            value_index=value_index,
+            player_var=player_var,
+            everything_in_range=everything_in_range
+        )
 
         variable_name = await self.utils.get_str_from_line_index(name_index)
         variable_name = await self._strip_brackets(variable_name)
@@ -34,7 +39,7 @@ class ParamHandler:
             variable_value = await self.utils.get_str_from_line_index(value_index)
 
         if not await self._is_containing_brackets(name_index):
-            await self.utils.log_return(False)
+            await self.logs.close(False)
             return False
 
         async def get_type() -> type or bool:
@@ -59,7 +64,7 @@ class ParamHandler:
             except ValueError:
                 pass
             
-            await self.utils.log_return(False)
+            await self.logs.close(False)
             return False
 
         if not player_var:
@@ -68,7 +73,7 @@ class ParamHandler:
         elif player_var:
             self.data.custom_variables.append([variable_name, int, True, variable_value])
         
-        await self.utils.log_return(True)
+        await self.logs.close(True)
         return True
 
     async def is_valid_mode(self,
@@ -81,9 +86,11 @@ class ParamHandler:
         if not required and not await self._is_line_index_present(line_index):
             return True
 
-        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
-                                      line_index=line_index,
-                                      possible_modes=possible_modes)
+        await self.logs.open(
+            inspect.getframeinfo(inspect.currentframe()),
+            line_index=line_index,
+            possible_modes=possible_modes
+        )
 
         if case_sensitive:
             possible_modes = [possible_mode for possible_mode in possible_modes]
@@ -93,12 +100,12 @@ class ParamHandler:
             mode = str(await self.utils.get_str_from_line_index(line_index)).casefold()
 
         if mode in possible_modes:
-            await self.utils.log_return(True)
+            await self.logs.close(True)
             return True
 
         else:
             await self.verdict_handler.error_template(line_index, "Invalid mode")
-            await self.utils.log_return(False)
+            await self.logs.close(False)
             return False
 
     async def is_non_se_variable(self,
@@ -120,7 +127,7 @@ class ParamHandler:
         :return: bool
         """
 
-        await self.utils.log_new_inst(
+        await self.logs.open(
             inspect.getframeinfo(inspect.currentframe()),
             line_index=line_index,
             var_type=var_type,
@@ -131,7 +138,7 @@ class ParamHandler:
         if not required:
             if len(self.data.line) - 1 < line_index:
 
-                await self.utils.log_return(True)
+                await self.logs.close(True)
                 return True
 
         variable = await self.utils.get_str_from_line_index(line_index)
@@ -179,7 +186,7 @@ class ParamHandler:
             other_allowed_syntax = None
 
         if star_allowed and variable == "*":
-            await self.utils.log_return(True)
+            await self.logs.close(True)
             return True
 
         if brackets_required and await self._is_containing_brackets(line_index):
@@ -187,26 +194,26 @@ class ParamHandler:
 
         elif brackets_required and not await self._is_containing_brackets(line_index):
             await self.verdict_handler.error_template(line_index, "Brackets absent or malformed")
-            await self.utils.log_return(False)
+            await self.logs.close(False)
             return False
 
         if other_allowed_syntax and variable.casefold() in other_allowed_syntax:
-            await self.utils.log_return(True)
+            await self.logs.close(True)
             return True
 
         if variable in group or any(variable in _ for _ in group):
-            await self.utils.log_return(True)
+            await self.logs.close(True)
             return True
 
         if ":" in variable:
             await self.verdict_handler.line_verdict(self.data.LineVerdictType.NOT_CHECKABLE)
 
-            await self.utils.log_return(True)
+            await self.logs.close(True)
             return True
 
         await self.verdict_handler.error_template(line_index, reason)
 
-        await self.utils.log_return(False)
+        await self.logs.close(False)
         return False
 
     async def is_se_var(self,
@@ -223,16 +230,18 @@ class ParamHandler:
         :return:
         """
 
-        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()),
-                                      line_index=line_index,
-                                      required=required)
+        await self.logs.open(
+            inspect.getframeinfo(inspect.currentframe()),
+            line_index=line_index,
+            required=required
+        )
 
         if not await self._is_line_index_present(line_index) and not required:
-            await self.utils.log_return(True)
+            await self.logs.close(True)
             return True
 
         if not await self._is_containing_brackets(line_index):
-            await self.utils.log_return(False)
+            await self.logs.close(False)
 
             await self.verdict_handler.error_template(line_index, "Brackets absent or malformed")
             return False
@@ -241,7 +250,7 @@ class ParamHandler:
         variable = await self._strip_brackets(variable)
 
         if ":" in variable:
-            await self.utils.log_return(True)
+            await self.logs.close(True)
             return True
 
         if await self._is_variable_defined(
@@ -250,11 +259,11 @@ class ParamHandler:
             player_var=True,
             var_list=self.data.SEVariable.se_variables
         ):
-            await self.utils.log_return(True)
+            await self.logs.close(True)
             return True
 
         await self.verdict_handler.error_template(line_index, "Invalid SE variable")
-        await self.utils.log_return(False)
+        await self.logs.close(False)
         return False
 
     async def is_bool(self, line_index, *, required: bool = True) -> bool:
@@ -262,52 +271,50 @@ class ParamHandler:
         variable = await self.utils.get_str_from_line_index(line_index)
 
         if not required and not await self._is_line_index_present(line_index):
-            await self.utils.log_return(True)
+            await self.logs.close(True)
             return True
 
         if variable.casefold() == "true" or variable.casefold() == "false":
-            await self.utils.log_return(True)
+            await self.logs.close(True)
             return True
 
         for se_var in self.data.SEVariable.se_variables:
             if await self._strip_brackets(variable) == se_var[0] and se_var[1] is bool:
 
-                await self.utils.log_return(True)
+                await self.logs.close(True)
                 return True
 
         await self.verdict_handler.error_template(line_index, "Invalid TRUE/FALSE argument")
-        await self.utils.log_return(False)
+        await self.logs.close(False)
         return False
 
     async def is_label(self, line_index: int) -> bool:
 
-        await self.utils.log_new_inst(
+        await self.logs.open(
             inspect.getframeinfo(inspect.currentframe()),
             line_index=line_index
         )
 
-        try:
-            parameter = await self.utils.get_str_from_line_index(line_index)
+        parameter = await self.utils.get_str_from_line_index(line_index)
 
-            if parameter in self.data.labels:
-                await self.utils.log_return(True)
-                return True
+        if parameter in self.data.labels:
+            await self.logs.close(True)
+            return True
 
-        except:
-            await self.verdict_handler.error_template(line_index, "Invalid label")
-            await self.utils.log_return(False)
-            return False
+        await self.verdict_handler.error_template(line_index, "Invalid label")
+        await self.logs.close(False)
+        return False
 
     # Check if len(list) can accommodate a param at the specified index
     async def _is_line_index_present(self, line_index: int) -> bool:
-        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
+        await self.logs.open(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
         action_len = len(self.data.line) - 1
 
         if action_len >= line_index:
-            await self.utils.log_return(True)
+            await self.logs.close(True)
             return True
         else:
-            await self.utils.log_return(False)
+            await self.logs.close(False)
             return False
 
     # Check if a variable in a list is present, True if is, False if not
@@ -317,7 +324,7 @@ class ParamHandler:
                                    player_var: bool,
                                    var_list: list) -> bool:
 
-        await self.utils.log_new_inst(
+        await self.logs.open(
             inspect.getframeinfo(inspect.currentframe()),
             var_type=var_type,
             line_index=line_index,
@@ -338,25 +345,25 @@ class ParamHandler:
 
             # Check variable type
             if se_var[1] == var_type:
-                await self.utils.log_return(True)
+                await self.logs.close(True)
                 return True
 
             # Try to force the value into a requested one (only possible with custom variables)
             if len(se_var) > 3:
                 try:
                     var_type(se_var[3])
-                    await self.utils.log_return(True)
+                    await self.logs.close(True)
                     return True
                 except:
                     continue
 
-        await self.utils.log_return(False)
+        await self.logs.close(False)
         return False
 
     async def is_variable_specified_type(self,
                                          var_type: type,
                                          line_index: int) -> bool:
-        await self.utils.log_new_inst(
+        await self.logs.open(
             inspect.getframeinfo(inspect.currentframe()),
             var_type=var_type,
             line_index=line_index
@@ -366,11 +373,11 @@ class ParamHandler:
 
         try:
             var_type(variable)
-            await self.utils.log_return(True)
+            await self.logs.close(True)
             return True
 
         except:
-            await self.utils.log_return(False)
+            await self.logs.close(False)
             return False
 
     async def is_number(self,
@@ -382,7 +389,7 @@ class ParamHandler:
                         min_value: int = float('-inf'),
                         max_value: int = float('inf')) -> bool:
 
-        await self.utils.log_new_inst(
+        await self.logs.open(
             inspect.getframeinfo(inspect.currentframe()),
             line_index=line_index,
             var_type=var_type,
@@ -393,7 +400,7 @@ class ParamHandler:
         )
 
         if (not required) and (not await self._is_line_index_present(line_index)):
-            await self.utils.log_return(True)
+            await self.logs.close(True)
             return True
 
         if await self._is_variable_defined(var_type=var_type,
@@ -401,15 +408,15 @@ class ParamHandler:
                                            player_var=True,
                                            var_list=self.data.SEVariable.se_variables):
 
-            await self.utils.log_return(True)
+            await self.logs.close(True)
             return True
 
         if await self.is_variable_specified_type(var_type, line_index):
-            await self.utils.log_return(True)
+            await self.logs.close(True)
             return True
 
         if math_supported:
-            await self.utils.log_return(True)
+            await self.logs.close(True)
             return True
 
         to_be_number = await self.utils.get_str_from_line_index(line_index)
@@ -418,17 +425,17 @@ class ParamHandler:
             # noinspection PyCallingNonCallable
             if min_value <= var_type(eval(to_be_number)) <= max_value:
 
-                await self.utils.log_return(True)
+                await self.logs.close(True)
                 return True
         except ValueError:
             pass
 
         await self.verdict_handler.error_template(line_index, "Invalid number")
-        await self.utils.log_return(False)
+        await self.logs.close(False)
         return False
 
     async def is_required_len(self, min_len: int, max_len) -> bool:
-        await self.utils.log_new_inst(
+        await self.logs.open(
             inspect.getframeinfo(inspect.currentframe()),
             min_len=min_len,
             max_len=max_len
@@ -439,38 +446,38 @@ class ParamHandler:
         if not min_len <= action_len:
             await self.verdict_handler.error_invalid_min_length(abs(action_len - min_len))
 
-            await self.utils.log_return(False)
+            await self.logs.close(False)
             return False
 
         if max_len is None:
-            await self.utils.log_return(True)
+            await self.logs.close(True)
             return True
 
         if not action_len <= max_len:
             await self.verdict_handler.error_invalid_max_length(action_len - max_len)
 
-            await self.utils.log_return(False)
+            await self.logs.close(False)
             return False
 
-        await self.utils.log_return(True)
+        await self.logs.close(True)
         return True
     
     async def _is_containing_brackets(self, line_index: int) -> bool:
-        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
+        await self.logs.open(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
 
         variable = await self.utils.get_str_from_line_index(line_index)
 
         if not (variable[0] == "{" and variable[-1] == "}"):
-            await self.utils.log_return(False)
+            await self.logs.close(False)
             return False
 
         variable = variable.removeprefix("{").removesuffix("}")
 
         if "{" in variable or "}" in variable:
-            await self.utils.log_return(False)
+            await self.logs.close(False)
             return False
         
-        await self.utils.log_return(True)
+        await self.logs.close(True)
         return True
     
     async def _strip_brackets(self, val: str) -> str:
@@ -481,9 +488,9 @@ class ParamHandler:
         :return: str value without brackets
         """
 
-        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()), val=val)
+        await self.logs.open(inspect.getframeinfo(inspect.currentframe()), val=val)
 
         output = val.replace("{", "").replace("}", "")
 
-        await self.utils.log_return(output)
+        await self.logs.close(output)
         return output

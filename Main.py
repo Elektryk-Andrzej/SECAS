@@ -2,7 +2,13 @@ import asyncio
 import discord
 from discord.ext import commands
 import os
+
+import ActionHandler
 import IOHandler
+import LogHandler
+import ParamHandler
+import Utils
+import VerdictHandler
 from TOKEN import TOKEN
 import Data
 
@@ -96,13 +102,18 @@ async def on_message(message):
     if message.author.id == bot.user.id:
         return
 
-    if message.content.upper().startswith(".I") or str(bot.user.id) in message.content:
+    if str(message.content).strip().casefold().startswith(".i") or str(bot.user.id) in str(message.content):
         await info_embed(message)
         return
 
-    elif message.content.upper().startswith(".V"):
+    elif str(message.content).strip().casefold().startswith(".v"):
         data = Data.Data()
-        io_handler = IOHandler.IOHandler(data, message, bot)
+        data.io_handler_object = IOHandler.IOHandler(data, message, bot)
+        data.action_handler_object = ActionHandler.ActionHandler(data)
+        data.log_handler_object = LogHandler.LogHandler(data)
+        data.param_handler_object = ParamHandler.ParamHandler(data)
+        data.utils_object = Utils.Utils(data)
+        data.verdict_handler_object = VerdictHandler.VerdictHandler(data)
 
         try:
             if os.path.exists(f"LOGS/{data.log_file_name}") or os.path.exists(f"LOGS\\{data.log_file_name}"):
@@ -119,7 +130,7 @@ async def on_message(message):
                 data.code = message.content
                 count_first_line = False
 
-            await io_handler.proccess_verify_request(count_first_line=count_first_line)
+            await data.io_handler_object.proccess_verify_request(count_first_line=count_first_line)
 
             if message.content.upper().startswith(".VD"):
                 with open(data.log_file_name, "rb") as file:

@@ -1,3 +1,11 @@
+import ActionHandler
+import IOHandler
+import LogHandler
+import ParamHandler
+import Utils
+import VerdictHandler
+
+
 class Data:
     class LineVerdictType:
         ERRORED = "ERRORED"
@@ -403,6 +411,13 @@ class Data:
         self.log_file_name: str = ""
         self.log_depth: int = 0
         self.log_depth_char: str = ">"
+
+        self.log_handler_object: LogHandler.LogHandler or None = None
+        self.action_handler_object: ActionHandler.ActionHandler or None = None
+        self.io_handler_object: IOHandler.IOHandler or None = None
+        self.param_handler_object: ParamHandler.ParamHandler or None = None
+        self.utils_object: Utils.Utils or None = None
+        self.verdict_handler_object: VerdictHandler.VerdictHandler or None = None
 
         for role in self.RoleType.role_types:
             self.SEVariable.se_variables.append([role.upper(), int, True])

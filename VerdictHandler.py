@@ -1,12 +1,11 @@
 import Data
-import Utils
 import inspect
 
 
 class VerdictHandler:
     def __init__(self, data: Data.Data):
         self.data = data
-        self.utils = Utils.Utils(data)
+        self.utils = data.utils_object
 
     async def error_template(self, line_index: int, reason: str) -> bool:
         """

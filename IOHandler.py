@@ -1,9 +1,6 @@
 from datetime import *
 import discord
 import Data
-import ActionHandler
-import VerdictHandler
-import Utils
 import inspect
 import os
 
@@ -13,9 +10,10 @@ class IOHandler:
         self.data: Data.Data = data
         self.bot = bot
         self.ctx = ctx
-        self.verdict_handler: VerdictHandler.VerdictHandler = VerdictHandler.VerdictHandler(data)
-        self.action_handler: ActionHandler.ActionHandler = ActionHandler.ActionHandler(data)
-        self.utils: Utils.Utils = Utils.Utils(data)
+        self.verdict_handler = data.verdict_handler_object
+        self.action_handler = data.action_handler_object
+        self.utils = data.utils_object
+        self.logs = data.log_handler_object
 
         date = datetime.now()
         self.data.log_file_name = (f"logs/{datetime.strftime(date, '%d;%m %H-%M-%S')} "
@@ -24,11 +22,11 @@ class IOHandler:
         if not os.path.exists("logs"):
             os.makedirs("logs")
             
-        with open(self.data.log_file_name, "x") as file:
+        with open(self.data.log_file_name, "w") as file:
             file.close()
 
     async def format_code(self, count_first_line: bool) -> list:
-        await self.utils.log_new_inst(inspect.getframeinfo(inspect.currentframe()))
+        await self.logs.open(inspect.getframeinfo(inspect.currentframe()))
 
         lines = self.data.code.splitlines()
 
@@ -51,7 +49,7 @@ class IOHandler:
                 label = str(line[0]).strip(":")
                 self.data.labels.append(label)
 
-                await self.utils.log(f"Registered a new label: \"{label}\"")
+                await self.utils.log.log(f"Registered a new label: \"{label}\"")
 
         await self.utils.log_return(None)
 
@@ -66,7 +64,7 @@ class IOHandler:
 
             line: list
             for index, line in enumerate(self.data.code):
-                await self.utils.log(f"Checking line {index+1} with value {line}")
+                await self.utils.log.log(f"Checking line {index+1} with value {line}")
                 self.data.code_index += 1
                 self.data.line = line
                 self.data.line_verdict_set = False

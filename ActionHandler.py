@@ -8,12 +8,9 @@ import VerdictHandler
 class ActionHandler:
     def __init__(self, data: Data.Data):
         self.data: Data.Data = data
-
-        self.param_handler: ParamHandler.ParamHandler = ParamHandler.ParamHandler(data)
-
-        self.utils: Utils.Utils = Utils.Utils(data)
-
-        self.verdict_handler: VerdictHandler.VerdictHandler = VerdictHandler.VerdictHandler(data)
+        self.param_handler: ParamHandler.ParamHandler = data.param_handler_object
+        self.utils: Utils.Utils = data.utils_object
+        self.verdict_handler: VerdictHandler.VerdictHandler = data.verdict_handler_object
 
         self.actions: dict = {
             "HINTPLAYER": self.HINTPLAYER,
@@ -306,7 +303,6 @@ class ActionHandler:
 
     async def TESLA(self) -> bool:
         mode_selected = str(await self.utils.get_str_from_line_index(1)).casefold()
-
         if mode_selected == "enable" or mode_selected == "disable":
             if not await self.param_handler.is_required_len(1, 1):
                 return False
@@ -760,13 +756,13 @@ class ActionHandler:
         if not await self.param_handler.is_valid_mode(1, possible_modes=("save", "delete", "add", "remove")):
             return False
 
-        if not await self.param_handler.register_var(1, 2, player_var=True):
+        if not await self.param_handler.register_var(2, 3, player_var=True):
             return False
 
         if not await self.param_handler.is_se_var(2):
             return False
 
-        if not await self.param_handler.is_number(3, int, required=False):
+        if not await self.param_handler.register_var(3, 3, player_var=True):
             return False
 
         return True

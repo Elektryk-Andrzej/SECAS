@@ -9,17 +9,24 @@ class IOHandler:
         self.lv: LabelVisualiser = LabelVisualiser.LabelVisualiser()
 
     async def visualise(self) -> str:
+        max_line_len: int = 40
+
         self.lv.format_script(self.msg.content)
         self.lv.register_labels()
         self.lv.set_matrix()
         self.lv.register_redirect_actions()
 
         result: str = "```"
-        for index, line in enumerate(self.lv.get_result()):
+        results = self.lv.get_result()
+        for index, line in enumerate(results):
             if index == 0:
                 continue
 
-            result += f"{line} | {self.lv.script[index]}\n"
+            result += (
+                f"{line} | {self.lv.script[index]}\n"
+                if len(self.lv.script[index]) <= max_line_len else
+                f"{line} | {self.lv.script[index][:max_line_len]}...\n"
+            )
 
         return result + "```"
 

@@ -16,7 +16,7 @@ async def info_embed(message):
     class SelectMenu(discord.ui.View):
         def __init__(self, message):
             super().__init__()
-            self.message = message
+            self.message: discord.Message = message
             self.embed = None
 
         @discord.ui.select(

@@ -23,7 +23,7 @@ class LabelVisualiser:
         self.labels: dict = {}
         self.matrix: list = []
         self.connections: dict = {}
-        self.script: list = ["SIX:", "NINE:", ":"]
+        self.script: list = []
 
     def format_script(self, script) -> None:
         self.script = script.splitlines()
@@ -58,15 +58,16 @@ class LabelVisualiser:
                         self.char.right_down_left if not inverted else self.char.up_right_left
                     )
 
-                elif column is self.char.right_down and inverted or column is self.char.up_right and not inverted:
-                    self.matrix[row_index][column_index] = (
-                        self.char.right_down_left if not inverted else self.char.up_right_left
-                    )
+                elif column is self.char.right_down or column is self.char.up_right:
+                    self.matrix[row_index][column_index] = self.char.up_right_down
 
-                else:
+                elif column is None:
                     self.matrix[row_index][column_index] = (
                         self.char.right_down if not inverted else self.char.up_right
                     )
+
+                else:
+                    ic("ERROR ERROR ERROR")
 
                 break
 

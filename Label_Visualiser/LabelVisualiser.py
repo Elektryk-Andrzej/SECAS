@@ -1,5 +1,6 @@
 import dataclasses
-import pprint
+from icecream import ic
+ic.configureOutput(includeContext=True)
 
 
 @dataclasses.dataclass
@@ -28,16 +29,13 @@ class LabelVisualiser:
         self.script = script.splitlines()
 
     def set_matrix(self, rows: int or None = None, columns: int or None = None) -> None:
-
-        for index in range(len(self.script) if not rows else rows):
+        for index in range(len(self.script) if rows is None else rows):
             column: list = []
 
-            for _ in range(len(self.labels)*2 if not columns else columns):
+            for _ in range(len(self.labels)*8 if columns is None else columns):
                 column.append(None)
 
             self.matrix.append(column)
-
-        print(self.matrix)
 
     @staticmethod
     def _is_primary_column(row_index: int) -> bool:
@@ -45,17 +43,22 @@ class LabelVisualiser:
 
     def _create_pointer_start_row(self, start_index, row_index, pointer_column, inverted):
         for column_index, column in enumerate(self.matrix[start_index]):
-
             # Add heading arrow
             if (column_index == 0 or not self._is_primary_column(column_index)) and column is None:
                 self.matrix[row_index][column_index] = self.char.arrow_left
 
             # Add entry "┌" if reached target column
             elif column_index == pointer_column:
+
                 if column is self.char.up_down:
                     self.matrix[row_index][column_index] = self.char.up_right_down
 
                 elif column is self.char.arrow_left:
+                    self.matrix[row_index][column_index] = (
+                        self.char.right_down_left if not inverted else self.char.up_right_left
+                    )
+
+                elif column is self.char.right_down and inverted or column is self.char.up_right and not inverted:
                     self.matrix[row_index][column_index] = (
                         self.char.right_down_left if not inverted else self.char.up_right_left
                     )
@@ -73,9 +76,7 @@ class LabelVisualiser:
 
             # Change from "┌" to "┬" if reached "┌" but not target column
             elif column is self.char.right_down:
-                self.matrix[row_index][column_index] = (
-                    self.char.right_down_left if not inverted else self.char.up_right_left
-                )
+                self.matrix[row_index][column_index] = self.char.right_down_left
 
     def _create_pointer_end_row(self, end_index, row_index, pointer_column, inverted):
         for column_index, column in enumerate(self.matrix[end_index]):
@@ -141,32 +142,47 @@ class LabelVisualiser:
                     return False
 
             else:
-                print(row_index)
-                print(pointer_column)
                 self.matrix[row_index][pointer_column] = self.char.up_down
 
         return True
 
     def _get_and_register_lowest_column(self, start_index: int, end_index: int) -> int:
+
         if start_index > end_index:
             start_index, end_index = end_index, start_index
 
-        slots_occupying: set = set(range(start_index, end_index+1))
+        def _is_intersecting(pointer_column: int, start_index: int, end_index: int) -> bool:
+
+            for i in range(len(self.connections[pointer_column])):
+                space_occupied_start, space_occupied_end = self.connections[pointer_column][i]
+
+                ic(pointer_column, start_index, end_index, space_occupied_start, space_occupied_end)
+                if end_index > space_occupied_start and space_occupied_end > start_index:
+                    return True
+
+            return False
+
+        if not self.connections:
+            self.connections[1] = [[start_index, end_index]]
+            ic(self.connections)
+            return 1
 
         for key in self.connections.keys():
-            val: set = self.connections[key]
+            is_intersecting = _is_intersecting(key, start_index, end_index)
+            ic(is_intersecting)
 
-            if val & slots_occupying:
+            if is_intersecting:
+                ic("try get next column")
                 continue
-
-            self.connections[key] = self.connections[key] | slots_occupying
-            key_added = key
-            break
+            else:
+                self.connections[key].append([start_index, end_index])
+                ic("added to column", self.connections[key])
+                return key
         else:
-            key_added: int = len(self.connections) * 2 + 1
-            self.connections[key_added] = slots_occupying
-
-        return key_added
+            key = len(self.connections)*2+1
+            self.connections[key] = [[start_index, end_index]]
+            ic("no new column available", self.connections[key], key)
+            return key
 
     def register_labels(self):
         for index, line in enumerate(self.script):
@@ -175,7 +191,6 @@ class LabelVisualiser:
 
             if str(line).endswith(":") and " " not in line:
                 self.labels[str(line).strip(":")] = index
-                print("Registeted label")
 
     def register_redirect_actions(self) -> bool:
         for index, line in enumerate(self.script):
@@ -183,30 +198,37 @@ class LabelVisualiser:
                 continue
 
             line: list = line.split(" ")
-            print(f"{line = }")
+
             if line[0] == "GOTOIF" and len(line) >= 4:
-                print("gotoif detected")
-                print(f"{self.create_pointer(index, self.labels[line[1]]) = }")
-                print(f"{self.create_pointer(index, self.labels[line[2]]) = }")
+                try:
+                    self.create_pointer(index, self.labels[line[1]])
+                except KeyError:
+                    pass
+
+                try:
+                    self.create_pointer(index, self.labels[line[2]])
+                except KeyError:
+                    pass
 
             elif line[0] == "GOTO" and len(line) == 2:
-                print("goto detected")
-                print(f"{self.create_pointer(index, self.labels[line[1]]) = }")
+                try:
+                    self.create_pointer(index, self.labels[line[1]])
+                except KeyError:
+                    pass
 
             else:
-                print("No actions")
+                pass
 
         return True
 
     def get_result(self) -> list:
-        print([row[-1] for row in lv.matrix])
-        for i in range(100):
-            if any([row[-1] for row in lv.matrix]) is False:
-                [row.pop() for row in lv.matrix]
+        for i in range(len(self.matrix[0])):
+            if any([row[-1] for row in self.matrix]) is False:
+                [row.pop() for row in self.matrix]
             else:
                 break
         else:
-            print("fucked")
+            pass
 
         for index, row in enumerate(self.matrix):
             row_printable: str = ""
@@ -216,23 +238,6 @@ class LabelVisualiser:
 
             yield row_printable
 
-
-lv = LabelVisualiser()
-if input("y/n?") == "y":
-    lv.set_matrix(8, 8)
-    lv.create_pointer(0, 4)
-    lv.create_pointer(6, 4)
-
-    for value in lv.get_result():
-        print(f"{value}")
-else:
-    lv.format_script("GOTOIF SIX NINE x\nSIX:\nNINE:\n\n\nGOTO SIX")
-    lv.register_labels()
-    lv.set_matrix()
-    lv.register_redirect_actions()
-
-    for index, value in enumerate(lv.get_result()):
-        print(f"{value} | {lv.script[index]}")
 
 
 

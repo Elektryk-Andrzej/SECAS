@@ -423,7 +423,7 @@ class ParamHandler:
 
                 await self.logs.close(True)
                 return True
-        except ValueError:
+        except Exception:
             pass
 
         await self.verdict.error_template(line_index, "Invalid number")

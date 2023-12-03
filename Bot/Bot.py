@@ -4,7 +4,8 @@ from discord.ext import commands
 import os
 import time
 
-from Code_Validator import VerdictHandler, LogHandler, IOHandler, ParamHandler, ActionHandler, Utils, Data
+from Code_Validator import VerdictHandler, LogHandler, IOHandlerCV, ParamHandler, ActionHandler, Utils, Data
+from Label_Visualiser import IOHandlerLV
 from TOKEN import TOKEN
 
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
@@ -81,6 +82,7 @@ async def info_embed(message):
     select_menu = SelectMenu(message)
     await message.channel.send(embed=(await select_menu.send_initial_embed()), view=select_menu)
 
+
 async def command_trigger(value: str, key: str) -> bool:
     return True if value.strip().casefold().startswith("." + key) else False
 
@@ -105,7 +107,8 @@ async def on_message(message):
         return
 
     elif await command_trigger(message.content, "vl"):
-        await message.reply("Verify labels!")
+        lv = IOHandlerLV.IOHandler(message, bot)
+        await message.reply(await lv.visualise())
 
     elif await command_trigger(message.content, "vs"):
         data = Data.Data()
@@ -126,7 +129,7 @@ async def on_message(message):
         data.action_handler_object = ActionHandler.ActionHandler(data)
         time.sleep(.1)
 
-        data.io_handler_object = IOHandler.IOHandler(data, message, bot)
+        data.io_handler_object = IOHandlerCV.IOHandler(data, message, bot)
 
         """try:"""
         if os.path.exists(f".\\Logs\\{data.log_file_name}"):

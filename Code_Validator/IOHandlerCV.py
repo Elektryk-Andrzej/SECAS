@@ -6,10 +6,10 @@ import os
 
 
 class IOHandler:
-    def __init__(self, data: Data.Data, ctx, bot):
+    def __init__(self, data: Data.Data, msg, bot):
         self.data: Data.Data = data
         self.bot = bot
-        self.ctx = ctx
+        self.msg = msg
         self.verdict_handler: VerdictHandler.VerdictHandler = data.verdict_handler_object
         self.action_handler: ActionHandler.ActionHandler = data.action_handler_object
         print("action handler required")
@@ -18,7 +18,7 @@ class IOHandler:
 
         date = datetime.now()
         self.data.log_file_name = (f"../Logs/{datetime.strftime(date, '%d;%m %H-%M-%S')} "
-                                   f"@ {ctx.author.display_name}")
+                                   f"@ {msg.author.display_name}")
 
         if not os.path.exists("../Logs"):
             os.makedirs("../Logs")
@@ -60,7 +60,7 @@ class IOHandler:
             count_first_line=count_first_line
         )
 
-        async with self.ctx.channel.typing():
+        async with self.msg.channel.typing():
             await self.format_code(count_first_line=count_first_line)
 
             await self.get_labels()
@@ -103,7 +103,7 @@ class IOHandler:
                     await self.verdict_handler.error_template(0, "Invalid action")
 
             if self.data.code_index == 0:
-                await self.ctx.reply("No code found! First line is always ignored.")
+                await self.msg.reply("No code found! First line is always ignored.")
             else:
                 await self.send_result_embed()
 
@@ -182,7 +182,7 @@ class IOHandler:
             for embed_content_list in await self.format_processed_lines_to_overview():
                 embed_content = "".join(embed_content_list)
 
-                await self.ctx.channel.send(
+                await self.msg.channel.send(
                     embed=discord.Embed(
                         title=None,
                         description=embed_content,
@@ -193,7 +193,7 @@ class IOHandler:
             for embed_content_list in await self.format_processed_lines_to_error_summary():
                 embed_content = "".join(embed_content_list)
 
-                await self.ctx.channel.send(embed=discord.Embed(
+                await self.msg.channel.send(embed=discord.Embed(
                         title=None,
                         description=embed_content,
                         color=color_error
@@ -204,7 +204,7 @@ class IOHandler:
             for embed_content_list in await self.format_processed_lines_to_overview():
                 embed_content = "".join(embed_content_list)
 
-                await self.ctx.channel.send(embed=discord.Embed(
+                await self.msg.channel.send(embed=discord.Embed(
                         title=None,
                         description=embed_content,
                         color=color_no_error

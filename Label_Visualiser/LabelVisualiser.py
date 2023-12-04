@@ -198,22 +198,22 @@ class LabelVisualiser:
             if line is None:
                 continue
 
-            line: list = line.split(" ")
+            line_as_list: list = line.split(" ")
 
-            if line[0] == "GOTOIF" and len(line) >= 4:
+            if line_as_list[0] == "GOTOIF" and len(line_as_list) >= 4:
                 try:
-                    self.create_pointer(index, self.labels[line[1]])
+                    self.create_pointer(index, self.labels[line_as_list[1]])
                 except KeyError:
                     pass
 
                 try:
-                    self.create_pointer(index, self.labels[line[2]])
+                    self.create_pointer(index, self.labels[line_as_list[2]])
                 except KeyError:
                     pass
 
-            elif line[0] == "GOTO" and len(line) == 2:
+            elif line_as_list[0] == "GOTO" and len(line_as_list) == 2:
                 try:
-                    self.create_pointer(index, self.labels[line[1]])
+                    self.create_pointer(index, self.labels[line_as_list[1]])
                 except KeyError:
                     pass
 
@@ -238,10 +238,3 @@ class LabelVisualiser:
                 row_printable += column if column else " "
 
             yield row_printable
-
-
-
-
-
-
-

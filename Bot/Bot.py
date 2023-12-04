@@ -153,7 +153,6 @@ async def on_message(message):
                 # noinspection PyTypeChecker
                 await message.channel.send(file=discord.File(file, "result.txt"))
 
-
         """except Exception as e:
             await message.reply(f"ERROR: `{e}`")
 

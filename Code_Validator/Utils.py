@@ -1,5 +1,6 @@
 from Code_Validator import Data, LogHandler
 import inspect
+import difflib
 
 
 class Utils:
@@ -34,3 +35,14 @@ class Utils:
 
         await self.logs.close(output)
         return output
+
+    @staticmethod
+    async def get_closest_match(value: str, possible_values: list or tuple) -> str:
+        if value.upper() in possible_values:
+            return value.upper()
+
+        elif value.casefold() in possible_values:
+            return value.casefold()
+
+        else:
+            return difflib.get_close_matches(value, possible_values, n=1, cutoff=0)[0]

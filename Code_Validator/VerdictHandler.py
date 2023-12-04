@@ -8,12 +8,13 @@ class VerdictHandler:
         self.utils: Utils.Utils = data.utils_object
         self.logs: LogHandler.LogHandler = data.log_handler_object
 
-    async def error_template(self, line_index: int, reason: str) -> bool:
+    async def error_template(self, line_index: int, reason: str, closest_match: str or None = None) -> bool:
         """
         Formats a line by adding arrows around a malformed parameter and automatically creates a line verdict
 
         :param line_index: line index to report as malformed
         :param reason: the reason why it is malformed
+        :param closest_match: footer to put under the main reason, used for "Did you mean x?"
         :return: bool
         """
         self.data.errored = True
@@ -30,7 +31,8 @@ class VerdictHandler:
 
         await self.line_verdict(self.data.LineVerdictType().ERRORED,
                                 line_to_print,
-                                reason)
+                                reason,
+                                closest_match)
 
         await self.logs.close(True)
         return True
@@ -102,7 +104,8 @@ class VerdictHandler:
     async def line_verdict(self,
                            verdict_type: Data.Data.LineVerdictType,
                            line_to_print: str or None = None,
-                           reason: str or None = None) -> bool:
+                           reason: str or None = None,
+                           closest_match: str or None = None) -> bool:
         """
         Set a verdict for the line with LineVerdictType attributes and format it for later use
 
@@ -148,7 +151,7 @@ class VerdictHandler:
             reason = "ERROR"
 
         self.data.processed_lines.append([
-            color, normal_line, line_to_print, reason, self.data.code_index
+            color, normal_line, line_to_print, reason, self.data.code_index, closest_match
         ])
 
         await self.logs.close(True)

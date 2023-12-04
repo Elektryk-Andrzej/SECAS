@@ -287,7 +287,7 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 2):
             return False
 
-        modes = ("lock", "unlock", "open", "close", "destroy")
+        modes = ("LOCK", "UNLOCK", "OPEN", "CLOSE", "DESTROY")
         if not await self.param.is_valid_mode(1, possible_modes=modes):
             return False
 
@@ -299,19 +299,21 @@ class ActionHandler:
         return True
 
     async def TESLA(self) -> bool:
-        mode_selected = str(await self.utils.get_str_from_line_index(1)).casefold()
-        if mode_selected == "enable" or mode_selected == "disable":
+        mode_selected = str(await self.utils.get_str_from_line_index(1))
+        modes_available: tuple = ("ENABLE", "DISABLE", "ROLETYPE", "PLAYERS")
+
+        if mode_selected == "ENABLE" or mode_selected == "DISABLE":
             if not await self.param.is_required_len(1, 1):
                 return False
 
-        elif mode_selected == "roletype":
+        elif mode_selected == "ROLETYPE":
             if not await self.param.is_required_len(2, 2):
                 return False
 
             if not await self.param.is_non_se_variable(2, var_type=self.data.RoleType):
                 return False
 
-        elif mode_selected == "players":
+        elif mode_selected == "PLAYERS":
             if not await self.param.is_required_len(2, 2):
                 return False
 
@@ -319,7 +321,8 @@ class ActionHandler:
                 return False
 
         else:
-            await self.verdict.error_template(1, "Invalid mode")
+            closest_match: str = await self.utils.get_closest_match(mode_selected, modes_available)
+            await self.verdict.error_template(1, f"Invalid mode | Did you mean {closest_match}?")
             return False
 
         return True

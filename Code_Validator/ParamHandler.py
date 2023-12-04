@@ -9,69 +9,6 @@ class ParamHandler:
         self.verdict: VerdictHandler.VerdictHandler = data.verdict_handler_object
         self.logs: LogHandler.LogHandler = data.log_handler_object
 
-    # Register a certain value to an SE variable
-    async def register_var(self,
-                           name_index: int,
-                           value_index: int,
-                           *,
-                           player_var: bool,
-                           everything_in_range: bool = False) -> bool:
-
-        await self.logs.open(
-            inspect.getframeinfo(inspect.currentframe()),
-            name_index=name_index,
-            value_index=value_index,
-            player_var=player_var,
-            everything_in_range=everything_in_range
-        )
-
-        variable_name = await self.utils.get_str_from_line_index(name_index)
-        variable_name = await self._strip_brackets(variable_name)
-        variable_value = ""
-
-        if everything_in_range:
-            variable_value = " ".join(self.data.line[value_index:])
-        else:
-            variable_value = await self.utils.get_str_from_line_index(value_index)
-
-        if not await self._is_containing_brackets(name_index):
-            await self.logs.close(False)
-            return False
-
-        async def get_type() -> type or bool:
-            if variable_value.lower() == "true" or variable_value.lower() == "false":
-                return bool
-
-            try:
-                int(variable_value)
-                return int
-            except ValueError:
-                pass
-
-            try:
-                float(variable_value)
-                return float
-            except ValueError:
-                pass
-
-            try:
-                str(variable_value)
-                return str
-            except ValueError:
-                pass
-            
-            await self.logs.close(False)
-            return False
-
-        if not player_var:
-            self.data.custom_variables.append([variable_name, await get_type(), False, variable_value])
-
-        elif player_var:
-            self.data.custom_variables.append([variable_name, int, True, variable_value])
-        
-        await self.logs.close(True)
-        return True
-
     async def is_valid_mode(self,
                             line_index: int,
                             *,
@@ -100,18 +37,20 @@ class ParamHandler:
             return True
 
         else:
-            await self.verdict.error_template(line_index, "Invalid mode")
+            closest_match = await self.utils.get_closest_match(mode, possible_modes)
+            await self.verdict.error_template(
+                line_index,
+                f"Invalid mode | Did you mean {closest_match}?"
+            )
             await self.logs.close(False)
             return False
 
     async def is_non_se_variable(self,
                                  line_index: int,
                                  *,
-                                 var_type: Data.Data.RoomType or Data.Data.ItemType or
-                                           Data.Data.EffectType or Data.Data.RoleType or
-                                           Data.Data.DoorType,
+                                 var_type: object,
                                  required: bool = True,
-                                 star_allowed: bool = False) -> bool:
+                                 other_syntax_allowed: tuple) -> bool:
 
         """
         Handles all non-standard variables, like doors, rooms, roles etc.
@@ -119,7 +58,7 @@ class ParamHandler:
         :param line_index: 
         :param var_type: things like Data.Data.ExampleType
         :param required:
-        :param star_allowed: 
+        :param other_syntax_allowed:
         :return: bool
         """
 
@@ -128,74 +67,61 @@ class ParamHandler:
             line_index=line_index,
             var_type=var_type,
             required=required,
-            star_allowed=star_allowed
+            other_syntax_allowed=other_syntax_allowed
         )
 
-        if not required:
-            if len(self.data.line) - 1 < line_index:
-
-                await self.logs.close(True)
-                return True
+        if not required and not await self._is_line_index_present(line_index):
+            await self.logs.close(True)
+            return True
 
         variable = await self.utils.get_str_from_line_index(line_index)
-        print(variable)
 
         if var_type is Data.Data.RoomType:
             reason = "Invalid room variable"
             brackets_required = False
             group = Data.Data.RoomType.room_types
-            other_allowed_syntax = "all"
 
         elif var_type is Data.Data.ItemType:
             reason = "Invalid item variable"
             brackets_required = False
             group = Data.Data.ItemType.item_types
-            other_allowed_syntax = None
 
         elif var_type is Data.Data.EffectType:
             reason = "Invalid effect variable"
             brackets_required = False
             group = Data.Data.EffectType.effect_types
-            other_allowed_syntax = None
 
         elif var_type is Data.Data.RoleType:
             reason = "Invalid role variable"
             brackets_required = False
             group = Data.Data.RoleType.role_types
-            other_allowed_syntax = None
 
         elif var_type is Data.Data.DoorType:
             reason = "Invalid door variable"
             brackets_required = False
             group = Data.Data.DoorType.door_types
-            other_allowed_syntax = None
 
         elif var_type is Data.Data.SpawnPosition:
             reason = "Invalid spawn position"
             brackets_required = False
             group = Data.Data.SpawnPosition.spawn_positions
-            other_allowed_syntax = None
 
         else:
             await self.verdict.error_template(line_index, "SECAS ERROR - Could not get variable type")
             await self.logs.close(False)
             return False
 
-        if star_allowed and variable == "*":
+        if variable in other_syntax_allowed:
             await self.logs.close(True)
             return True
 
         if brackets_required and await self._is_containing_brackets(line_index):
             variable = await self._strip_brackets(variable)
 
-        elif brackets_required and not await self._is_containing_brackets(line_index):
+        elif brackets_required:
             await self.verdict.error_template(line_index, "Brackets absent or malformed")
             await self.logs.close(False)
             return False
-
-        if other_allowed_syntax and variable.casefold() in other_allowed_syntax:
-            await self.logs.close(True)
-            return True
 
         if variable and variable in group or any(variable in _ for _ in group):
             await self.logs.close(True)
@@ -203,12 +129,11 @@ class ParamHandler:
 
         if ":" in variable:
             await self.verdict.line_verdict(self.data.LineVerdictType.NOT_CHECKABLE)
-
             await self.logs.close(True)
             return True
 
+        closest_match: str = await self.utils.get_closest_match(variable, group)
         await self.verdict.error_template(line_index, reason)
-
         await self.logs.close(False)
         return False
 
@@ -249,38 +174,24 @@ class ParamHandler:
             await self.logs.close(True)
             return True
 
-        if await self._is_variable_defined(
-            var_type=int,
-            line_index=line_index,
-            player_var=True,
-            var_list=self.data.SEVariable.se_variables
-        ):
-            await self.logs.close(True)
-            return True
-
         await self.verdict.error_template(line_index, "Invalid SE variable")
         await self.logs.close(False)
         return False
 
     async def is_bool(self, line_index, *, required: bool = True) -> bool:
-
-        variable = await self.utils.get_str_from_line_index(line_index)
+        arg = await self.utils.get_str_from_line_index(line_index)
+        possible_args: tuple = ("TRUE", "FALSE", "YES", "NO")
 
         if not required and not await self._is_line_index_present(line_index):
             await self.logs.close(True)
             return True
 
-        if variable.casefold() == "true" or variable.casefold() == "false":
+        if arg.casefold() in [possible_arg.casefold() for possible_arg in possible_args]:
             await self.logs.close(True)
             return True
 
-        for se_var in self.data.SEVariable.se_variables:
-            if await self._strip_brackets(variable) == se_var[0] and se_var[1] is bool:
-
-                await self.logs.close(True)
-                return True
-
-        await self.verdict.error_template(line_index, "Invalid TRUE/FALSE argument")
+        closest_match: str = await self.utils.get_closest_match(arg, possible_args)
+        await self.verdict.error_template(line_index, f"Invalid bool | Did you mean {closest_match}?")
         await self.logs.close(False)
         return False
 
@@ -297,7 +208,12 @@ class ParamHandler:
             await self.logs.close(True)
             return True
 
-        await self.verdict.error_template(line_index, "Invalid label")
+        elif len(self.data.labels) > 0:
+            closest_match: str = await self.utils.get_closest_match(parameter, self.data.labels)
+            await self.verdict.error_template(line_index, f"Invalid label | Did you mean {closest_match}?")
+        else:
+            await self.verdict.error_template(line_index, "No labels registered")
+
         await self.logs.close(False)
         return False
 
@@ -310,69 +226,6 @@ class ParamHandler:
             await self.logs.close(True)
             return True
         else:
-            await self.logs.close(False)
-            return False
-
-    # Check if a variable in a list is present, True if is, False if not
-    async def _is_variable_defined(self, *,
-                                   var_type,
-                                   line_index: int,
-                                   player_var: bool,
-                                   var_list: list) -> bool:
-
-        await self.logs.open(
-            inspect.getframeinfo(inspect.currentframe()),
-            var_type=var_type,
-            line_index=line_index,
-            player_var=player_var,
-            var_list=var_list
-        )
-
-        if var_list == self.data.SEVariable.se_variables:
-            var_list = self.data.SEVariable.se_variables + self.data.custom_variables
-
-        var_name = await self.utils.get_str_from_line_index(line_index)
-        var_name = await self._strip_brackets(var_name)
-
-        for se_var in var_list:
-            # Skip check if name is not the same, or if variable is a player var or not
-            if not var_name == se_var[0] or not se_var[2] == player_var:
-                continue
-
-            # Check variable type
-            if se_var[1] == var_type:
-                await self.logs.close(True)
-                return True
-
-            # Try to force the value into a requested one (only possible with custom variables)
-            if len(se_var) > 3:
-                try:
-                    var_type(se_var[3])
-                    await self.logs.close(True)
-                    return True
-                except:
-                    continue
-
-        await self.logs.close(False)
-        return False
-
-    async def is_variable_specified_type(self,
-                                         var_type: type,
-                                         line_index: int) -> bool:
-        await self.logs.open(
-            inspect.getframeinfo(inspect.currentframe()),
-            var_type=var_type,
-            line_index=line_index
-        )
-
-        variable = await self.utils.get_str_from_line_index(line_index)
-
-        try:
-            var_type(variable)
-            await self.logs.close(True)
-            return True
-
-        except:
             await self.logs.close(False)
             return False
 
@@ -399,18 +252,6 @@ class ParamHandler:
             await self.logs.close(True)
             return True
 
-        if await self._is_variable_defined(var_type=var_type,
-                                           line_index=line_index,
-                                           player_var=True,
-                                           var_list=self.data.SEVariable.se_variables):
-
-            await self.logs.close(True)
-            return True
-
-        if await self.is_variable_specified_type(var_type, line_index):
-            await self.logs.close(True)
-            return True
-
         if math_supported:
             await self.logs.close(True)
             return True
@@ -418,12 +259,12 @@ class ParamHandler:
         to_be_number = await self.utils.get_str_from_line_index(line_index)
 
         try:
-            # noinspection PyCallingNonCallable
             if min_value <= var_type(eval(to_be_number)) <= max_value:
 
                 await self.logs.close(True)
                 return True
-        except Exception:
+
+        except TypeError or Exception:
             pass
 
         await self.verdict.error_template(line_index, "Invalid number")
@@ -490,3 +331,7 @@ class ParamHandler:
 
         await self.logs.close(output)
         return output
+
+    @staticmethod
+    async def sex() -> str:
+        return "sex"

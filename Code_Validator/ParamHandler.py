@@ -332,6 +332,7 @@ class ParamHandler:
         await self.logs.close(output)
         return output
 
+    # With dedication to saskyc
     @staticmethod
     async def sex() -> str:
         return "sex"

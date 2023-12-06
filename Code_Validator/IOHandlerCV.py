@@ -77,27 +77,27 @@ class IOHandler:
                     action_done = await self.action_handler.actions[action_name]()
 
                     if action_done:
-                        await self.verdict_handler.line_verdict(self.data.LineVerdictType.PASSED)
+                        await self.verdict_handler.line_verdict(self.data.LineVerdict.PASSED)
 
                     else:
                         if not self.data.line_verdict_set:
                             await self.verdict_handler.line_verdict(
-                                self.data.LineVerdictType.ERRORED,
+                                self.data.LineVerdict.ERRORED,
                                 " ".join(self.data.line),
                                 "No reason specifed, consider this a SECAS error"
                             )
 
                 elif "#" in line[0]:
-                    await self.verdict_handler.line_verdict(self.data.LineVerdictType.COMMENT)
+                    await self.verdict_handler.line_verdict(self.data.LineVerdict.COMMENT)
 
                 elif ":" in line[-1] and len(line) == 1:
-                    await self.verdict_handler.line_verdict(self.data.LineVerdictType.LABEL)
+                    await self.verdict_handler.line_verdict(self.data.LineVerdict.LABEL)
 
                 elif "!--" in line[0] and len(self.data.line) == 2:
-                    await self.verdict_handler.line_verdict(self.data.LineVerdictType.FLAG)
+                    await self.verdict_handler.line_verdict(self.data.LineVerdict.FLAG)
 
                 elif line == ['']:
-                    await self.verdict_handler.line_verdict(self.data.LineVerdictType.EMPTY)
+                    await self.verdict_handler.line_verdict(self.data.LineVerdict.EMPTY)
 
                 else:
                     await self.verdict_handler.error_template(0, "Invalid action")
@@ -117,20 +117,24 @@ class IOHandler:
 
     async def format_processed_lines_to_overview(self) -> list:
         await self.logs.open(inspect.getframeinfo(inspect.currentframe()))
+        character_limit: int = 2000
+        overview_lines: list = []
 
-        character_limit = 2000
-
-        overview_lines = []
         for element in self.data.processed_lines:
-            if not element[0] == "⬛":
-                overview_lines.append(f"`{element[4]}`{element[0]} `{element[1]}`\n")
+            color, normal_line, line_to_print, reason, index, closest_match = element
+
+            if color != "⬛":
+                overview_lines.append(f"`{index}`{color} `{normal_line}`\n")
             else:
-                overview_lines.append(f"`{element[4]}`{element[0]}\n")
+                overview_lines.append(f"`{index}`{color}\n")
 
         devided_overview_lines = []
         current_list = []
 
         for element in overview_lines:
+            # stolen from chatgpt, no idea how it works but it works
+            # i dont even know what its supposed to do, but whatever :tf:
+
             if sum(map(len, current_list)) + len(str(element)) <= character_limit:
                 current_list.append(element)
 
@@ -146,15 +150,27 @@ class IOHandler:
 
     async def format_processed_lines_to_error_summary(self) -> list:
         await self.logs.open(inspect.getframeinfo(inspect.currentframe()))
+        character_limit: int = 2000
+        error_summary_lines: list = []
 
-        character_limit = 2000
-
-        error_summary_lines = []
         for element in self.data.processed_lines:
-            if not element[3] or not element[2]:
+            color, normal_line, line_to_print, reason, index, closest_match = element
+
+            if not reason or not line_to_print:
                 continue
 
-            error_summary_lines.append(f"### > {element[3]}\n`{element[4]}`{element[0]} `{element[2]}`\n")
+            if closest_match:
+                error_summary_lines.append(
+                    f"## > {reason}\n"
+                    f"`{index}`{color} `{line_to_print}`\n"
+                    f"### Did you mean `{closest_match}`?\n\n\n"
+                )
+            else:
+                error_summary_lines.append(
+                    f"## > {reason}\n"
+                    f"`{index}`{color} `{line_to_print}`\n"
+                    f"\n\n\n"
+                )
 
         devided_error_summary_lines = []
         current_list = []
@@ -184,7 +200,6 @@ class IOHandler:
 
                 await self.msg.channel.send(
                     embed=discord.Embed(
-                        title=None,
                         description=embed_content,
                         color=color_error
                     )
@@ -194,7 +209,6 @@ class IOHandler:
                 embed_content = "".join(embed_content_list)
 
                 await self.msg.channel.send(embed=discord.Embed(
-                        title=None,
                         description=embed_content,
                         color=color_error
                     )
@@ -205,7 +219,6 @@ class IOHandler:
                 embed_content = "".join(embed_content_list)
 
                 await self.msg.channel.send(embed=discord.Embed(
-                        title=None,
                         description=embed_content,
                         color=color_no_error
                     )

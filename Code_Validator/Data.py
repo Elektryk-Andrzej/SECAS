@@ -1,5 +1,5 @@
 class Data:
-    class LineVerdictType:
+    class LineVerdict:
         ERRORED = "ERRORED"
         PASSED = "PASSED"
         COMMENT = "COMMENT"
@@ -8,8 +8,8 @@ class Data:
         EMPTY = "EMPTY"
         NOT_CHECKABLE = "NOT CHECKABLE"
 
-    class RoomType:
-        room_types: list[str] = [
+    class Room:
+        rooms: tuple = (
             "LczArmory",
             "LczCurve",
             "LczStraight",
@@ -62,10 +62,10 @@ class Data:
             "EzCheckpointHallway",
             "HczTestRoom",
             "HczStraight",
-        ]
+        )
 
-    class ItemType:
-        item_types: list[str] = [
+    class Item:
+        items: tuple = (
             "KeycardJanitor", "0",
             "KeycardScientist", "1",
             "KeycardResearchCoordinator", "2",
@@ -117,10 +117,10 @@ class Data:
             "GunCom45", "48",
             "SCP1576", "49",
             "Jailbird", "50",
-        ]
+        )
 
-    class EffectType:
-        effect_types: list[str] = [
+    class Effect:
+        effects: tuple = (
             "AmnesiaItems",
             "AmnesiaVision",
             "Asphyxiated",
@@ -155,10 +155,10 @@ class Data:
             "SoundtrackMute",
             "AntiScp207",
             "Scanned"
-        ]
+        )
 
-    class RoleType:
-        role_types: list[str] = [
+    class Role:
+        roles: tuple = (
             "None",
             "Spectator",
             "CustomRole",
@@ -183,10 +183,10 @@ class Data:
             "ChaosRifleman",
             "ChaosRepressor",
             "ChaosMarauder"
-        ]
+        )
 
-    class DoorType:
-        door_types: list[str] = [
+    class Door:
+        doors: tuple = (
             "Scp914Door",
             "GR18Inner",
             "Scp049Gate",
@@ -286,89 +286,15 @@ class Data:
             "SERVERS_BOTTOM",
             "SURFACE_GATE",
             "SURFACE_NUKE"
-        ]
+        )
 
     class SpawnPosition:
-        spawn_positions = [
-            None
-        ]
+        positions: tuple = (
+            None,
+        )
 
-    class SEVariable:
-        se_variables: list[list[str, type, bool]] = [
-            ["CASSIESPEAKING", bool, False],
-            ["DECONTAMINATED", bool, False],
-            ["ISRUNNING", bool, False],
-            ["ROUNDENDED", bool, False],
-            ["ROUNDINPROGRESS", bool, False],
-            ["ROUNDSTARTED", bool, False],
-            ["SCP914ACTIVE", bool, False],
-            ["WARHEADCOUNTING", bool, False],
-            ["WARHEADDETONATED", bool, False],
-            ["WAVERESPAWNING", bool, False],
-            ["INTERCOMINUSE", bool, False],
-            ["HEAVILYMODDED", bool, False],
-            ["CHANCE", float, False],
-            ["CHANCE10", int, False],
-            ["CHANCE100", int, False],
-            ["CHANCE20", int, False],
-            ["CHANCE3", int, False],
-            ["CHANCE5", int, False],
-            ["CLASSDESCAPES", int, True],
-            ["ESCAPES", int, True],
-            ["SCIENTISTESCAPES", int, True],
-            ["INTERCOMCOOLDOWN", float, False],
-            ["INTERCOMUSETIME", float, False],
-            ["DETONATIONTIME", float, False],
-            ["ENGAGEDGENERATORS", int, False],
-            ["PLAYERS", int, True],
-            ["PLAYERSALIVE", int, True],
-            ["PLAYERSDEAD", int, True],
-            ["ROUNDMINUTES", float, False],
-            ["ROUNDSECONDS", float, False],
-            ["MAXPLAYERS", int, False],
-            ["IP", str, False],
-            ["PORT", str, False],
-            ["DOORSTATE", str, False],
-            ["LASTRESPAWNTEAM", str, False],
-            ["LASTRESPAWNUNIT", str, False],
-            ["NEXTWAVE", str, False],
-            ["SHOW", str, False],
-            ["CHAOSTICKETS", float, False],
-            ["NTFTICKETS", float, False],
-            ["RESPAWNEDPLAYERS", int, True],
-            ["TIMESINCELASTWAVE", float, False],
-            ["TIMEUNTILNEXTWAVE", float, False],
-            ["TOTALWAVES", int, False],
-            ["DAYOFMONTH", int, False],
-            ["DAYOFWEEK", int, False],
-            ["DAYOFYEAR", int, False],
-            ["MONTH", int, False],
-            ["TICK", int, False],
-            ["YEAR", int, False],
-            ["KILLS", int, False],
-            ["SCPKILLS", int, False],
-            ["FILTER", str, True],
-            ["C", str, False],
-            ["CI", int, True],
-            ["GUARDS", int, True],
-            ["MTFANDGUARDS", int, True],
-            ["MTF", int, True],
-            ["SCPS", int, True],
-            ["SH", int, True],
-            ["UIU", int, True],
-            ["INTERCOMSPEAKER", int, True],
-            ["SERVERSTAFF", int, True],
-            ["EZ", int, True],
-            ["HCZ", int, True],
-            ["LCZ", int, True],
-            ["POCKET", int, True],
-            ["SURFACE", int, True],
-            ["SENDER", int, True],
-            ["EVPLAYER", int, True],
-            ["EVATTACKER", int, True],
-        ]
-
-        enable_disable_key = [
+    class DisableKey:
+        keys: tuple = (
             "DROPPING",
             "DYING",
             "ESCAPING",
@@ -388,7 +314,12 @@ class Data:
             "TESLAS",
             "WARHEAD",
             "WORKSTATIONS"
-        ]
+        )
+
+    class Candy:
+        candies: tuple = (
+            None,
+        )
 
     def __init__(self):
         self.code: list or str = []
@@ -410,9 +341,3 @@ class Data:
         self.param_handler_object = None
         self.utils_object = None
         self.verdict_handler_object = None
-
-        for role in self.RoleType.role_types:
-            self.SEVariable.se_variables.append([role.upper(), int, True])
-
-        for room in self.RoomType().room_types:
-            self.SEVariable.se_variables.append([room.upper(), int, True])

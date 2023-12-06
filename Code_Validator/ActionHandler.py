@@ -1,7 +1,7 @@
 from Code_Validator import Data, ParamHandler, Utils, VerdictHandler
 
 
-# noinspection PyPep8Naming
+# noinspection PyPep8Naming,SpellCheckingInspection
 class ActionHandler:
     def __init__(self, data: Data.Data):
         self.data: Data.Data = data
@@ -82,8 +82,10 @@ class ActionHandler:
         if not await self.param.is_required_len(2, None):
             return False
 
-        elif not await self.param.is_number(1, float):
+        if not await self.param.is_number(1, float):
             return False
+
+        await self.param.cant_check()
 
         return True
 
@@ -91,11 +93,12 @@ class ActionHandler:
         if not await self.param.is_required_len(3, None):
             return False
 
-        elif not await self.param.is_se_var(1):
+        await self.param.cant_check(1)
+
+        if not await self.param.is_number(2, float):
             return False
 
-        elif not await self.param.is_number(2, float):
-            return False
+        await self.param.cant_check()
 
         return True
 
@@ -103,10 +106,9 @@ class ActionHandler:
         if not await self.param.is_required_len(3, None):
             return False
 
-        elif not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
-        elif not await self.param.is_number(2, int):
+        if not await self.param.is_number(2, int):
             return False
 
         return True
@@ -115,10 +117,7 @@ class ActionHandler:
         if not await self.param.is_required_len(3, None):
             return False
 
-        elif not await self.param.is_se_var(1):
-            return False
-
-        elif not await self.param.is_number(2, float):
+        if not await self.param.is_number(2, float):
             return False
 
         return True
@@ -127,7 +126,7 @@ class ActionHandler:
         if not await self.param.is_required_len(2, None):
             return False
 
-        elif not await self.param.is_number(1, float):
+        if not await self.param.is_number(1, float):
             return False
 
         return True
@@ -154,11 +153,10 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 3):
             return False
 
-        if not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
-        """if not await self.param_handler.is_non_se_variable(2, self.data.CandyType):
-            return False"""
+        if not await self.param.is_non_se_variable(2, var_type=self.data.Candy):
+            return False
 
         if not await self.param.is_number(3, int, required=False, min_value=1):
             return False
@@ -169,8 +167,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, 1):
             return False
 
-        elif not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
         return True
 
@@ -178,10 +175,9 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 3):
             return False
 
-        elif not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
-        if not await self.param.is_non_se_variable(2, var_type=self.data.ItemType):
+        if not await self.param.is_non_se_variable(2, var_type=self.data.Item):
             return False
 
         if not await self.param.is_number(3, int, required=False):
@@ -193,10 +189,9 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 3):
             return False
 
-        if not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
-        if not await self.param.is_non_se_variable(2, var_type=self.data.ItemType):
+        if not await self.param.is_non_se_variable(2, var_type=self.data.Item):
             return False
 
         if not await self.param.is_number(3, int, required=False):
@@ -209,8 +204,8 @@ class ActionHandler:
             return False
 
         if not await self.param.is_non_se_variable(1,
-                                                   var_type=self.data.RoomType,
-                                                   star_allowed=True):
+                                                   var_type=self.data.Room,
+                                                   other_syntax_allowed=("*",)):
             return False
 
         for index in range(2, 5):
@@ -224,8 +219,8 @@ class ActionHandler:
             return False
 
         if not await self.param.is_non_se_variable(1,
-                                                   var_type=self.data.RoomType,
-                                                   star_allowed=True):
+                                                   var_type=self.data.Room,
+                                                   other_syntax_allowed=("*",)):
             return False
 
         return True
@@ -235,8 +230,8 @@ class ActionHandler:
             return False
 
         if not await self.param.is_non_se_variable(1,
-                                                   var_type=self.data.RoomType,
-                                                   star_allowed=True):
+                                                   var_type=self.data.Room,
+                                                   other_syntax_allowed=("*",)):
             return False
 
         if not await self.param.is_number(2, float):
@@ -287,20 +282,20 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 2):
             return False
 
-        modes = ("LOCK", "UNLOCK", "OPEN", "CLOSE", "DESTROY")
+        modes: tuple = "LOCK", "UNLOCK", "OPEN", "CLOSE", "DESTROY"
         if not await self.param.is_valid_mode(1, possible_modes=modes):
             return False
 
         if not await self.param.is_non_se_variable(2,
-                                                   var_type=self.data.DoorType,
-                                                   star_allowed=True):
+                                                   var_type=self.data.Door,
+                                                   other_syntax_allowed=("*",)):
             return False
 
         return True
 
     async def TESLA(self) -> bool:
         mode_selected = str(await self.utils.get_str_from_line_index(1))
-        modes_available: tuple = ("ENABLE", "DISABLE", "ROLETYPE", "PLAYERS")
+        modes: tuple = "ENABLE", "DISABLE", "ROLETYPE", "PLAYERS"
 
         if mode_selected == "ENABLE" or mode_selected == "DISABLE":
             if not await self.param.is_required_len(1, 1):
@@ -310,19 +305,18 @@ class ActionHandler:
             if not await self.param.is_required_len(2, 2):
                 return False
 
-            if not await self.param.is_non_se_variable(2, var_type=self.data.RoleType):
+            if not await self.param.is_non_se_variable(2, var_type=self.data.Role):
                 return False
 
         elif mode_selected == "PLAYERS":
             if not await self.param.is_required_len(2, 2):
                 return False
 
-            if not await self.param.is_se_var(1):
-                return False
+            await self.param.cant_check(1)
 
         else:
-            closest_match: str = await self.utils.get_closest_match(mode_selected, modes_available)
-            await self.verdict.error_template(1, f"Invalid mode | Did you mean {closest_match}?")
+            closest_match: str = await self.utils.get_closest_match(mode_selected, modes)
+            await self.verdict.error_template(1, f"Invalid mode", closest_match)
             return False
 
         return True
@@ -331,7 +325,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, 1):
             return False
 
-        modes = ("start", "stop", "lock", "unlock", "detonate", "blastdoors")
+        modes: tuple = "START", "STOP", "LOCK", "UNLOCK", "DETONATE", "BLASTDOORS"
         if not await self.param.is_valid_mode(1, possible_modes=modes):
             return False
 
@@ -365,11 +359,10 @@ class ActionHandler:
         if not await self.param.is_required_len(1, None):
             return False
 
-        if not await self.param.is_valid_mode(1, possible_modes=("set", "clear")):
+        if not await self.param.is_valid_mode(1, possible_modes=("SET", "CLEAR")):
             return False
 
-        if not await self.param.is_se_var(2):
-            return False
+        await self.param.cant_check(2)
 
         return True
 
@@ -377,8 +370,7 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 3):
             return False
 
-        if not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
         if not await self.param.is_number(2, float, required=False):
             return False
@@ -389,13 +381,12 @@ class ActionHandler:
         if not await self.param.is_required_len(3, 4):
             return False
 
-        if not await self.param.is_valid_mode(1, possible_modes=("set", "clear")):
+        if not await self.param.is_valid_mode(1, possible_modes=("SET", "CLEAR")):
             return False
 
-        if not await self.param.is_se_var(2):
-            return False
+        await self.param.cant_check(2)
 
-        if not await self.param.is_non_se_variable(3, var_type=self.data.EffectType):
+        if not await self.param.is_non_se_variable(3, var_type=self.data.Effect):
             return False
 
         if not await self.param.is_number(4, float, required=False):
@@ -407,13 +398,12 @@ class ActionHandler:
         if not await self.param.is_required_len(3, 3):
             return False
 
-        if not await self.param.is_valid_mode(1, possible_modes=("set", "lock")):
+        if not await self.param.is_valid_mode(1, possible_modes=("SET", "LOCK")):
             return False
 
-        if not await self.param.is_se_var(2):
-            return False
+        await self.param.cant_check(2)
 
-        if not await self.param.is_valid_mode(3, possible_modes=("short", "medium", "long", "ultra")):
+        if not await self.param.is_valid_mode(3, possible_modes=("Short", "Medium", "Long", "Ultra")):
             return False
 
         return True
@@ -422,8 +412,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, None):
             return False
 
-        if not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
         return True
 
@@ -431,8 +420,7 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 2):
             return False
 
-        if not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
         if not self.param.is_number(2, float):
             return False
@@ -443,8 +431,7 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 2):
             return False
 
-        if not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
         if not await self.param.is_number(2, float):
             return False
@@ -455,8 +442,7 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 2):
             return False
 
-        if not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
         if not await self.param.is_number(2, float):
             return False
@@ -467,8 +453,7 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 2):
             return False
 
-        if not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
         if not await self.param.is_non_se_variable(2, var_type=self.data):
             return False
@@ -479,8 +464,7 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 2):
             return False
 
-        if not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
         if not await self.param.is_non_se_variable(2, var_type=self.data.SpawnPosition):
             return False
@@ -491,8 +475,7 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 2):
             return False
 
-        if not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
         if not await self.param.is_non_se_variable(2, var_type=self.data):
             return False
@@ -503,8 +486,7 @@ class ActionHandler:
         if not await self.param.is_required_len(4, 4):
             return False
 
-        if not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
         for index in range(2, 5):
             if not await self.param.is_number(index, float):
@@ -516,8 +498,7 @@ class ActionHandler:
         if not await self.param.is_required_len(4, 5):
             return False
 
-        if not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
         for i in range(2, 5):
             if not await self.param.is_number(i, float):
@@ -535,10 +516,9 @@ class ActionHandler:
         if not await self.param.is_valid_mode(1, possible_modes=("give", "remove")):
             return False
 
-        if not await self.param.is_se_var(2):
-            return False
+        await self.param.cant_check(2)
 
-        if not await self.param.is_non_se_variable(3, var_type=self.data.EffectType):
+        if not await self.param.is_non_se_variable(3, var_type=self.data.Effect):
             return False
 
         if not await self.param.is_number(4, int, required=False, min_value=0, max_value=255):
@@ -553,10 +533,9 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 3):
             return False
 
-        if not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
-        if not await self.param.is_non_se_variable(2, var_type=self.data.RoleType):
+        if not await self.param.is_non_se_variable(2, var_type=self.data.Role):
             return False
 
         if not await self.param.is_number(3, int, required=False):
@@ -574,10 +553,9 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 5):
             return False
 
-        if not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
-        if not await self.param.is_non_se_variable(2, var_type=self.data.RoleType):
+        if not await self.param.is_non_se_variable(2, var_type=self.data.Role):
             return False
 
         if not await self.param.is_bool(3, required=False):
@@ -595,12 +573,10 @@ class ActionHandler:
         if not await self.param.is_required_len(3, 3):
             return False
 
-        if not await self.param.is_valid_mode(1, possible_modes=("add", "remove", "set")):
+        if not await self.param.is_valid_mode(1, possible_modes=("ADD", "REMOVE", "SET")):
             return False
 
-        if not await self.param.is_valid_mode(2,
-                                              possible_modes=("ChaosInsurgency", "NineTailedFox"),
-                                              case_sensitive=True):
+        if not await self.param.is_valid_mode(2, possible_modes=("ChaosInsurgency", "NineTailedFox")):
             return False
 
         if not await self.param.is_number(3, int):
@@ -619,7 +595,7 @@ class ActionHandler:
             return False
 
         if not await self.param.is_valid_mode(1,
-                                              possible_modes=("enable", "disable", "force"),
+                                              possible_modes=("ENABLE", "DISABLE", "FORCE"),
                                               required=False):
             return False
 
@@ -638,11 +614,9 @@ class ActionHandler:
         if not await self.param.is_required_len(3, 3):
             return False
 
-        if not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
-        if not await self.param.is_se_var(2):
-            return False
+        await self.param.cant_check(2)
 
         if not await self.param.is_number(3, float):
             return False
@@ -653,8 +627,7 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 2):
             return False
 
-        if not await self.param.is_se_var(2):
-            return False
+        await self.param.cant_check(2)
 
         return True
 
@@ -662,11 +635,9 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 2):
             return False
 
-        if not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
-        if not await self.param.is_non_se_variable(2,
-                                                   var_type=self.data.SEVariable.enable_disable_key):
+        if not await self.param.is_non_se_variable(2, var_type=self.data.DisableKey.keys):
             return False
 
         return True
@@ -678,8 +649,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, 1):
             return False
 
-        if not await self.param.is_valid_mode(1,
-                                              possible_modes=self.data.SEVariable.enable_disable_key):
+        if not await self.param.is_valid_mode(1, possible_modes=self.data.DisableKey.keys):
             return False
 
         return True
@@ -692,11 +662,11 @@ class ActionHandler:
             return False
 
         if not await self.param.is_non_se_variable(1,
-                                                   var_type=self.data.RoleType,
-                                                   star_allowed=True):
+                                                   var_type=self.data.Role,
+                                                   other_syntax_allowed=("*",)):
             return False
 
-        if not await self.param.is_non_se_variable(2, var_type=self.data.RoleType):
+        if not await self.param.is_non_se_variable(2, var_type=self.data.Role):
             return False
 
         if not await self.param.is_bool(3, required=False):
@@ -708,7 +678,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, 2):
             return False
 
-        if not await self.param.is_non_se_variable(1, var_type=self.data.RoleType):
+        if not await self.param.is_non_se_variable(1, var_type=self.data.Role):
             return False
 
         if not await self.param.is_number(2, int, required=False):
@@ -720,18 +690,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, 1):
             return False
 
-        '''variable = await self.utils.get_str_from_line_index(1)
-        variable = await self.utils.strip_brackets(variable)
-
-        try:
-            if variable in self.data.SEVariable.se_variables[0][0] or variable in self.data.custom_variables[0]:
-                await self.verdict_handler.error_template(1, "Invalid variable | "
-                                             "Variable doesn't exist")
-                return True
-        except:
-            await self.verdict_handler.error_template(1, "Invalid variable | "
-                                         "Variable doesn't exist")
-            return False'''
+        await self.param.cant_check(1)
 
         return True
 
@@ -739,13 +698,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, 1):
             return False
 
-        '''variable = await self.utils.get_str_from_line_index(1)
-        variable = await self.utils.strip_brackets(variable)
-
-        if variable not in self.data.se_variables[0] and variable not in self.data.custom_variables[0]:
-            await self.verdict_handler.error_template(1, "Invalid player variable | "
-                                         "Variable doesn't exist")
-            return False'''
+        await self.param.cant_check(1)
 
         return True
 
@@ -753,17 +706,12 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 3):
             return False
 
-        if not await self.param.is_valid_mode(1, possible_modes=("save", "delete", "add", "remove")):
+        if not await self.param.is_valid_mode(1, possible_modes=("SAVE", "DELETE", "ADD", "REMOVE")):
             return False
 
-        if not await self.param.register_var(2, 3, player_var=True):
-            return False
+        await self.param.cant_check(2)
 
-        if not await self.param.is_se_var(2):
-            return False
-
-        if not await self.param.register_var(3, 3, player_var=True):
-            return False
+        await self.param.cant_check(3)
 
         return True
 
@@ -771,9 +719,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, None):
             return False
 
-        if not await self.param.register_var(1, 2,
-                                             everything_in_range=True, player_var=False):
-            return False
+        await self.param.cant_check()
 
         return True
 
@@ -784,6 +730,8 @@ class ActionHandler:
         if not await self.param.is_number(1, float, math_supported=True):
             return False
 
+        await self.param.cant_check()
+
         return True
 
     async def WAITMIL(self) -> bool:
@@ -792,6 +740,8 @@ class ActionHandler:
 
         if not await self.param.is_number(1, float, math_supported=True):
             return False
+
+        await self.param.cant_check()
 
         return True
 
@@ -805,8 +755,7 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 7):
             return False
 
-        if not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
         if not await self.param.is_number(2, float):
             return False
@@ -832,10 +781,9 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 2):
             return False
 
-        if not await self.param.is_se_var(1):
-            return False
+        await self.param.cant_check(1)
 
-        if not await self.param.is_non_se_variable(2, var_type=self.data.RoleType):
+        if not await self.param.is_non_se_variable(2, var_type=self.data.Role):
             return False
 
         return True
@@ -844,10 +792,14 @@ class ActionHandler:
         if not await self.param.is_required_len(1, 1):
             return False
 
+        await self.param.cant_check()
+
         return True
 
     async def HTTPPOST(self) -> bool:
         if not await self.param.is_required_len(2, 2):
             return False
+
+        await self.param.cant_check()
 
         return True

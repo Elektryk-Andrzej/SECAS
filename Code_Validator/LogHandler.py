@@ -8,7 +8,7 @@ class LogHandler:
     async def log(self, reason: str) -> None:
         """
         Basic log method.
-        Must be used after a open method for log indent to be correct.
+        Must be used after an open method for log indent to be correct.
 
         - no changes needed
 

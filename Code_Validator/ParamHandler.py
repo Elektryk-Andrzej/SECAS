@@ -13,7 +13,6 @@ class ParamHandler:
                             line_index: int,
                             *,
                             possible_modes: tuple or list,
-                            case_sensitive: bool = False,
                             required: bool = True) -> bool:
 
         if not required and not await self._is_line_index_present(line_index):
@@ -25,12 +24,8 @@ class ParamHandler:
             possible_modes=possible_modes
         )
 
-        if case_sensitive:
-            possible_modes = [possible_mode for possible_mode in possible_modes]
-            mode = await self.utils.get_str_from_line_index(line_index)
-        else:
-            possible_modes = [possible_mode.casefold() for possible_mode in possible_modes]
-            mode = str(await self.utils.get_str_from_line_index(line_index)).casefold()
+        possible_modes = [possible_mode for possible_mode in possible_modes]
+        mode = await self.utils.get_str_from_line_index(line_index)
 
         if mode in possible_modes:
             await self.logs.close(True)
@@ -40,7 +35,8 @@ class ParamHandler:
             closest_match = await self.utils.get_closest_match(mode, possible_modes)
             await self.verdict.error_template(
                 line_index,
-                f"Invalid mode | Did you mean {closest_match}?"
+                f"Invalid mode",
+                closest_match
             )
             await self.logs.close(False)
             return False
@@ -50,7 +46,7 @@ class ParamHandler:
                                  *,
                                  var_type: object,
                                  required: bool = True,
-                                 other_syntax_allowed: tuple) -> bool:
+                                 other_syntax_allowed: tuple = None) -> bool:
 
         """
         Handles all non-standard variables, like doors, rooms, roles etc.
@@ -76,107 +72,57 @@ class ParamHandler:
 
         variable = await self.utils.get_str_from_line_index(line_index)
 
-        if var_type is Data.Data.RoomType:
-            reason = "Invalid room variable"
-            brackets_required = False
-            group = Data.Data.RoomType.room_types
+        match var_type:
+            case Data.Data.Room:
+                reason = "Invalid room"
+                group = Data.Data.Room.rooms
 
-        elif var_type is Data.Data.ItemType:
-            reason = "Invalid item variable"
-            brackets_required = False
-            group = Data.Data.ItemType.item_types
+            case Data.Data.Item:
+                reason = "Invalid item"
+                group = Data.Data.Item.items
 
-        elif var_type is Data.Data.EffectType:
-            reason = "Invalid effect variable"
-            brackets_required = False
-            group = Data.Data.EffectType.effect_types
+            case Data.Data.Effect:
+                reason = "Invalid effect"
+                group = Data.Data.Effect.effects
 
-        elif var_type is Data.Data.RoleType:
-            reason = "Invalid role variable"
-            brackets_required = False
-            group = Data.Data.RoleType.role_types
+            case Data.Data.Role:
+                reason = "Invalid role"
+                group = Data.Data.Role.roles
 
-        elif var_type is Data.Data.DoorType:
-            reason = "Invalid door variable"
-            brackets_required = False
-            group = Data.Data.DoorType.door_types
+            case Data.Data.Door:
+                reason = "Invalid door"
+                group = Data.Data.Door.doors
 
-        elif var_type is Data.Data.SpawnPosition:
-            reason = "Invalid spawn position"
-            brackets_required = False
-            group = Data.Data.SpawnPosition.spawn_positions
+            case Data.Data.SpawnPosition:
+                reason = "Invalid position"
+                group = Data.Data.SpawnPosition.positions
 
-        else:
-            await self.verdict.error_template(line_index, "SECAS ERROR - Could not get variable type")
-            await self.logs.close(False)
-            return False
+            case _:
+                var_type_name: str = f'{var_type=}'.split('=')[0]
+                await self.verdict.error_template(
+                    line_index,
+                    f"SECAS doesn't support {var_type_name}",
+                    verdict_type=self.data.LineVerdict.NOT_CHECKABLE
+                )
+                await self.logs.close(False)
+                return False
 
-        if variable in other_syntax_allowed:
-            await self.logs.close(True)
-            return True
+        if other_syntax_allowed is not None:
+            if variable in other_syntax_allowed:
+                await self.logs.close(True)
+                return True
 
-        if brackets_required and await self._is_containing_brackets(line_index):
-            variable = await self._strip_brackets(variable)
-
-        elif brackets_required:
-            await self.verdict.error_template(line_index, "Brackets absent or malformed")
-            await self.logs.close(False)
-            return False
-
-        if variable and variable in group or any(variable in _ for _ in group):
-            await self.logs.close(True)
-            return True
-
-        if ":" in variable:
-            await self.verdict.line_verdict(self.data.LineVerdictType.NOT_CHECKABLE)
+        if variable in group:
             await self.logs.close(True)
             return True
 
         closest_match: str = await self.utils.get_closest_match(variable, group)
-        await self.verdict.error_template(line_index, reason)
+        await self.verdict.error_template(line_index, reason, closest_match)
         await self.logs.close(False)
         return False
 
-    async def is_se_var(self,
-                        line_index,
-                        *,
-                        required: bool = True) -> bool:
-
-        """
-        Checks if provided variable is a Scripted Events Language variable.
-        (SEL variables use bracket, like player variables)
-
-        :param line_index:
-        :param required:
-        :return:
-        """
-
-        await self.logs.open(
-            inspect.getframeinfo(inspect.currentframe()),
-            line_index=line_index,
-            required=required
-        )
-
-        if not await self._is_line_index_present(line_index) and not required:
-            await self.logs.close(True)
-            return True
-
-        if not await self._is_containing_brackets(line_index):
-            await self.logs.close(False)
-
-            await self.verdict.error_template(line_index, "Brackets absent or malformed")
-            return False
-
-        variable = await self.utils.get_str_from_line_index(line_index)
-        variable = await self._strip_brackets(variable)
-
-        if ":" in variable:
-            await self.logs.close(True)
-            return True
-
-        await self.verdict.error_template(line_index, "Invalid SE variable")
-        await self.logs.close(False)
-        return False
+    async def cant_check(self, line_index: int or None = None) -> bool:
+        pass
 
     async def is_bool(self, line_index, *, required: bool = True) -> bool:
         arg = await self.utils.get_str_from_line_index(line_index)

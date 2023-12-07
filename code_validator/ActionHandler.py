@@ -1,4 +1,4 @@
-from Code_Validator import Data, ParamHandler, Utils, VerdictHandler
+from code_validator import Data, ParamHandler, Utils, VerdictHandler
 
 
 # noinspection PyPep8Naming,SpellCheckingInspection

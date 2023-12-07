@@ -4,8 +4,8 @@ from discord.ext import commands
 import os
 import time
 
-from Code_Validator import VerdictHandler, LogHandler, IOHandlerCV, ParamHandler, ActionHandler, Utils, Data
-from Label_Visualiser import IOHandlerLV
+from code_validator import VerdictHandler, LogHandler, IOHandlerCV, ParamHandler, ActionHandler, Utils, Data
+from label_visualiser import IOHandlerLV
 from TOKEN import TOKEN
 
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())

@@ -1,4 +1,4 @@
-from Code_Validator import Data, LogHandler, Utils, VerdictHandler
+from code_validator import Data, LogHandler, Utils, VerdictHandler
 import inspect
 
 

@@ -1,4 +1,4 @@
-from Code_Validator import Data, VerdictHandler, ActionHandler, Utils, LogHandler
+from code_validator import Data, VerdictHandler, ActionHandler, Utils, LogHandler
 from datetime import *
 import discord
 import inspect
@@ -17,11 +17,11 @@ class IOHandler:
         self.logs: LogHandler.LogHandler = data.log_handler_object
 
         date = datetime.now()
-        self.data.log_file_name = (f"../Logs/{datetime.strftime(date, '%d;%m %H-%M-%S')} "
+        self.data.log_file_name = (f"../logs/{datetime.strftime(date, '%d;%m %H-%M-%S')} "
                                    f"@ {msg.author.display_name}")
 
-        if not os.path.exists("../Logs"):
-            os.makedirs("../Logs")
+        if not os.path.exists("../logs"):
+            os.makedirs("../logs")
             
         with open(self.data.log_file_name, "x") as file:
             file.close()
@@ -100,7 +100,8 @@ class IOHandler:
                     await self.verdict_handler.line_verdict(self.data.LineVerdict.EMPTY)
 
                 else:
-                    await self.verdict_handler.error_template(0, "Invalid action")
+                    closest_match = await self.utils.get_closest_match(action_name, self.action_handler.actions)
+                    await self.verdict_handler.error_template(0, "Invalid action", closest_match)
 
             if self.data.code_index == 0:
                 await self.msg.reply("No code found! First line is always ignored.")

@@ -1,0 +1,121 @@
+=== VARIABLES ===
+The following variables can all be used in conditions, such as IF, GOTOIF, WAITUNTIL, etc. Additionally, each RoleType has its own variable (eg. {NTFCAPTAIN}).
+An asterisk [*] before the name of a variable indicates it also stores players, which can be used in numerous actions such as SETROLE.
++ Booleans +
+{CASSIESPEAKING} - Whether or not CASSIE is currently speaking.
+{ISRUNNING} - Whether or not a specific script is running.
+{LOBBYLOCKED} - Indicates if the lobby is locked.
+{VEXISTS} - Whether or not the variable with the given name exists in the current context.
+
++ Chances +
+{CHANCE} - Always returns a random decimal between 0-1.
+{CHANCE10} - Always returns a random number from 1-10.
+{CHANCE100} - Always returns a random number from 1-100.
+{CHANCE20} - Always returns a random number from 1-20.
+{CHANCE3} - Always returns a random number from 1-3.
+{CHANCE5} - Always returns a random number from 1-5.
+
++ Escapes +
+[*] {CLASSDESCAPES} - The amount of Class-D escapes.
+[*] {ESCAPES} - The amount of escapes. Equivalent to {CLASSDESCAPES} + {SCIENTISTESCAPES}.
+[*] {SCIENTISTESCAPES} - The amount of Scientist escapes.
+
++ Filters +
+[*] {FILTER} - Filters a player variable by a certain type.
+[*] {INDEXVAR} - Indexes a player variable and gets ONE player at the specified position.
+
++ Intercom +
+{INTERCOMCOOLDOWN} - Indicates how much time is left on the intercom's cooldown.
+{INTERCOMINUSE} - Indicates whether or not the intercom is currently being used.
+{INTERCOMREADY} - Indicates whether or not the intercom is ready to be used.
+[*] {INTERCOMSPEAKER} - Gets the amount of players who are speaking on the intercom (always either 0 or 1).
+{INTERCOMUSETIME} - Indicates how much time is left for the intercom speaker to speak.
+
++ Kills & Deaths +
+{KILLS} - The amount of kills, the amount of kills per-role, or -1 if an invalid role type is provided.
+{SCPKILLS} - The amount of SCP-related kills.
+
++ Map +
+{DECONTAMINATED} - Whether or not Light Containment Zone has been decontaminated.
+{DOORSTATE} - Reveals the state of a door (either 'OPEN' or 'CLOSED').
+{ENGAGEDGENERATORS} - The amount of generators which are fully engaged.
+{SCP914ACTIVE} - Whether or not SCP-914 is currently active.
+
++ Players +
+[*] {HUMANS} - The amount of humans that are currently alive.
+[*] {INROOM} - The amount of players in the specified room.
+[*] {NONE} - Will always be an empty variable with no players.
+[*] {NPCS} - The amount of NPCs in the server.
+[*] {PLAYERS} - The amount of players in the server.
+[*] {PLAYERSALIVE} - The amount of alive players in the server.
+[*] {PLAYERSDEAD} - The amount of dead players in the server.
+[*] {SERVERSTAFF} - The amount of staff on the server (RA access)
+
++ Roles +
+[*] {CI} - The amount of Chaos Insurgency alive.
+[*] {GUARDS} - The amount of facility guards alive. Equivalent to {FACILITYGUARD}
+[*] {MTF} - The amount of MTF alive.
+[*] {MTFANDGUARDS} - The amount of facility guards & MTF alive.
+[*] {SCPS} - The amount of SCPs alive.
+[*] {SH} - The amount of Serpent's Hand alive (always 0 if the plugin is not installed).
+[*] {UIU} - The amount of UIU alive (always 0 if the plugin is not installed).
+
++ Round +
+{LOBBYTIME} - The amount of time remaining before the round starts. -1 if round already started.
+{ROUNDENDED} - Whether or not the round has ended.
+{ROUNDINPROGRESS} - Whether or not the round is in progress.
+{ROUNDMINUTES} - The amount of elapsed round time, in minutes.
+{ROUNDSECONDS} - The amount of elapsed round time, in seconds.
+{ROUNDSTARTED} - Whether or not the round has started.
+{UPTIMEROUND} - The amount of rounds that have progressed since the server has started.
+
++ Server Info +
+{HEAVILYMODDED} - Whether or not this server is heavily modded.
+{IP} - This server's IP address.
+{MAXPLAYERS} - This server's maximum player count.
+{PORT} - This server's PORT.
+
++ Strings +
+{C} - Convert a player variable into a format to use with commands.
+{LEN} - Reveals the length of a player variable.
+{RANDOMROOM} - Gets the RoomType of a random room. Can be filtered by zone.
+{SHOW} - Reveal certain properties about the players in a player variable. This variable is designed to only be used with a player variable containing one player. However, it CAN be used with multiple players, and will list the display in the form of a comma-separated list.
+
++ Tickets & Respawn Waves +
+{CHAOSSPAWNS} - Total amount of Chaos Insurgency respawns.
+{CHAOSTICKETS} - The amount of Chaos Insurgency tickets.
+{LASTRESPAWNTEAM} - The most recent team that spawn.
+{LASTRESPAWNUNIT} - The most recent team's unit name.
+{MTFSPAWNS} - Total amount of Mobile Task Force respawns.
+{NEXTWAVE} - The next team to spawn, either NineTailedFox, ChaosInsurgency, or None.
+{NTFTICKETS} - The amount of NTF tickets.
+[*] {RESPAWNEDPLAYERS} - The amount of players that have respawned in the most recent respawn wave.
+{TIMESINCELASTWAVE} - The amount of time since the last respawn wave, in seconds. If a respawn wave has not occurred yet, this value will be very large.
+{TIMEUNTILNEXTWAVE} - The amount of time until the next respawn wave, in seconds.
+{TOTALWAVES} - The amount of respawn waves.
+{WAVERESPAWNING} - Whether or not a wave has respawned within the last 5 seconds.
+
++ Warhead +
+{DETONATIONTIME} - The amount of time until the warhead detonates.
+{WARHEADCOUNTING} - Whether or not the Alpha Warhead is currently counting down.
+{WARHEADDETONATED} - Whether or not the warhead has been detonated.
+
++ World Time +
+{DAYOFMONTH} - The current real-world day of the month, from 1-31, in UTC time.
+{DAYOFWEEK} - The current real-world day of the week, from 1-7, in UTC time.
+{DAYOFYEAR} - The current real-world day of the year, from 1-366, in UTC time.
+{HOUR} - The current real-world hour, from 0-23.
+{MONTH} - The current real-world month, from 1-12, in UTC time.
+{TICK} - The amount of seconds since 01 January 1970 00:00.
+{YEAR} - The current real-world year, from 1-9999, in UTC time.
+
++ Zone +
+[*] {EZ} - The amount of players in Entrance Zone.
+[*] {HCZ} - The amount of players in Heavy Containment Zone.
+[*] {LCZ} - The amount of players in Light Containment Zone.
+[*] {POCKET} - The amount of players in the Pocket Dimension.
+[*] {SURFACE} - The amount of players on the Surface.
+
++ Script Defined +
+These variables are defined by a script. These variables can be used in any script and are erased when the round restarts.
+None

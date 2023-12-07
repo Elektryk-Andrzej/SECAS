@@ -1,5 +1,5 @@
 import discord
-from Label_Visualiser import LabelVisualiser
+from label_visualiser import LabelVisualiser
 
 
 class IOHandler:
@@ -13,8 +13,9 @@ class IOHandler:
 
         self.lv.format_script(self.msg.content)
         self.lv.register_labels()
-        self.lv.set_matrix()
-        self.lv.register_redirect_actions()
+        self.lv.register_matrix()
+        self.lv.register_actions()
+        self.lv.draw_connections()
 
         result: str = "```"
         results = self.lv.get_result()

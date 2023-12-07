@@ -24,11 +24,12 @@ class LabelVisualiser:
         self.matrix: list = []
         self.connections: dict = {}
         self.script: list = []
+        self.requested_connections: list = []
 
     def format_script(self, script) -> None:
         self.script = script.splitlines()
 
-    def set_matrix(self, rows: int or None = None, columns: int or None = None) -> None:
+    def register_matrix(self, rows: int or None = None, columns: int or None = None) -> None:
         for index in range(len(self.script) if rows is None else rows):
             column: list = []
 
@@ -99,7 +100,7 @@ class LabelVisualiser:
             elif column is None:
                 self.matrix[row_index][column_index] = self.char.arrow_right
 
-    def create_pointer(self, start_index: int, end_index: int) -> bool:
+    def create_connection(self, start_index: int, end_index: int) -> bool:
         if end_index < start_index:
             inverted: bool = True
         else:
@@ -187,13 +188,22 @@ class LabelVisualiser:
 
     def register_labels(self):
         for index, line in enumerate(self.script):
-            if not line:
+            if line is None:
                 continue
 
             if str(line).endswith(":") and " " not in line:
                 self.labels[str(line).strip(":")] = index
 
-    def register_redirect_actions(self) -> bool:
+    def _add_connection_request(self, start_index: int, end_index: int) -> None:
+        pos_diff: int = end_index - start_index if start_index < end_index else start_index - end_index
+        self.requested_connections.append([pos_diff, start_index, end_index, False])
+
+    def draw_connections(self) -> None:
+        for connection in sorted(self.requested_connections, key=lambda x: x[0]):
+            pos_diff, start_index, end_index, done = connection
+            self.create_connection(start_index, end_index)
+
+    def register_actions(self) -> bool:
         for index, line in enumerate(self.script):
             if line is None:
                 continue
@@ -202,18 +212,18 @@ class LabelVisualiser:
 
             if line_as_list[0] == "GOTOIF" and len(line_as_list) >= 4:
                 try:
-                    self.create_pointer(index, self.labels[line_as_list[1]])
+                    self._add_connection_request(index, self.labels[line_as_list[1]])
                 except KeyError:
                     pass
 
                 try:
-                    self.create_pointer(index, self.labels[line_as_list[2]])
+                    self._add_connection_request(index, self.labels[line_as_list[2]])
                 except KeyError:
                     pass
 
             elif line_as_list[0] == "GOTO" and len(line_as_list) == 2:
                 try:
-                    self.create_pointer(index, self.labels[line_as_list[1]])
+                    self._add_connection_request(index, self.labels[line_as_list[1]])
                 except KeyError:
                     pass
 

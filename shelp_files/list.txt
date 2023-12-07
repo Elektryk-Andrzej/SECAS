@@ -1,0 +1,93 @@
+List of all actions. For more information on each action, run the HELP <ACTIONNAME> action (or shelp <ACTIONNAME> in the server console).
+
+== Broadcast Actions ==
+HINTPLAYER : Broadcasts a hint to specific player(s).
+HINT : Broadcasts a hint to every player.
+COUNTDOWN : Displays a countdown on the player(s) screens (using broadcasts).
+BROADCASTPLAYER : Broadcasts a message to specific player(s).
+BROADCAST : Broadcasts a message to every player.
+
+== C.A.S.S.I.E Actions ==
+CLEARCASSIE : Clears cassie queue.
+SILENTCASSIE : Makes a silent cassie announcement.
+CASSIE : Makes a loud cassie announcement.
+
+== Health Actions ==
+DAMAGE : Damages the targeted player.
+KILL : Kills the targeted players.
+ADVAHP : Add AHP to the targeted players, with advanced settings.
+AHP : Add AHP to the targeted players.
+MAXHP : Set the Maximum HP of the targeted players.
+HP : Set the HP of the targeted players.
+
+== Inventory Actions ==
+GIVECANDY : Gives the targeted players a candy.
+CLEARINVENTORY : Clears inventory of the targeted players.
+REMOVEITEM : Removes an item from the targeted players.
+GIVE : Gives the targeted players an item.
+
+== Lights Actions ==
+LIGHTCOLOR : Sets the lights in the provided room(s) to the given RGB color.
+RESETLIGHTCOLOR : Resets the light color in the given room.
+LIGHTSOFF : Turns all the lights off for a given period of time.
+
+== Logic Actions ==
+GOTO : Moves to the provided line.
+GOTOIF : Reads the condition and jumps to the first provided line if the condition is TRUE, or the second provided line if the condition is FALSE.
+IF : Reads the condition and stops execution of the script if the result is FALSE.
+STOP : Stops the event execution at this line.
+STOPIF : Reads the condition and stops execution of the script if the result is TRUE.
+
+== Map Actions ==
+DECONTAMINATE : Enables, disables, or forces decontamination.
+DOOR : Controls map doors.
+TESLA : Modifies tesla gates.
+WARHEAD : Forces a specific warhead action.
+
+== Miscellaneous Actions ==
+HTTPPOST : Sends an HTTP POST request to a website.
+HTTPGET : Sends an HTTP GET request to a website.
+EXECUTESCRIPT : Executes a different script.
+HELP : Gets information about a command or a variable, or lists all commands or variables.
+COMMAND : Runs a server command with full permission.
+LOG : Creates a console log. Variables are supported.
+
+== Player Actions ==
+CUSTOMINFO : Sets/clears the custom info of the targeted player(s).
+EFFECTPERM : Action for giving/removing permanent player effects.
+RADIORANGE : Modifies radio range settings.
+RESKIN : Sets the appearance of all players to the given role. Does NOT actually change their role -- only their appearance!
+ADVSETROLE : Sets all players to the given role with advanced settings.
+TPDOOR : Teleports players to the specified door.
+TPSPAWN : Teleports players to the specified SpawnLocationType.
+TPROOM : Teleports players to the specified room center.
+TPX : Teleports players to the specified X, Y, Z coordinates.
+SIZE : Sets all players to the given size.
+EFFECT : Action for giving/removing player effects.
+SETROLE : Sets all players to the given role.
+
+== Round Actions ==
+ENDROUND : Ends the round.
+TICKET : Modifies tickets.
+STARTROUND : Starts the round.
+ROUNDLOCK : Set server's roundlock.
+
+== Round Rule Actions ==
+DAMAGERULE : Creates a new damage rule.
+DELINFECTRULE : Delete a currently-existing infection rule.
+ENABLEPLAYER : Enables a feature for the entire round, but only for certain player(s).
+DISABLEPLAYER : Disables a feature for the entire round, but only for certain player(s).
+ENABLE : Enables a previously disabled round feature.
+DISABLE : Disables a feature for the entire round.
+INFECTRULE : Creates a new infection rule.
+SPAWNRULE : Creates a new spawn rule, modifying how players spawn at the start of the game. MUST BE USED BEFORE THE ROUND STARTS.
+
+== Variable Actions ==
+PLAYERVAR : Allows manipulation of player variables.
+DELVARIABLE : Deletes a previously-defined variable.
+SAVE : Saves a new variable. Saved variables can be used in ANY script, and are reset when the round ends.
+
+== Yielding Actions ==
+WAITMIL : Yields execution of the script for the given number of milliseconds.
+WAITSEC : Yields execution of the script for the given number of seconds.
+WAITUNTIL : Reads the condition and yields execution of the script until the condition is TRUE.

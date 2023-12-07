@@ -132,9 +132,6 @@ class IOHandler:
         current_list = []
 
         for element in overview_lines:
-            # stolen from chatgpt, no idea how it works but it works
-            # i dont even know what its supposed to do, but whatever :tf:
-
             if sum(map(len, current_list)) + len(str(element)) <= character_limit:
                 current_list.append(element)
 

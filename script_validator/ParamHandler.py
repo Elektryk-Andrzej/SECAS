@@ -233,7 +233,7 @@ class ParamHandler:
 
         elif len(self.data.labels) > 0:
             closest_match: str = await self.utils.get_closest_match(parameter, self.data.labels)
-            await self.verdict.error_template(line_index, f"Invalid label | Did you mean {closest_match}?")
+            await self.verdict.error_template(line_index, f"Invalid label", closest_match)
         else:
             await self.verdict.error_template(line_index, "No labels registered")
 

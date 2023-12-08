@@ -9,7 +9,7 @@ class IOHandler:
         self.lv: LabelVisualiser = LabelVisualiser.LabelVisualiser()
 
     async def visualise(self) -> str:
-        max_line_len: int = 40
+        max_line_len: int = 30
 
         self.lv.format_script(self.msg.content)
         self.lv.register_labels()
@@ -23,11 +23,16 @@ class IOHandler:
             if index == 0:
                 continue
 
+            if len(result) > 1500:
+                await self.msg.channel.send(result + "```")
+                result: str = "```"
+
             result += (
-                f"{line} | {self.lv.script[index]}\n"
+                f"{line} {self.lv.script[index]}\n"
                 if len(self.lv.script[index]) <= max_line_len else
-                f"{line} | {self.lv.script[index][:max_line_len]}...\n"
+                f"{line} {self.lv.script[index][:max_line_len]}...\n"
             )
 
-        return result + "```"
+        await self.msg.channel.send(result + "```")
+
 

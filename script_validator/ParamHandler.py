@@ -1,4 +1,4 @@
-from code_validator import Data, LogHandler, Utils, VerdictHandler
+from script_validator import Data, LogHandler, Utils, VerdictHandler
 import inspect
 
 
@@ -9,11 +9,69 @@ class ParamHandler:
         self.verdict: VerdictHandler.VerdictHandler = data.verdict_handler_object
         self.logs: LogHandler.LogHandler = data.log_handler_object
 
+    async def _is_valid_variable_syntax(self, line_index: int) -> bool:
+        """
+        Checks if correct variable syntax is used at line_index
+        \n
+        REPORTS ERRORS
+
+        :param line_index:
+        :return: bool
+        """
+        await self.logs.open(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
+
+        variable = await self.utils.get_str_from_line_index(line_index)
+
+        if not (variable[0] == "{" and variable[-1] == "}"):
+            await self.verdict.error_template(line_index, "Invalid variable syntax")
+            await self.logs.close(False)
+            return False
+
+        variable = variable[1:-1]
+
+        if "{" in variable or "}" in variable:
+            await self.logs.close(False)
+            return False
+
+        await self.logs.close(True)
+        return True
+
+    async def _is_using_variable(self, line_index: int) -> bool:
+        """
+        Checks if a variable is used at line_index
+        \n
+        DOESN'T REPORT ERRORS
+
+        :param line_index:
+        :return: bool
+        """
+        await self.logs.open(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
+
+        variable = await self.utils.get_str_from_line_index(line_index)
+
+        if "{" in variable or "}" in variable:
+            await self.logs.close(True)
+            return True
+
+        else:
+            await self.logs.close(False)
+            return False
+
     async def is_valid_mode(self,
                             line_index: int,
                             *,
                             possible_modes: tuple or list,
                             required: bool = True) -> bool:
+        """
+        Checks if mode at line_index is in possible_modes
+        \n
+        REPORTS ERRORS
+
+        :param line_index:
+        :param possible_modes:
+        :param required:
+        :return: bool
+        """
 
         if not required and not await self._is_line_index_present(line_index):
             return True
@@ -49,7 +107,9 @@ class ParamHandler:
                                  other_syntax_allowed: tuple = None) -> bool:
 
         """
-        Handles all non-standard variables, like doors, rooms, roles etc.
+        Checks for all non-standard variables, like doors, rooms, roles at line_index
+        \n
+        REPORTS ERRORS
         
         :param line_index: 
         :param var_type: things like Data.Data.ExampleType
@@ -98,10 +158,9 @@ class ParamHandler:
                 group = Data.Data.SpawnPosition.positions
 
             case _:
-                var_type_name: str = f'{var_type=}'.split('=')[0]
                 await self.verdict.error_template(
                     line_index,
-                    f"SECAS doesn't support {var_type_name}",
+                    f"SECAS doesn't support this variable type",
                     verdict_type=self.data.LineVerdict.NOT_CHECKABLE
                 )
                 await self.logs.close(False)
@@ -121,12 +180,30 @@ class ParamHandler:
         await self.logs.close(False)
         return False
 
-    async def cant_check(self, line_index: int or None = None) -> bool:
+    async def cant_check(self, line_index: int or None = None) -> None:
+        """
+        Reports to VerdictHandler that specifed line_index cannot be verifed.
+        Used mostly for user side parameters like variables.
+        :param line_index:
+        :return: None
+        """
+        pass
+
+    async def is_variable(self, line_index: int) -> bool:
+        """
+        Checks if a variable is used at specifed line_index.
+
+        :param line_index:
+        :return:
+        """
+
+
+    async def is_text(self, start_line_index: int) -> bool:
         pass
 
     async def is_bool(self, line_index, *, required: bool = True) -> bool:
-        arg = await self.utils.get_str_from_line_index(line_index)
-        possible_args: tuple = ("TRUE", "FALSE", "YES", "NO")
+        arg: str = await self.utils.get_str_from_line_index(line_index)
+        possible_args: tuple = "TRUE", "FALSE"
 
         if not required and not await self._is_line_index_present(line_index):
             await self.logs.close(True)
@@ -137,7 +214,7 @@ class ParamHandler:
             return True
 
         closest_match: str = await self.utils.get_closest_match(arg, possible_args)
-        await self.verdict.error_template(line_index, f"Invalid bool | Did you mean {closest_match}?")
+        await self.verdict.error_template(line_index, f"Invalid bool", closest_match)
         await self.logs.close(False)
         return False
 
@@ -210,7 +287,10 @@ class ParamHandler:
                 await self.logs.close(True)
                 return True
 
-        except TypeError or Exception:
+        except TypeError:
+            pass
+
+        except NameError:
             pass
 
         await self.verdict.error_template(line_index, "Invalid number")
@@ -245,24 +325,6 @@ class ParamHandler:
         await self.logs.close(True)
         return True
     
-    async def _is_containing_brackets(self, line_index: int) -> bool:
-        await self.logs.open(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
-
-        variable = await self.utils.get_str_from_line_index(line_index)
-
-        if not (variable[0] == "{" and variable[-1] == "}"):
-            await self.logs.close(False)
-            return False
-
-        variable = variable.removeprefix("{").removesuffix("}")
-
-        if "{" in variable or "}" in variable:
-            await self.logs.close(False)
-            return False
-        
-        await self.logs.close(True)
-        return True
-    
     async def _strip_brackets(self, val: str) -> str:
         """
         Strip brackets form the provided value.
@@ -273,7 +335,7 @@ class ParamHandler:
 
         await self.logs.open(inspect.getframeinfo(inspect.currentframe()), val=val)
 
-        output = val.replace("{", "").replace("}", "")
+        output = val.strip()[1:-1]
 
         await self.logs.close(output)
         return output

@@ -1,4 +1,4 @@
-from code_validator import Data
+from script_validator import Data
 
 
 class LogHandler:

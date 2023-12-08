@@ -326,6 +326,7 @@ class Data:
         self.code_index: int = 0
         self.line: list = []
         self.processed_lines: list = []
+        self.verdict_line: list = []
         self.errored: bool = False
         self.line_verdict_set: bool = False
         self.labels: list = ["NEXT", "START", "STOP"]

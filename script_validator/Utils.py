@@ -1,4 +1,4 @@
-from code_validator import Data, LogHandler
+from script_validator import Data, LogHandler
 import inspect
 import difflib
 

@@ -1,18 +1,16 @@
-import asyncio
 import discord
-from discord.ext import commands
+import discord.ext.commands
 import os
 import time
 
-from code_validator import VerdictHandler, LogHandler, IOHandlerCV, ParamHandler, ActionHandler, Utils, Data
-from label_visualiser import IOHandlerLV
+from script_validator import VerdictHandler, LogHandler, IOHandlerVS, ParamHandler, ActionHandler, Utils, Data
+from label_visualiser import IOHandlerVL
 from TOKEN import TOKEN
 
-bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
+bot = discord.ext.commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
 
 async def info_embed(message):
-    # noinspection PyUnresolvedReferences
     class SelectMenu(discord.ui.View):
         def __init__(self, message):
             super().__init__()
@@ -31,6 +29,7 @@ async def info_embed(message):
         async def select_error(self, interaction: discord.Interaction,
                                select_item: discord.ui.Select):
 
+            # noinspection PyUnresolvedReferences
             await interaction.response.defer()
             answer = select_item.values
 
@@ -107,8 +106,8 @@ async def on_message(message):
         return
 
     elif await command_trigger(message.content, "vl"):
-        lv = IOHandlerLV.IOHandler(message, bot)
-        await message.reply(await lv.visualise())
+        lv = IOHandlerVL.IOHandler(message, bot)
+        await lv.visualise()
 
     elif await command_trigger(message.content, "vs"):
         data = Data.Data()
@@ -129,12 +128,11 @@ async def on_message(message):
         data.action_handler_object = ActionHandler.ActionHandler(data)
         time.sleep(.1)
 
-        data.io_handler_object = IOHandlerCV.IOHandler(data, message, bot)
+        data.io_handler_object = IOHandlerVS.IOHandler(data, message, bot)
 
         """try:"""
         if os.path.exists(f".\\Logs\\{data.log_file_name}"):
-            await asyncio.sleep(1.5)
-            data = Data.Data()
+            await message.reply("Calm down!", mention_author=False)
 
         count_first_line: bool
         if message.attachments and message.attachments[0].filename.endswith('.txt'):
@@ -162,11 +160,11 @@ async def on_message(message):
 
     elif await command_trigger(message.content, "v"):
         await message.reply(
-            "Command `.v` (verify) is no longer a valid command.\n"
-            "From now it's `.vs` (verify script) instead."
+            "Prefix `.v` is no longer supported\n"
+            "Use `.vs` to verify script\n"
+            "Use `.vl` to visualise labels"
         )
 
 
 if __name__ == "__main__":
     bot.run(TOKEN)
-    TOKEN = None

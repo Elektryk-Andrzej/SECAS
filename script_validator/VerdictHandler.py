@@ -1,4 +1,4 @@
-from code_validator import Data, LogHandler, Utils
+from script_validator import Data, LogHandler, Utils
 import inspect
 
 
@@ -11,8 +11,8 @@ class VerdictHandler:
     async def error_template(self,
                              line_index: int,
                              reason: str,
-                             closest_match: str or None = None,
-                             verdict_type: Data.Data.LineVerdict or None = None) -> None:
+                             closest_match: str = None,
+                             verdict_type: Data.Data.LineVerdict = None) -> None:
         """
         Formats a line by adding arrows around a malformed parameter and automatically creates a line verdict
 
@@ -46,7 +46,7 @@ class VerdictHandler:
 
     async def error_invalid_min_length(self, number_missing: int) -> None:
         """
-        Formats a line by adding three underscors where parameters are missing and automatically creates a line verdict
+        Formats a line by adding three underscors where parameters are missing and automatically creating a line verdict
 
         :param number_missing: number of parameters missing
         :return: bool
@@ -58,7 +58,7 @@ class VerdictHandler:
 
         self.data.line_errored = True
 
-        reason = f"Missing required arguments | {number_missing}"
+        reason = f"Missing arguments"
 
         missing_arguments = ""
 
@@ -77,7 +77,7 @@ class VerdictHandler:
 
     async def error_invalid_max_length(self, past_max_length: int) -> None:
         """
-        Formats a line by adding arrows around a malformed parameters and automatically creates a line verdict
+        Formats a line by adding arrows around a malformed parameters and automatically creating a line verdict
 
         :param past_max_length: number of parameters that exceed the maximum amount possible
         :return: bool
@@ -93,7 +93,7 @@ class VerdictHandler:
             await self.error_template(-1, "Unexpected arguments")
 
         line_copy = self.data.line.copy()
-        reason = f"Unknown arguments | {past_max_length}"
+        reason = f"Unexpected arguments"
         start_index = len(line_copy) - past_max_length
 
         line_copy[start_index], line_copy[-1] = \

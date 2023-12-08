@@ -1,4 +1,4 @@
-from code_validator import Data, VerdictHandler, ActionHandler, Utils, LogHandler
+from script_validator import Data, VerdictHandler, ActionHandler, Utils, LogHandler
 from datetime import *
 import discord
 import inspect
@@ -12,7 +12,6 @@ class IOHandler:
         self.msg = msg
         self.verdict_handler: VerdictHandler.VerdictHandler = data.verdict_handler_object
         self.action_handler: ActionHandler.ActionHandler = data.action_handler_object
-        print("action handler required")
         self.utils: Utils.Utils = data.utils_object
         self.logs: LogHandler.LogHandler = data.log_handler_object
 
@@ -29,11 +28,7 @@ class IOHandler:
     async def format_code(self, count_first_line: bool) -> list:
         await self.logs.open(inspect.getframeinfo(inspect.currentframe()))
 
-        lines = self.data.code.splitlines()
-
-        self.data.code = [line for line in lines]
-
-        self.data.code = [line.split(" ") for line in lines]
+        self.data.code = [str(line.strip()).split(" ") for line in self.data.code.splitlines()]
 
         if not count_first_line:
             self.data.code.pop(0)
@@ -60,59 +55,62 @@ class IOHandler:
             count_first_line=count_first_line
         )
 
-        async with self.msg.channel.typing():
-            await self.format_code(count_first_line=count_first_line)
+        await self.format_code(count_first_line=count_first_line)
 
-            await self.get_labels()
+        await self.get_labels()
 
+        line: list
+        for index, line in enumerate(self.data.code):
+            index: int
             line: list
-            for index, line in enumerate(self.data.code):
-                await self.logs.log(f"Checking line {index+1} with value {line}")
 
-                self.data.code_index += 1
-                self.data.line = line
-                self.data.line_verdict_set = False
+            await self.logs.log(f"Checking line {index+1} with value {line}")
 
-                if (action_name := line[0]) in self.action_handler.actions:
-                    action_done = await self.action_handler.actions[action_name]()
+            self.data.code_index += 1
+            self.data.line = line
+            self.data.line_verdict_set = False
+            self.data.verdict_line = line
 
-                    if action_done:
-                        await self.verdict_handler.line_verdict(self.data.LineVerdict.PASSED)
+            if (action_name := line[0]) in self.action_handler.actions:
+                action_done = await self.action_handler.actions[action_name]()
 
-                    else:
-                        if not self.data.line_verdict_set:
-                            await self.verdict_handler.line_verdict(
-                                self.data.LineVerdict.ERRORED,
-                                " ".join(self.data.line),
-                                "No reason specifed, consider this a SECAS error"
-                            )
-
-                elif "#" in line[0]:
-                    await self.verdict_handler.line_verdict(self.data.LineVerdict.COMMENT)
-
-                elif ":" in line[-1] and len(line) == 1:
-                    await self.verdict_handler.line_verdict(self.data.LineVerdict.LABEL)
-
-                elif "!--" in line[0] and len(self.data.line) == 2:
-                    await self.verdict_handler.line_verdict(self.data.LineVerdict.FLAG)
-
-                elif line == ['']:
-                    await self.verdict_handler.line_verdict(self.data.LineVerdict.EMPTY)
+                if action_done:
+                    await self.verdict_handler.line_verdict(self.data.LineVerdict.PASSED)
 
                 else:
-                    closest_match = await self.utils.get_closest_match(action_name, self.action_handler.actions)
-                    await self.verdict_handler.error_template(0, "Invalid action", closest_match)
+                    if not self.data.line_verdict_set:
+                        await self.verdict_handler.line_verdict(
+                            self.data.LineVerdict.ERRORED,
+                            " ".join(self.data.line),
+                            "No reason specifed, consider this a SECAS error"
+                        )
 
-            if self.data.code_index == 0:
-                await self.msg.reply("No code found! First line is always ignored.")
+            elif "#" in line[0]:
+                await self.verdict_handler.line_verdict(self.data.LineVerdict.COMMENT)
+
+            elif ":" in line[-1] and len(line) == 1:
+                await self.verdict_handler.line_verdict(self.data.LineVerdict.LABEL)
+
+            elif "!--" in line[0] and len(self.data.line) == 2:
+                await self.verdict_handler.line_verdict(self.data.LineVerdict.FLAG)
+
+            elif line == ['']:
+                await self.verdict_handler.line_verdict(self.data.LineVerdict.EMPTY)
+
             else:
-                await self.send_result_embed()
+                closest_match = await self.utils.get_closest_match(action_name, self.action_handler.actions)
+                await self.verdict_handler.error_template(0, "Invalid action", closest_match)
 
-            '''except Exception as e:
-                await self.ctx.reply("An error occured while generating the overviev.\n"
-                                     f"Please report it to {self.data.andrzej_ping}, thank you.\n"
-                                     f"`{e}`",
-                                     mention_author=False)'''
+        if self.data.code_index == 0:
+            await self.msg.reply("No code found! First line is always ignored.")
+        else:
+            await self.send_result_embed()
+
+        '''except Exception as e:
+            await self.ctx.reply("An error occured while generating the overviev.\n"
+                                 f"Please report it to {self.data.andrzej_ping}, thank you.\n"
+                                 f"`{e}`",
+                                 mention_author=False)'''
 
         await self.logs.close(None)
 
@@ -161,13 +159,12 @@ class IOHandler:
                 error_summary_lines.append(
                     f"## > {reason}\n"
                     f"`{index}`{color} `{line_to_print}`\n"
-                    f"### Did you mean `{closest_match}`?\n\n\n"
+                    f"### Did you mean `{closest_match}`?\nㅤ\n"
                 )
             else:
                 error_summary_lines.append(
                     f"## > {reason}\n"
-                    f"`{index}`{color} `{line_to_print}`\n"
-                    f"\n\n\n"
+                    f"`{index}`{color} `{line_to_print}`\nㅤ\n"
                 )
 
         devided_error_summary_lines = []

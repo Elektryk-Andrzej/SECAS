@@ -90,7 +90,7 @@ class ParamHandler:
             return True
 
         else:
-            closest_match = await self.utils.get_closest_match(mode, possible_modes)
+            closest_match = await self.utils.get_closest_match(mode, tuple(possible_modes))
             await self.verdict.error_template(
                 line_index,
                 f"Invalid mode",
@@ -232,7 +232,7 @@ class ParamHandler:
             return True
 
         elif len(self.data.labels) > 0:
-            closest_match: str = await self.utils.get_closest_match(parameter, self.data.labels)
+            closest_match: str = await self.utils.get_closest_match(parameter, tuple(self.data.labels))
             await self.verdict.error_template(line_index, f"Invalid label", closest_match)
         else:
             await self.verdict.error_template(line_index, "No labels registered")

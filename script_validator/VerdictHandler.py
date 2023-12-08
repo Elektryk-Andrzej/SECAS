@@ -18,7 +18,7 @@ class VerdictHandler:
 
         :param line_index: line index to report as malformed
         :param reason: the reason why it is malformed
-        :param closest_match: footer to put under the main reason, used for "Did you mean x?"
+        :param closest_match: footer to put under the bot_main reason, used for "Did you mean x?"
         :param verdict_type: LineVerdictType variable
         :return: bool
         """

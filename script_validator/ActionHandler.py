@@ -381,7 +381,7 @@ class ActionHandler:
         if not await self.param.is_required_len(3, 4):
             return False
 
-        if not await self.param.is_valid_mode(1, possible_modes=("SET", "CLEAR")):
+        if not await self.param.is_valid_mode(1, possible_modes=("GIVE", "REMOVE")):
             return False
 
         await self.param.cant_check(2)

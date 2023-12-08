@@ -1,6 +1,7 @@
 logs
 venv
-bot/TOKEN.py
+bot_main/TOKEN.py
 test.py
 .idea
 SECAS.tar
+/shelp_files/temp_repo/

@@ -1,0 +1,20 @@
++ HINTPLAYER +
+Broadcasts a hint to specific player(s).
+Action type: Broadcast
+Usage: HINTPLAYER <PLAYERS> <DURATION> <MESSAGE>
+
+Arguments:
+<players>
+  Required: YES
+  Type: Player List
+  The players to show. Variables are supported.
+
+<duration>
+  Required: YES
+  Type: Float (Number)
+  The duration of the message. Variables are supported.
+
+<message>
+  Required: YES
+  Type: String (Message/Text)
+  The message. Variables are supported.

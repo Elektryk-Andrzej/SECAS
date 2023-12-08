@@ -8,7 +8,7 @@ class IOHandler:
         self.bot: discord.Client = bot
         self.lv: LabelVisualiser = LabelVisualiser.LabelVisualiser()
 
-    async def visualise(self) -> str:
+    async def visualise(self) -> None:
         max_line_len: int = 30
 
         self.lv.format_script(self.msg.content)

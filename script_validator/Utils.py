@@ -37,12 +37,18 @@ class Utils:
         return output
 
     @staticmethod
-    async def get_closest_match(value: str, possible_values: list or tuple) -> str:
+    async def get_closest_match(value: str, possible_values: tuple) -> str:
         if value.upper() in possible_values:
             return value.upper()
 
         elif value.casefold() in possible_values:
             return value.casefold()
+
+        elif value.capitalize() in possible_values:
+            return value.capitalize()
+
+        elif value.lower() in possible_values:
+            return value.lower()
 
         else:
             return difflib.get_close_matches(value, possible_values, n=1, cutoff=0)[0]

@@ -82,7 +82,7 @@ class IOHandler:
                         await self.verdict_handler.line_verdict(
                             self.data.LineVerdict.ERRORED,
                             " ".join(self.data.line),
-                            "No reason specifed, consider this a SECAS error"
+                            "SECAS ERROR: Returned False with no reason specifed"
                         )
 
             elif "#" in line[0]:
@@ -155,16 +155,23 @@ class IOHandler:
             if not reason or not line_to_print:
                 continue
 
+            new_line_suffix = "ㅤ\nㅤ\nㅤ\n" if len(error_summary_lines) != 0 else ""
+            new_line_prefix = "\n" if len(error_summary_lines) != 0 else ""
+
             if closest_match:
                 error_summary_lines.append(
+                    f"{new_line_prefix}"
                     f"## > {reason}\n"
                     f"`{index}`{color} `{line_to_print}`\n"
-                    f"### Did you mean `{closest_match}`?\nㅤ\n"
+                    f"### Did you mean `{closest_match}`?"
+                    f"{new_line_suffix}"
                 )
             else:
                 error_summary_lines.append(
+                    f"{new_line_prefix}"
                     f"## > {reason}\n"
-                    f"`{index}`{color} `{line_to_print}`\nㅤ\n"
+                    f"`{index}`{color} `{line_to_print}`"
+                    f"{new_line_suffix}"
                 )
 
         devided_error_summary_lines = []

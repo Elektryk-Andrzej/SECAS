@@ -205,7 +205,7 @@ class ActionHandler:
 
         if not await self.param.is_non_se_variable(1,
                                                    var_type=self.data.Room,
-                                                   other_syntax_allowed=("*",)):
+                                                   other_syntax_allowed=("*", "ALL")):
             return False
 
         for index in range(2, 5):
@@ -220,7 +220,7 @@ class ActionHandler:
 
         if not await self.param.is_non_se_variable(1,
                                                    var_type=self.data.Room,
-                                                   other_syntax_allowed=("*",)):
+                                                   other_syntax_allowed=("*", "ALL")):
             return False
 
         return True
@@ -231,7 +231,7 @@ class ActionHandler:
 
         if not await self.param.is_non_se_variable(1,
                                                    var_type=self.data.Room,
-                                                   other_syntax_allowed=("*",)):
+                                                   other_syntax_allowed=("*", "ALL")):
             return False
 
         if not await self.param.is_number(2, float):
@@ -288,7 +288,7 @@ class ActionHandler:
 
         if not await self.param.is_non_se_variable(2,
                                                    var_type=self.data.Door,
-                                                   other_syntax_allowed=("*",)):
+                                                   other_syntax_allowed=("*", "ALL")):
             return False
 
         return True
@@ -513,7 +513,7 @@ class ActionHandler:
         if not await self.param.is_required_len(3, 5):
             return False
 
-        if not await self.param.is_valid_mode(1, possible_modes=("give", "remove")):
+        if not await self.param.is_valid_mode(1, possible_modes=("GIVE", "REMOVE")):
             return False
 
         await self.param.cant_check(2)
@@ -663,7 +663,7 @@ class ActionHandler:
 
         if not await self.param.is_non_se_variable(1,
                                                    var_type=self.data.Role,
-                                                   other_syntax_allowed=("*",)):
+                                                   other_syntax_allowed=("*", "ALL")):
             return False
 
         if not await self.param.is_non_se_variable(2, var_type=self.data.Role):

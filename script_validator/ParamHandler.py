@@ -175,7 +175,7 @@ class ParamHandler:
             await self.logs.close(True)
             return True
 
-        closest_match: str = await self.utils.get_closest_match(variable, group)
+        closest_match: str = await self.utils.get_closest_match(variable, group + other_syntax_allowed)
         await self.verdict.error_template(line_index, reason, closest_match)
         await self.logs.close(False)
         return False

@@ -155,8 +155,8 @@ class IOHandler:
             if not reason or not line_to_print:
                 continue
 
-            new_line_suffix = "ㅤ\nㅤ\nㅤ\n" if len(error_summary_lines) != 0 else ""
-            new_line_prefix = "\n" if len(error_summary_lines) != 0 else ""
+            print(len(error_summary_lines))
+            new_line_prefix = "\nㅤ\n" if len(error_summary_lines) != 0 else ""
 
             if closest_match:
                 error_summary_lines.append(
@@ -164,14 +164,12 @@ class IOHandler:
                     f"## > {reason}\n"
                     f"`{index}`{color} `{line_to_print}`\n"
                     f"### Did you mean `{closest_match}`?"
-                    f"{new_line_suffix}"
                 )
             else:
                 error_summary_lines.append(
                     f"{new_line_prefix}"
                     f"## > {reason}\n"
                     f"`{index}`{color} `{line_to_print}`"
-                    f"{new_line_suffix}"
                 )
 
         devided_error_summary_lines = []

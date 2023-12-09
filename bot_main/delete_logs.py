@@ -8,3 +8,4 @@ def delete_logs() -> None:
 
 if __name__ == "__main__":
     delete_logs()
+

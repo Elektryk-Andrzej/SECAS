@@ -1,6 +1,4 @@
 import dataclasses
-from icecream import ic
-ic.configureOutput(includeContext=True)
 
 
 @dataclasses.dataclass
@@ -66,9 +64,6 @@ class LabelVisualiser:
                     self.matrix[row_index][column_index] = (
                         self.char.right_down if not inverted else self.char.up_right
                     )
-
-                else:
-                    ic("ERROR ERROR ERROR")
 
                 break
 
@@ -158,7 +153,6 @@ class LabelVisualiser:
             for i in range(len(self.connections[pointer_column])):
                 space_occupied_start, space_occupied_end = self.connections[pointer_column][i]
 
-                ic(pointer_column, start_index, end_index, space_occupied_start, space_occupied_end)
                 if end_index > space_occupied_start and space_occupied_end > start_index:
                     return True
 
@@ -166,25 +160,18 @@ class LabelVisualiser:
 
         if not self.connections:
             self.connections[1] = [[start_index, end_index]]
-            ic(self.connections)
             return 1
 
         for key in self.connections.keys():
             is_intersecting = _is_intersecting(key, start_index, end_index)
-            ic(is_intersecting)
 
-            if is_intersecting:
-                ic("try get next column")
-                continue
-            else:
+            if not is_intersecting:
                 self.connections[key].append([start_index, end_index])
-                ic("added to column", self.connections[key])
                 return key
-        else:
-            key = len(self.connections)*2+1
-            self.connections[key] = [[start_index, end_index]]
-            ic("no new column available", self.connections[key], key)
-            return key
+
+        key = len(self.connections)*2+1
+        self.connections[key] = [[start_index, end_index]]
+        return key
 
     def register_labels(self):
         for index, line in enumerate(self.script):
@@ -226,9 +213,6 @@ class LabelVisualiser:
                     self._add_connection_request(index, self.labels[line_as_list[1]])
                 except KeyError:
                     pass
-
-            else:
-                pass
 
         return True
 

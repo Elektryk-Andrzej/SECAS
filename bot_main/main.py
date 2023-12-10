@@ -6,7 +6,7 @@ import time
 from bot_main.info_embed import info_embed
 from script_validator import VerdictHandler, LogHandler, IOHandlerVS, ParamHandler, ActionHandler, Utils, Data
 from label_visualiser import IOHandlerVL
-from DISCORD_TOKEN import TOKEN
+from tokens.discord_token import DISCORD_TOKEN
 
 bot = discord.ext.commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
@@ -96,4 +96,4 @@ async def on_message(message):
 
 
 if __name__ == "__main__":
-    bot.run(TOKEN)
+    bot.run(DISCORD_TOKEN)

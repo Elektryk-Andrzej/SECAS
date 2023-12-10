@@ -6,7 +6,7 @@ import time
 from bot_main.info_embed import info_embed
 from script_validator import VerdictHandler, LogHandler, IOHandlerVS, ParamHandler, ActionHandler, Utils, Data
 from label_visualiser import IOHandlerVL
-from TOKEN import TOKEN
+from DISCORD_TOKEN import TOKEN
 
 bot = discord.ext.commands.Bot(command_prefix=".", intents=discord.Intents.all())
 

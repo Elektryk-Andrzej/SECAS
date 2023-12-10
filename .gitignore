@@ -1,5 +1,5 @@
-/bot_main/TOKEN.py
 logs
-shelp
 venv
 test.py
+/tokens/github_token.py
+/tokens/discord_token.py

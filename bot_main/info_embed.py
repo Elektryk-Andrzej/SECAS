@@ -14,7 +14,6 @@ class Descriptions:
     )
 
 
-
 class SelectMenu(discord.ui.View):
     def __init__(self, message, bot):
         super().__init__()

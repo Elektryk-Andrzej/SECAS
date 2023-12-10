@@ -7,6 +7,7 @@ from bot_main.info_embed import info_embed
 from script_validator import VerdictHandler, LogHandler, IOHandlerVS, ParamHandler, ActionHandler, Utils, Data
 from label_visualiser import IOHandlerVL
 from tokens.discord_token import DISCORD_TOKEN
+from shelp import IOHandlerSH
 
 bot = discord.ext.commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
@@ -37,6 +38,11 @@ async def on_message(message):
     elif await command_trigger(message.content, "vl"):
         lv = IOHandlerVL.IOHandler(message, bot)
         await lv.visualise()
+
+    elif await command_trigger(message.content, "sh"):
+        sh = IOHandlerSH.IOHandler(message)
+        action = str(message.content).split(" ")[1].upper()
+        await sh.get_action_info(action)
 
     elif await command_trigger(message.content, "vs"):
         data = Data.Data()

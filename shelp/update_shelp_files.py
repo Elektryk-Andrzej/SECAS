@@ -119,14 +119,26 @@ async def get_action_shelp_info(file_path) -> list:
     return [name, description, params]
 
 
-async def main():
-    print(await get_available_action_dirs())
+async def update():
     for dir_available in await get_available_action_dirs():
-        print(dir_available)
         for act in await get_available_actions(dir_available):
-            print(act)
-            for shelp in await get_action_shelp_info(f"{dir}/{act}"):
-                print(shelp)
+            info = await get_action_shelp_info(f"{dir_available}/{act}")
+            if info[0] is None:
+                continue
+
+            with open("shelp_info.py", "a") as file:
+                file.write(f"{info[0]}: list = {info}\n")
+
+            print("DONE " + info[0])
+
+    with open("shelp/shelp_info.py", "r") as file:
+        text = file.read()
+        text = text.replace("\\\\\\", "")
+        text = text.replace("\\\\", "\\")
+
+    with open("shelp/shelp_info.py", "w") as file:
+        file.write(text)
 
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(update())

@@ -98,7 +98,9 @@ class IOHandler:
                 await self.verdict_handler.line_verdict(self.data.LineVerdict.EMPTY)
 
             else:
-                closest_match = await self.utils.get_closest_match(action_name, self.action_handler.actions)
+                closest_match = await self.utils.get_closest_match(
+                    action_name, tuple(self.action_handler.actions.keys())
+                )
                 await self.verdict_handler.error_template(0, "Invalid action", closest_match)
 
         if self.data.code_index == 0:

@@ -192,16 +192,41 @@ class ParamHandler:
     async def is_variable(self, line_index: int) -> bool:
         """
         Checks if a variable is used at specifed line_index.
+        \n
+        REPORTS ERRORS
 
         :param line_index:
-        :return:
+        :return: bool
         """
+
+        await self.logs.open(
+            inspect.getframeinfo(inspect.currentframe()),
+            line_index=line_index
+        )
+
+        if not await self._is_using_variable(line_index):
+            await self.verdict.error_template(line_index, "No brackets used")
+            await self.logs.close(False)
+            return False
+
+        if not await self._is_valid_variable_syntax(line_index):
+            await self.logs.close(False)
+            return False
+
+        await self.logs.close(True)
+        return True
 
 
     async def is_text(self, start_line_index: int) -> bool:
         pass
 
+
     async def is_bool(self, line_index, *, required: bool = True) -> bool:
+        await self.logs.open(
+            inspect.getframeinfo(inspect.currentframe()),
+            line_index=line_index
+        )
+
         arg: str = await self.utils.get_str_from_line_index(line_index)
         possible_args: tuple = "TRUE", "FALSE"
 
@@ -219,7 +244,6 @@ class ParamHandler:
         return False
 
     async def is_label(self, line_index: int) -> bool:
-
         await self.logs.open(
             inspect.getframeinfo(inspect.currentframe()),
             line_index=line_index

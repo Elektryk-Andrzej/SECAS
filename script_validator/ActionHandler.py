@@ -716,8 +716,10 @@ class ActionHandler:
         return True
 
     async def SAVE(self) -> bool:
-        if not await self.param.is_required_len(1, None):
+        if not await self.param.is_required_len(2, None):
             return False
+
+        await self.param.is_variable(1)
 
         await self.param.cant_check()
 

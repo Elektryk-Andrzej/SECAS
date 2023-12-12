@@ -67,7 +67,7 @@ async def on_message(message):
 
         """try:"""
         if os.path.exists(f".\\Logs\\{data.log_file_name}"):
-            await message.reply("Calm down!", mention_author=False)
+            await message.reply("Calm down and try again later!", mention_author=False)
 
         count_first_line: bool
         if message.attachments and message.attachments[0].filename.endswith('.txt'):
@@ -96,8 +96,7 @@ async def on_message(message):
     elif await command_trigger(message.content, "v"):
         await message.reply(
             "Prefix `.v` is no longer supported\n"
-            "Use `.vs` to verify script\n"
-            "Use `.vl` to visualise labels"
+            "Check `.i` for more info."
         )
 
 

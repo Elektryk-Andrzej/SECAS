@@ -11,7 +11,7 @@ class Descriptions:
 
     verify_script_usage: str = (
         "SECAS supports `3 commands`, those being:\n"
-        "- `.vs` (script verifier) - Checks for syntax errors.\n"
+        "- `.vs` (verify script) - Checks for syntax errors.\n"
         "- `.vl` (visualise labes) - Shows redirect logic.\n"
         "- `.sh` (script help) - Brings up a summary of an action."
     )
@@ -41,25 +41,36 @@ class SelectMenu(discord.ui.View):
         answer = select_item.values
 
         if answer[0] == "description":
-            await self.embed.edit(embed=discord.Embed(
-                title=f"What is {self.bot.user.name}?",
-                description=self.desc.description
-            ))
+            await self.embed.edit(
+                embed=discord.Embed(
+                    title="What is SECAS?",
+                    description=self.desc.description,
+                    color=0xeddb9f
+                )
+            )
 
         elif answer[0] == "usage":
-            await self.embed.edit(embed=discord.Embed(
-                title=f"How to verify my script?",
-                description=self.desc.verify_script_usage
-            ))
+            await self.embed.edit(
+                embed=discord.Embed(
+                    title="Which commands can I use?",
+                    description=self.desc.verify_script_usage,
+                    color=0xeddb9f
+                )
+            )
 
         elif answer[0] == "donate":
-            await self.embed.edit(embed=discord.Embed(
-                title=f"{self.bot.user.name} supporters!",
-                description=f"# <:saskyc:1146409898314309643> <@543711481837912078> - 1mo\n"
-                            f"# <:jraylor:1148181032772849665> <@533344220585394206> - 8mo\n"
-                            f"# <:xxnubnubxx:1156643754552336504> <@389059604895498243> - 2mo\n"
-                            f"Enjoying the SECAS project? Consider supporting!\n"
-                            f"## > [ko-fi](https://ko-fi.com/elektrykandrzej)\n"))
+            await self.embed.edit(
+                embed=discord.Embed(
+                    title=f"{self.bot.user.name} supporters!",
+                    description=
+                    f"# <:saskyc:1146409898314309643> <@543711481837912078> - 1mo\n"
+                    f"# <:jraylor:1148181032772849665> <@533344220585394206> - 8mo\n"
+                    f"# <:xxnubnubxx:1156643754552336504> <@389059604895498243> - 2mo\n"
+                    f"Enjoying the SECAS project? Consider supporting!\n"
+                    f"## > [ko-fi](https://ko-fi.com/elektrykandrzej)\n",
+                    color=0xeddb9f
+                )
+            )
 
         else:
             return
@@ -67,7 +78,7 @@ class SelectMenu(discord.ui.View):
     async def send_initial_embed(self):
         self.embed = await self.message.reply(
             embed=discord.Embed(
-                title=f"About {self.bot.user.display_name}", color=0x444444), mention_author=False)
+                title=f"About {self.bot.user.display_name}", color=0xeddb9f), mention_author=False)
         return self.embed
 
 

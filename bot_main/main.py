@@ -22,7 +22,7 @@ async def on_ready():
     await bot.change_presence(
         activity=discord.Activity(
             type=discord.ActivityType.watching,
-            name=f".v / .i"),
+            name=f".i / .vs / .vl / .sh"),
         status=discord.Status.online
     )
 

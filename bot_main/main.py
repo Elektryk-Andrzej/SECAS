@@ -65,20 +65,8 @@ async def on_message(message):
         data.io_handler_object = IOHandlerVS.IOHandler(data, message, bot)
 
         """try:"""
-        if os.path.exists(f".\\Logs\\{data.log_file_name}"):
-            await message.reply("Calm down and try again later!", mention_author=False)
 
-        count_first_line: bool
-        if message.attachments and message.attachments[0].filename.endswith('.txt'):
-            attachment = message.attachments[0]
-            message_content = await attachment.read()
-            data.code = message_content.decode("utf-8")
-            count_first_line = True
-        else:
-            data.code = message.content
-            count_first_line = False
-
-        await data.io_handler_object.proccess_verify_request(count_first_line=count_first_line)
+        await data.io_handler_object.proccess_request()
 
         if await command_trigger(message.content, "vsd"):
             with open(data.log_file_name, "rb") as file:

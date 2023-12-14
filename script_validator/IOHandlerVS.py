@@ -26,7 +26,10 @@ class IOHandler:
             file.close()
 
     async def format_code(self, count_first_line: bool) -> list:
-        await self.logs.open(inspect.getframeinfo(inspect.currentframe()))
+        await self.logs.open(
+            inspect.getframeinfo(inspect.currentframe()),
+            count_first_line=count_first_line
+        )
 
         self.data.code = [str(line.strip()).split(" ") for line in self.data.code.splitlines()]
 
@@ -49,11 +52,20 @@ class IOHandler:
 
         await self.logs.close(None)
 
-    async def proccess_verify_request(self, count_first_line: bool) -> None:
+    async def proccess_request(self) -> None:
         await self.logs.open(
-            inspect.getframeinfo(inspect.currentframe()),
-            count_first_line=count_first_line
+            inspect.getframeinfo(inspect.currentframe())
         )
+
+        count_first_line: bool
+        if self.msg.attachments and self.msg.attachments[0].filename.endswith('.txt'):
+            attachment = self.msg.attachments[0]
+            message_content = await attachment.read()
+            self.data.code = message_content.decode("utf-8")
+            count_first_line = True
+        else:
+            self.data.code = self.msg.content
+            count_first_line = False
 
         await self.format_code(count_first_line=count_first_line)
 

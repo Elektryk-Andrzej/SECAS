@@ -5,5 +5,4 @@ test.py
 /tokens/discord_token.py
 SECAS.7z
 SECAS.tar
-/shelp/action_info.py
-/shelp/variable_info.py
+shelp/update_shelp_files.py

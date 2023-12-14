@@ -41,8 +41,7 @@ async def on_message(message):
 
     elif await command_trigger(message.content, "sh"):
         sh = IOHandlerSH.IOHandler(message)
-        action = str(message.content).split(" ")[1].upper()
-        await sh.get_action_info(action)
+        await sh.process_help_request()
 
     elif await command_trigger(message.content, "vs"):
         data = Data.Data()

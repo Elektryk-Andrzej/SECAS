@@ -1,8 +1,9 @@
 logs
 venv
+shelp/action_info.py
+shelp/variable_info.py
 test.py
 /tokens/github_token.py
 /tokens/discord_token.py
 SECAS.7z
 SECAS.tar
-shelp

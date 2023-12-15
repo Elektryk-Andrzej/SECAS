@@ -1,6 +1,5 @@
 import discord
 import discord.ext.commands
-import os
 import time
 
 from bot_main.info_embed import info_embed

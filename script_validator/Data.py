@@ -7,6 +7,7 @@ class Data:
         FLAG = "FLAG"
         EMPTY = "EMPTY"
         NOT_CHECKABLE = "NOT CHECKABLE"
+        TYPO = "TYPO"
 
     class Room:
         rooms: tuple = (

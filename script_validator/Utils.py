@@ -1,5 +1,4 @@
-from script_validator import Data, LogHandler
-import inspect
+from script_validator import Data
 import difflib
 
 
@@ -11,7 +10,6 @@ class Utils:
         """
 
         self.data: Data.Data = data
-        self.logs: LogHandler.LogHandler = data.log_handler_object
 
     async def get_str_from_line_index(self, line_index) -> str:
         """
@@ -23,17 +21,13 @@ class Utils:
         :return: str value of the provided line index
         """
 
-        await self.logs.open(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
-
         output: str
         try:
             output = str(self.data.line[line_index])
 
         except IndexError:
             output = str(self.data.line[-1])
-            await self.logs.log("Specified line index is out of range, returned the last index")
 
-        await self.logs.close(output)
         return output
 
     @staticmethod

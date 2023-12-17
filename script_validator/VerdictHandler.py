@@ -12,7 +12,8 @@ class VerdictHandler:
                              line_index: int,
                              reason: str,
                              closest_match: str = None,
-                             verdict_type: Data.Data.LineVerdict = None) -> None:
+                             verdict_type: Data.Data.LineVerdict = None,
+                             closest_match_print_string: tuple = None) -> None:
         """
         Formats a line by adding arrows around a malformed parameter and automatically creates a line verdict
 
@@ -20,6 +21,7 @@ class VerdictHandler:
         :param reason: the reason why it is malformed
         :param closest_match: footer to put under the bot_main reason, used for "Did you mean x?"
         :param verdict_type: LineVerdictType variable
+        :param closest_match_print_string: change "Did you mean x?", where index 0 is before and 1 after x
         :return: bool
         """
         self.data.errored = True
@@ -38,7 +40,8 @@ class VerdictHandler:
             self.data.LineVerdict.ERRORED if not verdict_type else verdict_type,
             line_to_print,
             reason,
-            closest_match
+            closest_match,
+            closest_match_print_string
         )
 
         await self.logs.close(None)
@@ -110,14 +113,21 @@ class VerdictHandler:
 
     async def line_verdict(self,
                            verdict_type: Data.Data.LineVerdict,
-                           line_to_print: str or None = None,
-                           reason: str or None = None,
-                           closest_match: str or None = None) -> None:
+                           line_to_print: str = None,
+                           reason: str = None,
+                           closest_match: str = None,
+                           closest_match_print_string: tuple = None) -> None:
         """
         Set a verdict for the line with LineVerdictType attributes and format it for later use
 
         :return: None
         """
+        closest_match_print_string = (
+            ("Did you mean ", "?")
+            if closest_match_print_string is None
+            else closest_match_print_string
+        )
+
         await self.logs.open(
             inspect.getframeinfo(inspect.currentframe()),
             verdict_type=verdict_type
@@ -155,15 +165,18 @@ class VerdictHandler:
         elif verdict_type is self.data.LineVerdict.NOT_CHECKABLE:
             color = "🟧"
 
+        elif verdict_type is self.data.LineVerdict.TYPO:
+            color = "🟨"
+
         else:
             self.data.errored = True
             await self.logs.log("No verdict type provided")
-            color = "🟧"
+            color = "❌"
             line_to_print = "ERROR"
             reason = "ERROR"
 
         self.data.processed_lines.append([
-            color, normal_line, line_to_print, reason, self.data.code_index, closest_match
+            color, normal_line, line_to_print, reason, self.data.code_index, closest_match, closest_match_print_string
         ])
 
         await self.logs.close(None)

@@ -134,7 +134,7 @@ class IOHandler:
         overview_lines: list = []
 
         for element in self.data.processed_lines:
-            color, normal_line, line_to_print, reason, index, closest_match = element
+            color, normal_line, line_to_print, reason, index, closest_match, _ = element
 
             if color != "⬛":
                 overview_lines.append(f"`{index}`{color} `{normal_line}`\n")
@@ -164,7 +164,8 @@ class IOHandler:
         error_summary_lines: list = []
 
         for element in self.data.processed_lines:
-            color, normal_line, line_to_print, reason, index, closest_match = element
+            color, normal_line, line_to_print, reason, index, closest_match, closest_match_print_string = element
+            print(f"{closest_match_print_string = }")
 
             if not reason or not line_to_print:
                 continue
@@ -176,7 +177,7 @@ class IOHandler:
                     f"{new_line_prefix}"
                     f"## > {reason}\n"
                     f"`{index}`{color} `{line_to_print}`\n"
-                    f"### Did you mean `{closest_match}`?"
+                    f"### {closest_match_print_string[0]}`{closest_match}`{closest_match_print_string[1]}"
                 )
             else:
                 error_summary_lines.append(

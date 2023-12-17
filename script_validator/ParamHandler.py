@@ -36,6 +36,35 @@ class ParamHandler:
         await self.logs.close(True)
         return True
 
+    async def _is_incorrect_caps(self, line_index: int, closest_match: str) -> bool:
+        """
+        Checks if a variable has incorrect capitalization
+        Returns False if line_index and closest_match have different values other than caps or are the same
+        \n
+        REPORTS ERRORS
+
+        :param line_index:
+        :param closest_match:
+        :return: bool
+        """
+
+        await self.logs.open(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
+        variable = await self.utils.get_str_from_line_index(line_index)
+
+        if variable.casefold() == closest_match.casefold():
+            await self.verdict.error_template(
+                line_index,
+                "Invalid capitalization",
+                closest_match,
+                self.data.LineVerdict.TYPO,
+                ("Consider changing to ", "")
+            )
+            await self.logs.close(True)
+            return True
+
+        await self.logs.close(False)
+        return False
+
     async def _is_using_variable(self, line_index: int) -> bool:
         """
         Checks if a variable is used at line_index
@@ -89,15 +118,19 @@ class ParamHandler:
             await self.logs.close(True)
             return True
 
-        else:
-            closest_match = await self.utils.get_closest_match(mode, tuple(possible_modes))
-            await self.verdict.error_template(
-                line_index,
-                f"Invalid mode",
-                closest_match
-            )
+        closest_match = await self.utils.get_closest_match(mode, tuple(possible_modes))
+
+        if await self._is_incorrect_caps(line_index, closest_match):
             await self.logs.close(False)
             return False
+
+        await self.verdict.error_template(
+            line_index,
+            f"Invalid mode",
+            closest_match
+        )
+        await self.logs.close(False)
+        return False
 
     async def is_non_se_variable(self,
                                  line_index: int,
@@ -179,6 +212,11 @@ class ParamHandler:
             variable,
             group + other_syntax_allowed if other_syntax_allowed else group
         )
+
+        if await self._is_incorrect_caps(line_index, closest_match):
+            await self.logs.close(False)
+            return False
+
         await self.verdict.error_template(line_index, reason, closest_match)
         await self.logs.close(False)
         return False

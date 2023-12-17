@@ -169,7 +169,6 @@ class IOHandler:
             if not reason or not line_to_print:
                 continue
 
-            print(len(error_summary_lines))
             new_line_prefix = "\nㅤ\n" if len(error_summary_lines) != 0 else ""
 
             if closest_match:

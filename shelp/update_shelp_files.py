@@ -18,7 +18,6 @@ async def get_available_action_dirs() -> list:
     r: list = []
 
     if not response.status_code == 200:
-        print(response.content)
         return r
 
     for x in response.json():
@@ -97,7 +96,6 @@ async def get_action_shelp_info(file_path) -> list:
         return exit_list
 
     if response.status_code != 200:
-        print(response.content)
         print("ERROR")
         return []
 
@@ -190,7 +188,6 @@ async def get_variable_shelp_info(file_path) -> list:
         return get_params_exit_list
 
     if response.status_code != 200:
-        print(response.content)
         print("ERROR")
         return []
 

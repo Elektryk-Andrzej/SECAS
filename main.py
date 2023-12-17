@@ -7,6 +7,7 @@ from script_validator import VerdictHandler, LogHandler, IOHandlerVS, ParamHandl
 from label_visualiser import IOHandlerVL
 from tokens.discord_token import DISCORD_TOKEN
 from shelp import IOHandlerSH
+import command_prefixes as cmd
 
 bot = discord.ext.commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
@@ -31,18 +32,19 @@ async def on_message(message):
     if message.author.id == bot.user.id:
         return
 
-    if await command_trigger(message.content, "i") or str(bot.user.id) in str(message.content):
+    if (await command_trigger(message.content, cmd.info)
+            or str(bot.user.id) in str(message.content)):
         await info_embed(message, bot)
 
-    elif await command_trigger(message.content, "vl"):
+    elif await command_trigger(message.content, cmd.visualise_labels):
         lv = IOHandlerVL.IOHandler(message, bot)
         await lv.visualise()
 
-    elif await command_trigger(message.content, "sh"):
+    elif await command_trigger(message.content, cmd.script_help):
         sh = IOHandlerSH.IOHandler(message)
         await sh.process_help_request()
 
-    elif await command_trigger(message.content, "vs"):
+    elif await command_trigger(message.content, cmd.verify_script):
         data = Data.Data()
         time.sleep(.1)
 

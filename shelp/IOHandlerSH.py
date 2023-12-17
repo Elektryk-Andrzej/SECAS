@@ -1,6 +1,8 @@
 import shelp.action_info
+import shelp.variable_info
 import discord
 import script_validator.Utils
+import command_prefixes as cmd
 
 
 class IOHandler:
@@ -12,63 +14,67 @@ class IOHandler:
             shelp.action_info.__dict__.items()
             if not var_name.startswith('__')
         }
+        self.variables = {
+            var_name: var_value for
+            var_name, var_value in
+            shelp.variable_info.__dict__.items()
+            if not var_name.startswith('__')
+        }
         self.action_check_keyword: tuple = "ACT", "ACTION", "A"
         self.variable_check_keyword: tuple = "VAR", "VARIABLE", "V"
 
         self.closest_match = script_validator.Utils.Utils.get_closest_match
 
-    async def process_help_request(self):
+    async def process_help_request(self) -> None:
         message: list = self.msg.content.strip().upper().split(" ")
+        message = [message[0], "".join(message[1:])]
 
         if len(message) < 2:
             await self.msg.reply(
-                "Mode not specified!\n"
-                "Available modes:\n"
-                f"- Action mode - {self.action_check_keyword}\n"
-                f"- Variable mode - {self.variable_check_keyword}",
+                content=(
+                    f"## Tutorial on {cmd.visualise_labels}\n"
+                    f"`.{cmd.visualise_labels} ACTION NAME` to get info about a specified action."
+                    f"`.{cmd.visualise_labels} {{VARIABLE NAME}}` to get info about a specfied variable."
+                    f"`.{cmd.visualise_labels} LIST` to get a lis of all actions."
+                    f"`.{cmd.visualise_labels} LISTVAR` to get a list of all variables."
+                ),
                 mention_author=False
             )
             return
 
-        if len(message) < 3:
-            await self.msg.reply(
-                "Please specify an action/variable!\n"
-                "You can use ` * ` to get a list of all available actions/variables.",
-                mention_author=False
-            )
-            return
+        if (key := message[1][1:-1]) in self.variables.keys() and message[1][0] == "{" and message[1][-1] == "}":
+            await self.get_info(key, self.variables)
 
-        if message[1] in self.variable_check_keyword:
-            pass
+        elif (key := message[1]) in self.actions.keys():
+            await self.get_info(key, self.actions)
 
-        elif message[1] in self.action_check_keyword:
-            await self.get_action_info("".join(message[2:]))
+        elif message[1] == "LIST":
+            await self.get_all_info(self.actions)
+
+        elif message[1] == "LISTVAR":
+            await self.get_all_info(self.variables)
 
         else:
+            closest_match = await script_validator.Utils.Utils.get_closest_match(
+                value=message[1],
+                possible_values=(
+                    tuple(self.actions.keys()) +
+                    tuple([f"{{{var}}}" for var in self.variables.keys()]) +
+                    ("LIST", "LISTVAR")
+                )
+            )
+
             await self.msg.reply(
-                "Wrong mode specified!\n"
-                "Available modes:\n"
-                f"- Action mode - {self.action_check_keyword}\n"
-                f"- Variable mode - {self.variable_check_keyword}",
+                "I couldn't find what you were looking for :(\n"
+                f"## Did you mean `{closest_match}`?",
                 mention_author=False
             )
 
-    async def get_action_info(self, action: str):
-        action = action.upper().strip()
-        message_to_send: str = ""
+    async def get_info(self, key: str, group: dict):
+        params: list = group[key]
+        embed_to_send: discord.Embed = discord.Embed(title=params[0], description=params[1])
 
-        if action == "*":
-            await self.get_all_action_info()
-            return
-
-        if action not in self.actions.keys():
-            message_to_send = f"Found no results for \"{action}\", showing definition for most similar action."
-            action = await self.closest_match(action, tuple(self.actions.keys()))
-
-        action_params: list = self.actions[action]
-        embed_to_send: discord.Embed = discord.Embed(title=action_params[0], description=action_params[1])
-
-        for param in action_params[2]:
+        for param in params[2]:
             param: list
             param_name: str = param[0]
             param_type: str = param[1]
@@ -85,15 +91,18 @@ class IOHandler:
                 inline=False
             )
 
-        await self.msg.reply(message_to_send, embed=embed_to_send, mention_author=False)
+        await self.msg.reply(embed=embed_to_send, mention_author=False)
 
-    async def get_all_action_info(self):
-        embed_to_send: discord.Embed = discord.Embed(title="Action list", description="", color=0xeddb9f)
-        for index, action in enumerate(self.actions.items()):
-            print(action)
+    async def get_all_info(self, group: dict):
+        embed_to_send: discord.Embed = discord.Embed(
+            title=f"LIST - ALL ACTIONS" if group is self.actions else "LISTVAR - ALL VARIABLES",
+            description="",
+            color=0xeddb9f
+        )
+        for index, key in enumerate(group.items()):
             embed_to_send.add_field(
-                name=action[0],
-                value=action[1][1] if action[1][1] is not None else "", inline=False)
+                name=key[1][0],
+                value=key[1][1] if key[1][1] is not None else "", inline=False)
 
             if index % 30 == 0 and index != 0:
                 await self.msg.channel.send(embed=embed_to_send)

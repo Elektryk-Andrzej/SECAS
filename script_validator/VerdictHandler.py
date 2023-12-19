@@ -122,11 +122,8 @@ class VerdictHandler:
 
         :return: None
         """
-        closest_match_print_string = (
-            ("Did you mean ", "?")
-            if closest_match_print_string is None
-            else closest_match_print_string
-        )
+        if closest_match_print_string is None:
+            closest_match_print_string = ("Did you mean ", "?")
 
         await self.logs.open(
             inspect.getframeinfo(inspect.currentframe()),

@@ -9,6 +9,17 @@ class Data:
         NOT_CHECKABLE = "NOT CHECKABLE"
         TYPO = "TYPO"
 
+    class Team:
+        teams: tuple = (
+            "Dead",
+            "SCPs",
+            "ClassD",
+            "FoundationForces",
+            "Scientists",
+            "ChaosInsurgency",
+            "OtherAlive"
+        )
+
     class Room:
         rooms: tuple = (
             "LczArmory",
@@ -325,13 +336,12 @@ class Data:
     def __init__(self):
         self.code: list or str = []
         self.code_index: int = 0
-        self.line: list = []
+        self.line: tuple = ()
         self.processed_lines: list = []
-        self.verdict_line: list = []
-        self.errored: bool = False
+        self.line_to_copy_for_verdict_processing: list = []
+        self.show_overview: bool = False
         self.line_verdict_set: bool = False
         self.labels: list = ["NEXT", "START", "STOP"]
-        self.custom_variables: list[list] = []
         self.andrzej_ping: str = "<@762016625096261652>"
         self.log_file_name: str = ""
         self.log_depth: int = 0

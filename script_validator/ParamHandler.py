@@ -9,21 +9,18 @@ class ParamHandler:
         self.verdict: VerdictHandler.VerdictHandler = data.verdict_handler_object
         self.logs: LogHandler.LogHandler = data.log_handler_object
 
-    async def _is_valid_variable_syntax(self, line_index: int) -> bool:
+    async def _is_valid_variable_syntax(self, line_index: int, report_error: bool = True) -> bool:
         """
         Checks if correct variable syntax is used at line_index
-        \n
-        REPORTS ERRORS
-
-        :param line_index:
-        :return: bool
         """
+
         await self.logs.open(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
 
         variable = await self.utils.get_str_from_line_index(line_index)
 
         if not (variable[0] == "{" and variable[-1] == "}"):
-            await self.verdict.error_template(line_index, "Invalid variable syntax")
+            if report_error:
+                await self.verdict.error_template(line_index, "Invalid variable syntax")
             await self.logs.close(False)
             return False
 
@@ -36,55 +33,32 @@ class ParamHandler:
         await self.logs.close(True)
         return True
 
-    async def _is_incorrect_caps(self, line_index: int, closest_match: str) -> bool:
+    async def _is_incorrect_caps(self,
+                                 line_index: int,
+                                 propper_value: str,
+                                 report_error: bool = True) -> bool:
         """
-        Checks if a variable has incorrect capitalization
+        Checks if a variable has incorrect capitalization.
         Returns False if line_index and closest_match have different values other than caps or are the same
-        \n
-        REPORTS ERRORS
-
-        :param line_index:
-        :param closest_match:
-        :return: bool
         """
 
         await self.logs.open(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
         variable = await self.utils.get_str_from_line_index(line_index)
 
-        if variable.casefold() == closest_match.casefold():
-            await self.verdict.error_template(
-                line_index,
-                "Invalid capitalization",
-                closest_match,
-                self.data.LineVerdict.TYPO,
-                ("Consider changing to ", "")
-            )
+        if variable.casefold() == propper_value.casefold():
+            if report_error:
+                await self.verdict.error_template(
+                    line_index,
+                    "Invalid capitalization",
+                    propper_value,
+                    self.data.LineVerdict.TYPO,
+                    ("Consider changing to ", "")
+                )
             await self.logs.close(True)
             return True
 
         await self.logs.close(False)
         return False
-
-    async def _is_using_variable(self, line_index: int) -> bool:
-        """
-        Checks if a variable is used at line_index
-        \n
-        DOESN'T REPORT ERRORS
-
-        :param line_index:
-        :return: bool
-        """
-        await self.logs.open(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
-
-        variable = await self.utils.get_str_from_line_index(line_index)
-
-        if "{" in variable or "}" in variable:
-            await self.logs.close(True)
-            return True
-
-        else:
-            await self.logs.close(False)
-            return False
 
     async def is_valid_mode(self,
                             line_index: int,
@@ -137,18 +111,13 @@ class ParamHandler:
                                  *,
                                  var_type: object,
                                  required: bool = True,
-                                 other_syntax_allowed: tuple = None) -> bool:
+                                 other_syntax_allowed: tuple = None,
+                                 report_error: bool = True) -> bool:
 
         """
         Checks for all non-standard variables, like doors, rooms, roles at line_index
         \n
         REPORTS ERRORS
-        
-        :param line_index: 
-        :param var_type: things like Data.Data.ExampleType
-        :param required:
-        :param other_syntax_allowed:
-        :return: bool
         """
 
         await self.logs.open(
@@ -190,12 +159,26 @@ class ParamHandler:
                 reason = "Invalid position"
                 group = Data.Data.SpawnPosition.positions
 
+            case Data.Data.DisableKey:
+                reason = "Invalid key"
+                group = Data.Data.DisableKey.keys
+
+            case Data.Data.Team:
+                reason = "Invalid team"
+                group = Data.Data.Team.teams
+
+            case Data.Data.Candy:
+                if report_error:
+                    await self.verdict.mark_uncheckable_parameters(line_index)
+                return True
+
             case _:
-                await self.verdict.error_template(
-                    line_index,
-                    f"SECAS doesn't support this variable type",
-                    verdict_type=self.data.LineVerdict.NOT_CHECKABLE
-                )
+                if report_error:
+                    await self.verdict.error_template(
+                        line_index,
+                        f"Can't check",
+                        verdict_type=self.data.LineVerdict.NOT_CHECKABLE
+                    )
                 await self.logs.close(False)
                 return False
 
@@ -213,54 +196,75 @@ class ParamHandler:
             group + other_syntax_allowed if other_syntax_allowed else group
         )
 
-        if await self._is_incorrect_caps(line_index, closest_match):
+        if await self._is_incorrect_caps(line_index, closest_match, report_error):
             await self.logs.close(False)
             return False
 
-        await self.verdict.error_template(line_index, reason, closest_match)
+        if report_error:
+            await self.verdict.error_template(line_index, reason, closest_match)
         await self.logs.close(False)
         return False
 
-    async def cant_check(self, line_index: int or None = None) -> None:
+    async def mark_as_uncheckable(self, line_index: int, to_line_end: bool = False) -> None:
         """
         Reports to VerdictHandler that specifed line_index cannot be verifed.
         Used mostly for user side parameters like variables.
-        :param line_index:
-        :return: None
         """
+        await self.verdict.mark_uncheckable_parameters(line_index, to_line_end)
         pass
 
-    async def is_variable(self, line_index: int) -> bool:
+    async def is_se_variable(self, line_index: int, report_error: bool = True) -> bool:
         """
-        Checks if a variable is used at specifed line_index.
-        \n
-        REPORTS ERRORS
-
-        :param line_index:
-        :return: bool
+        Checks if a player variable is used at specifed line_index.
         """
-
         await self.logs.open(
             inspect.getframeinfo(inspect.currentframe()),
             line_index=line_index
         )
 
-        if not await self._is_using_variable(line_index):
-            await self.verdict.error_template(line_index, "No brackets used")
+        param = await self.utils.get_str_from_line_index(line_index)
+
+        if param == "*":
+            await self.logs.close(True)
+            return True
+
+        if await self._is_incorrect_caps(line_index, "ALL", report_error):
             await self.logs.close(False)
             return False
 
-        if not await self._is_valid_variable_syntax(line_index):
+        if not await self._is_valid_variable_syntax(line_index, report_error):
             await self.logs.close(False)
             return False
+
+        if report_error:
+            await self.verdict.mark_uncheckable_parameters(line_index)
 
         await self.logs.close(True)
         return True
 
+    async def mark_as_text(self, start_line_index: int) -> None:
+        """
+        Mark the text as not required to be checked.
+        """
+        if not await self._is_line_index_present(start_line_index):
+            return
 
-    async def is_text(self, start_line_index: int) -> bool:
-        pass
+        await self.verdict.mark_uncheckable_parameters(start_line_index,
+                                                       True,
+                                                       "<txt>")
+        return
 
+    async def mark_as_condition(self, start_line_index: int) -> None:
+        """
+        Mark the condition as something not checkable.
+        """
+        if not await self._is_line_index_present(start_line_index):
+            return
+
+        await self.verdict.mark_uncheckable_parameters(start_line_index,
+                                                       True,
+                                                       "<cnd>")
+        return
 
     async def is_bool(self, line_index, *, required: bool = True) -> bool:
         await self.logs.open(
@@ -279,10 +283,9 @@ class ParamHandler:
             await self.logs.close(True)
             return True
 
-        closest_match: str = await self.utils.get_closest_match(arg, possible_args)
-        await self.verdict.error_template(line_index, f"Invalid bool", closest_match)
-        await self.logs.close(False)
-        return False
+        await self.verdict.mark_uncheckable_parameters(line_index)
+        await self.logs.close(True)
+        return True
 
     async def is_label(self, line_index: int) -> bool:
         await self.logs.open(
@@ -341,26 +344,34 @@ class ParamHandler:
             return True
 
         if math_supported:
+            await self.verdict.mark_uncheckable_parameters(line_index,
+                                                           True,
+                                                           "<mth>")
             await self.logs.close(True)
             return True
 
         to_be_number = await self.utils.get_str_from_line_index(line_index)
+        numbers = '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'
 
-        try:
-            if min_value <= var_type(eval(to_be_number)) <= max_value:
+        if var_type is int and all([(char in numbers) for char in to_be_number]):
+            await self.logs.close(True)
+            return True
 
-                await self.logs.close(True)
-                return True
+        elif var_type is float and all([(char in numbers or char == ".") for char in to_be_number]):
+            await self.logs.close(True)
+            return True
 
-        except TypeError:
-            pass
+        if not await self._is_valid_variable_syntax(line_index, False):
+            await self.verdict.error_template(
+                line_index,
+                "Invalid variable syntax",
+                footer="(this action doesn't support math)"
+            )
+            await self.logs.close(False)
+            return False
 
-        except NameError:
-            pass
-
-        await self.verdict.error_template(line_index, "Invalid number")
-        await self.logs.close(False)
-        return False
+        await self.logs.close(True)
+        return True
 
     async def is_required_len(self, min_len: int, max_len) -> bool:
         await self.logs.open(

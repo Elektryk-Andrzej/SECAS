@@ -81,7 +81,7 @@ class IOHandler:
             self.data.code_index += 1
             self.data.line = line
             self.data.line_verdict_set = False
-            self.data.verdict_line = line
+            self.data.line_to_copy_for_verdict_processing = line
 
             if (action_name := line[0]) in self.action_handler.actions:
                 action_done = await self.action_handler.actions[action_name]()
@@ -92,9 +92,9 @@ class IOHandler:
                 else:
                     if not self.data.line_verdict_set:
                         await self.verdict_handler.line_verdict(
-                            self.data.LineVerdict.ERRORED,
+                            self.data.LineVerdict.NOT_CHECKABLE,
                             " ".join(self.data.line),
-                            "SECAS ERROR: Returned False with no reason specifed"
+                            "SECAS ERROR; report to dev"
                         )
 
             elif "#" in line[0]:
@@ -128,13 +128,20 @@ class IOHandler:
 
         await self.logs.close(None)
 
+    async def get_overview_embed_color(self) -> int:
+        for element in self.data.processed_lines:
+            if element[0] == "🟥":
+                return 0xdd2e44
+        else:
+            return 0xfdcb58
+
     async def format_processed_lines_to_overview(self) -> list:
         await self.logs.open(inspect.getframeinfo(inspect.currentframe()))
         character_limit: int = 2000
         overview_lines: list = []
 
         for element in self.data.processed_lines:
-            color, normal_line, line_to_print, reason, index, closest_match, _ = element
+            color, normal_line, _, _, index, _, _, _ = element
 
             if color != "⬛":
                 overview_lines.append(f"`{index}`{color} `{normal_line}`\n")
@@ -164,21 +171,29 @@ class IOHandler:
         error_summary_lines: list = []
 
         for element in self.data.processed_lines:
-            color, normal_line, line_to_print, reason, index, closest_match, closest_match_print_string = element
-            print(f"{closest_match_print_string = }")
+            color, _, line_to_print, reason, index, closest_match, closest_match_print_string, footer = element
 
             if not reason or not line_to_print:
                 continue
 
             new_line_prefix = "\nㅤ\n" if len(error_summary_lines) != 0 else ""
 
-            if closest_match:
+            if closest_match is not None:
                 error_summary_lines.append(
                     f"{new_line_prefix}"
                     f"## > {reason}\n"
                     f"`{index}`{color} `{line_to_print}`\n"
                     f"### {closest_match_print_string[0]}`{closest_match}`{closest_match_print_string[1]}"
                 )
+
+            elif footer is not None:
+                error_summary_lines.append(
+                    f"{new_line_prefix}"
+                    f"## > {reason}\n"
+                    f"`{index}`{color} `{line_to_print}`\n"
+                    f"### {footer}"
+                )
+
             else:
                 error_summary_lines.append(
                     f"{new_line_prefix}"
@@ -205,17 +220,17 @@ class IOHandler:
 
     async def send_result_embed(self) -> None:
         await self.logs.open(inspect.getframeinfo(inspect.currentframe()))
-        color_error = 0xdd2e44
+        color_overview = await self.get_overview_embed_color()
         color_no_error = 0x77b255
 
-        if self.data.errored:
+        if self.data.show_overview:
             for embed_content_list in await self.format_processed_lines_to_overview():
                 embed_content = "".join(embed_content_list)
 
                 await self.msg.channel.send(
                     embed=discord.Embed(
                         description=embed_content,
-                        color=color_error
+                        color=color_overview
                     )
                 )
 
@@ -224,7 +239,7 @@ class IOHandler:
 
                 await self.msg.channel.send(embed=discord.Embed(
                         description=embed_content,
-                        color=color_error
+                        color=color_overview
                     )
                 )
 

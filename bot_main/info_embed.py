@@ -29,7 +29,7 @@ class SelectMenu(discord.ui.View):
         placeholder="Select an option",
         options=[
             discord.SelectOption(label="What is SECAS?", value="description"),
-            discord.SelectOption(label="Which commands can I use?", value="usage"),
+            discord.SelectOption(label="Command - Verify Script", value="vs usage"),
             discord.SelectOption(label="Supporting!", value="donate"),
         ]
     )
@@ -49,7 +49,7 @@ class SelectMenu(discord.ui.View):
                 )
             )
 
-        elif answer[0] == "usage":
+        elif answer[0] == "vs usage":
             await self.embed.edit(
                 embed=discord.Embed(
                     title="Which commands can I use?",

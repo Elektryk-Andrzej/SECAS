@@ -215,7 +215,10 @@ async def get_variable_shelp_info(file_path) -> list:
     return main_exit_list
 
 
-async def update():
+async def update_actions():
+    with open("action_info.py", "w") as file:
+        file.write("")
+
     for dir_available in await get_available_action_dirs():
         for act in await get_available_actions(dir_available):
             info = await get_action_shelp_info(f"{dir_available}/{act}")
@@ -227,17 +230,20 @@ async def update():
 
             print("DONE " + info[0])
 
-    with open("shelp/action_info.py", "r") as file:
+    with open("action_info.py", "r") as file:
         text = file.read()
 
     text = text.replace("\\\\\\", "")
     text = text.replace("\\\\", "\\")
 
-    with open("shelp/action_info.py", "w") as file:
+    with open("action_info.py", "w") as file:
         file.write(text)
 
 
-async def test():
+async def update_variables():
+    with open("variable_info.py", "w") as file:
+        file.write("")
+
     for var_file in await get_available_variables():
         for var in await get_variable_shelp_info(var_file):
             if var[0] == '$"{{{RoleType.ToString().ToUpper()}}}':
@@ -267,4 +273,5 @@ async def test():
 
 
 if __name__ == "__main__":
-    asyncio.run(test())
+    asyncio.run(update_actions())
+    asyncio.run(update_variables())

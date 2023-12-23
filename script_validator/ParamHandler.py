@@ -35,7 +35,7 @@ class ParamHandler:
 
     async def _is_incorrect_caps(self,
                                  line_index: int,
-                                 propper_value: str,
+                                 propper_value: str | list | tuple,
                                  report_error: bool = True) -> bool:
         """
         Checks if a variable has incorrect capitalization.
@@ -45,17 +45,38 @@ class ParamHandler:
         await self.logs.open(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
         variable = await self.utils.get_str_from_line_index(line_index)
 
-        if variable.casefold() == propper_value.casefold():
-            if report_error:
-                await self.verdict.error_template(
-                    line_index,
-                    "Invalid capitalization",
-                    propper_value,
-                    self.data.LineVerdict.TYPO,
-                    ("Consider changing to ", "")
-                )
-            await self.logs.close(True)
-            return True
+        if type(propper_value) is str:
+
+            if variable.casefold() == propper_value.casefold():
+                if report_error:
+                    await self.verdict.error_template(
+                        line_index,
+                        "Invalid capitalization",
+                        propper_value,
+                        self.data.LineVerdict.TYPO,
+                        ("Consider changing to ", "")
+                    )
+
+                await self.logs.close(True)
+                return True
+
+        elif type(propper_value) is tuple or type(propper_value) is list:
+            for val in propper_value:
+
+                if variable.casefold() == val.casefold():
+                    if report_error:
+                        await self.verdict.error_template(
+                            line_index,
+                            "Invalid capitalization",
+                            val,
+                            self.data.LineVerdict.TYPO,
+                            ("Consider changing to ", "")
+                        )
+
+                    await self.logs.close(True)
+                    return True
+
+
 
         await self.logs.close(False)
         return False
@@ -116,8 +137,6 @@ class ParamHandler:
 
         """
         Checks for all non-standard variables, like doors, rooms, roles at line_index
-        \n
-        REPORTS ERRORS
         """
 
         await self.logs.open(
@@ -196,7 +215,7 @@ class ParamHandler:
             group + other_syntax_allowed if other_syntax_allowed else group
         )
 
-        if await self._is_incorrect_caps(line_index, closest_match, report_error):
+        if await self._is_incorrect_caps(line_index, group, report_error):
             await self.logs.close(False)
             return False
 

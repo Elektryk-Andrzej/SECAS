@@ -104,7 +104,7 @@ class IOHandler:
                 name=key[1][0],
                 value=key[1][1] if key[1][1] is not None else "", inline=False)
 
-            if index % 30 == 0 and index != 0:
+            if index % 20 == 0 and index != 0:
                 await self.msg.channel.send(embed=embed_to_send)
                 embed_to_send: discord.Embed = discord.Embed(title="", description="", color=0xeddb9f)
 

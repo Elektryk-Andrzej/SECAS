@@ -76,8 +76,6 @@ class ParamHandler:
                     await self.logs.close(True)
                     return True
 
-
-
         await self.logs.close(False)
         return False
 
@@ -85,15 +83,15 @@ class ParamHandler:
                             line_index: int,
                             *,
                             possible_modes: tuple or list,
-                            required: bool = True) -> bool:
+                            required: bool = True,
+                            report_error: bool = True) -> bool:
         """
         Checks if mode at line_index is in possible_modes
-        \n
-        REPORTS ERRORS
 
         :param line_index:
         :param possible_modes:
         :param required:
+        :param report_error:
         :return: bool
         """
 
@@ -115,15 +113,17 @@ class ParamHandler:
 
         closest_match = await self.utils.get_closest_match(mode, tuple(possible_modes))
 
-        if await self._is_incorrect_caps(line_index, closest_match):
+        if await self._is_incorrect_caps(line_index, closest_match, report_error):
             await self.logs.close(False)
             return False
 
-        await self.verdict.error_template(
-            line_index,
-            f"Invalid mode",
-            closest_match
-        )
+        if report_error:
+            await self.verdict.error_template(
+                line_index,
+                f"Invalid mode",
+                closest_match
+            )
+
         await self.logs.close(False)
         return False
 

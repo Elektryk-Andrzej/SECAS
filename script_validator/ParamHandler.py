@@ -87,12 +87,6 @@ class ParamHandler:
                             report_error: bool = True) -> bool:
         """
         Checks if mode at line_index is in possible_modes
-
-        :param line_index:
-        :param possible_modes:
-        :param required:
-        :param report_error:
-        :return: bool
         """
 
         if not required and not await self._is_line_index_present(line_index):
@@ -363,9 +357,11 @@ class ParamHandler:
             return True
 
         if math_supported:
-            await self.verdict.mark_uncheckable_parameters(line_index,
-                                                           True,
-                                                           "<mth>")
+            await self.verdict.mark_uncheckable_parameters(
+                line_index,
+                True,
+                "<mth>"
+            )
             await self.logs.close(True)
             return True
 
@@ -422,10 +418,7 @@ class ParamHandler:
     
     async def _strip_brackets(self, val: str) -> str:
         """
-        Strip brackets form the provided value.
-
-        :param val: str value to remove brackets from
-        :return: str value without brackets
+        Strip brackets form the provided value
         """
 
         await self.logs.open(inspect.getframeinfo(inspect.currentframe()), val=val)

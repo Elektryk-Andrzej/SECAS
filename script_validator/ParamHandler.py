@@ -432,3 +432,8 @@ class ParamHandler:
     @staticmethod
     async def sex() -> str:
         return "sex"
+
+    # saskyc momento
+    @staticmethod
+    async def autism() -> str:
+        return "saskyc"

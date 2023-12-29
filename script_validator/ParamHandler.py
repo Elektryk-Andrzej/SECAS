@@ -11,7 +11,7 @@ class ParamHandler:
 
     async def _is_valid_variable_syntax(self, line_index: int, report_error: bool = True) -> bool:
         """
-        Checks if correct variable syntax is used at line_index
+        check if correct variable syntax is used
         """
 
         await self.logs.open(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
@@ -38,8 +38,7 @@ class ParamHandler:
                                  propper_value: str | list | tuple,
                                  report_error: bool = True) -> bool:
         """
-        Checks if a variable has incorrect capitalization.
-        Returns False if line_index and closest_match have different values other than caps or are the same
+        check if a variable has incorrect capitalization
         """
 
         await self.logs.open(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
@@ -86,7 +85,7 @@ class ParamHandler:
                             required: bool = True,
                             report_error: bool = True) -> bool:
         """
-        Checks if mode at line_index is in possible_modes
+        check if param is a valid mode
         """
 
         if not required and not await self._is_line_index_present(line_index):
@@ -130,7 +129,7 @@ class ParamHandler:
                                  report_error: bool = True) -> bool:
 
         """
-        Checks for all non-standard variables, like doors, rooms, roles at line_index
+        all non-standard variables, like doors, rooms, roles
         """
 
         await self.logs.open(
@@ -220,16 +219,17 @@ class ParamHandler:
 
     async def mark_as_uncheckable(self, line_index: int, to_line_end: bool = False) -> None:
         """
-        Reports to VerdictHandler that specifed line_index cannot be verifed.
-        Used mostly for user side parameters like variables.
+        mark this as something that we cant check (a lot of stuff lol)
         """
+
         await self.verdict.mark_uncheckable_parameters(line_index, to_line_end)
         pass
 
     async def is_se_variable(self, line_index: int, report_error: bool = True) -> bool:
         """
-        Checks if a player variable is used at specifed line_index.
+        check if param is a variable
         """
+
         await self.logs.open(
             inspect.getframeinfo(inspect.currentframe()),
             line_index=line_index
@@ -250,14 +250,17 @@ class ParamHandler:
             return False
 
         if report_error:
-            await self.verdict.mark_uncheckable_parameters(line_index)
+            await self.verdict.mark_uncheckable_parameters(
+                line_index,
+                text_to_replace_with="<var>"
+            )
 
         await self.logs.close(True)
         return True
 
-    async def mark_as_text(self, start_line_index: int) -> None:
+    async def text(self, start_line_index: int) -> None:
         """
-        Mark the text as not required to be checked.
+        some text that we dont care about, like broadcast or cassie
         """
         if not await self._is_line_index_present(start_line_index):
             return
@@ -267,10 +270,13 @@ class ParamHandler:
                                                        "<txt>")
         return
 
-    async def mark_as_condition(self, start_line_index: int) -> None:
+    async def condition(self, start_line_index: int) -> None:
         """
-        Mark the condition as something not checkable.
+        mark the start point of a condition
         """
+
+        # THUNDERMAKER300 gimme code for this
+
         if not await self._is_line_index_present(start_line_index):
             return
 
@@ -321,7 +327,6 @@ class ParamHandler:
         await self.logs.close(False)
         return False
 
-    # Check if len(list) can accommodate a param at the specified index
     async def _is_line_index_present(self, line_index: int) -> bool:
         await self.logs.open(inspect.getframeinfo(inspect.currentframe()), line_index=line_index)
         action_len = len(self.data.line) - 1
@@ -341,6 +346,9 @@ class ParamHandler:
                         required: bool = True,
                         min_value: int = float('-inf'),
                         max_value: int = float('inf')) -> bool:
+        """
+        is param a number
+        """
 
         await self.logs.open(
             inspect.getframeinfo(inspect.currentframe()),
@@ -389,6 +397,9 @@ class ParamHandler:
         return True
 
     async def is_required_len(self, min_len: int, max_len) -> bool:
+        """
+        does action have all required params
+        """
         await self.logs.open(
             inspect.getframeinfo(inspect.currentframe()),
             min_len=min_len,

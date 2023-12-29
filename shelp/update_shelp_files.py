@@ -216,7 +216,7 @@ async def get_variable_shelp_info(file_path) -> list:
 
 
 async def update_actions():
-    with open("action_info.py", "w") as file:
+    with open("../shelp/action_info.py", "w") as file:
         file.write("")
 
     for dir_available in await get_available_action_dirs():
@@ -225,30 +225,30 @@ async def update_actions():
             if info[0] is None:
                 continue
 
-            with open("action_info.py", "a") as file:
+            with open("../shelp/action_info.py", "a") as file:
                 file.write(f"{info[0]}: list = {info}\n")
 
             print("DONE " + info[0])
 
-    with open("action_info.py", "r") as file:
+    with open("../shelp/action_info.py", "r") as file:
         text = file.read()
 
     text = text.replace("\\\\\\", "")
     text = text.replace("\\\\", "\\")
 
-    with open("action_info.py", "w") as file:
+    with open("../shelp/action_info.py", "w") as file:
         file.write(text)
 
 
 async def update_variables():
-    with open("variable_info.py", "w") as file:
+    with open("../shelp/variable_info.py", "w") as file:
         file.write("")
 
     for var_file in await get_available_variables():
         for var in await get_variable_shelp_info(var_file):
             if var[0] == '$"{{{RoleType.ToString().ToUpper()}}}':
                 for role in script_validator.Data.Data.Role.roles[1:]:
-                    with open("variable_info.py", "a") as file:
+                    with open("../shelp/variable_info.py", "a") as file:
                         file.write(
                             f"{str(role).upper()}: list = "
                             f"[\'{{{str(role).upper()}}}\', \'The amount of {role}\\'s alive.\', []]\n"
@@ -257,18 +257,18 @@ async def update_variables():
                     print(f"added {role}")
                 continue
 
-            with open("variable_info.py", "a") as file:
+            with open("../shelp/variable_info.py", "a") as file:
                 file.write(f"{str(var[0]).strip('}').strip('{')}: list = {var}\n")
 
             print(f"added {var[0]}")
 
-    with open("variable_info.py", "r") as file:
+    with open("../shelp/variable_info.py", "r") as file:
         text = file.read()
 
     text = text.replace("\\\\\\", "")
     text = text.replace("\\\\", "\\")
 
-    with open("variable_info.py", "w") as file:
+    with open("../shelp/variable_info.py", "w") as file:
         file.write(text)
 
 

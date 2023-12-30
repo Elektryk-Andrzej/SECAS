@@ -725,7 +725,7 @@ class ActionHandler:
         return True
 
     async def DISABLEPLAYER(self) -> bool:
-        return await self.ENABLEPLAYER()
+        return await self.ENABLEPLAYER()  # trollface emoji
 
     async def ENABLE(self) -> bool:
         if not await self.param.is_required_len(1, 1):
@@ -737,7 +737,7 @@ class ActionHandler:
         return True
 
     async def DISABLE(self) -> bool:
-        return await self.ENABLE()
+        return await self.ENABLE()  # trollface emoji
 
     async def INFECTRULE(self) -> bool:
         if not await self.param.is_required_len(2, 3):
@@ -787,15 +787,15 @@ class ActionHandler:
         return True
 
     async def PLAYERVAR(self) -> bool:
-        if not await self.param.is_required_len(2, 3):
+        if not await self.param.is_required_len(3, 3):
             return False
 
         if not await self.param.is_valid_mode(1, possible_modes=("SAVE", "DELETE", "ADD", "REMOVE")):
             return False
 
-        await self.param.mark_as_uncheckable(2)
+        await self.param.is_se_variable(2)
 
-        await self.param.mark_as_uncheckable(3)
+        await self.param.is_se_variable(3)
 
         return True
 
@@ -806,7 +806,7 @@ class ActionHandler:
         if not await self.param.is_se_variable(1):
             return False
 
-        await self.param.mark_as_uncheckable(2)
+        await self.param.mark_as_uncheckable(2, True)
 
         return True
 

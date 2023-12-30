@@ -894,11 +894,11 @@ class ActionHandler:
         return True
 
     async def CASSIEPLAYER(self) -> bool:
-        if not await self.param.is_required_len(2, None):
+        if not await self.param.is_required_len(2, 2):
             return False
 
-        await self.param.is_se_variable(1)
+        await self.param.mark_as_uncheckable(1)
 
-        await self.param.text(2)
+        await self.param.mark_as_uncheckable(2)
 
         return True

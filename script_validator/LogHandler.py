@@ -15,6 +15,7 @@ class LogHandler:
         :param reason: Reason of the log
         :return: None
         """
+        return
 
         prefix: str = self.data.log_depth_char * self.data.log_depth
 
@@ -45,6 +46,7 @@ class LogHandler:
         :param kwargs: all args provided
         :return: None
         """
+        return
         self.data.log_depth += 1
         prefix: str = self.data.log_depth_char * self.data.log_depth
         kwargs_formatted: str = ""
@@ -83,6 +85,7 @@ class LogHandler:
         :param output: the value returned by the method
         :return: provided output
         """
+        return
 
         prefix: str = self.data.log_depth_char * self.data.log_depth
         output_type: str = str(type(output)).strip('<class ').strip('\'>')

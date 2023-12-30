@@ -76,6 +76,8 @@ class ActionHandler:
             "WAITMIL": self.WAITMIL,
             "WAITSEC": self.WAITSEC,
             "WAITUNTIL": self.WAITUNTIL,
+
+            "CASSIEPLAYER": self.CASSIEPLAYERq
         }
 
     async def HINT(self) -> bool:
@@ -892,11 +894,11 @@ class ActionHandler:
         return True
 
     async def CASSIEPLAYER(self) -> bool:
-        if not await self.param.is_required_len(2, 2):
+        if not await self.param.is_required_len(2, None):
             return False
 
-        await self.param.mark_as_uncheckable(1)
+        await self.param.is_se_variable(1)
 
-        await self.param.mark_as_uncheckable(2)
+        await self.param.text(2)
 
         return True

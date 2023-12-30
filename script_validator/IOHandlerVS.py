@@ -82,7 +82,7 @@ class IOHandler:
                         await self.verdict_handler.line_verdict(
                             self.data.LineVerdict.NOT_CHECKABLE,
                             " ".join(self.data.line),
-                            "SECAS ERROR; report to dev"
+                            "Unknown error"
                         )
 
             elif "#" in line[0]:

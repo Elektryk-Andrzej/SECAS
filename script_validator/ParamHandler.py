@@ -20,13 +20,19 @@ class ParamHandler:
 
         if not (variable[0] == "{" and variable[-1] == "}"):
             if report_error:
-                await self.verdict.error_template(line_index, "Invalid variable syntax")
+                if not ("{" in variable or "}" in variable):
+                    await self.verdict.error_template(line_index, "No brackets provided")
+                else:
+                    await self.verdict.error_template(line_index, "Malformed brackets")
+
             await self.logs.close(False)
             return False
 
         variable = variable[1:-1]
 
         if "{" in variable or "}" in variable:
+            if report_error:
+                await self.verdict.error_template(line_index, "Nested variables don't exist")
             await self.logs.close(False)
             return False
 

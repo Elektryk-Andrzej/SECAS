@@ -101,7 +101,7 @@ class IOHandler:
                 closest_match = await self.utils.get_closest_match(
                     action_name, tuple(self.action_handler.actions.keys())
                 )
-                await self.verdict_handler.error_template(0, "Invalid action", closest_match)
+                await self.verdict_handler.error_template(0, "What is this?", closest_match)
 
         if self.data.code_index == 0:
             await self.msg.reply("No code found! First line is always ignored.")

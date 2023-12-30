@@ -6,7 +6,8 @@ from bot_main.info_embed import info_embed
 from script_validator import VerdictHandler, LogHandler, IOHandlerVS, ParamHandler, ActionHandler, Utils, Data
 from label_visualiser import IOHandlerVL
 from tokens.discord_token import DISCORD_TOKEN
-from shelp import IOHandlerSH
+from shelp import IOHandlerSH, update_shelp_files
+from easter_eggs import kissmass
 import command_prefixes as cmd
 
 bot = discord.ext.commands.Bot(command_prefix=".", intents=discord.Intents.all())
@@ -28,23 +29,45 @@ async def on_ready():
 
 
 @bot.event
-async def on_message(message: discord.Message):
-    if message.author.id == bot.user.id:
+async def on_message(msg: discord.Message):
+    if msg.author.bot:
         return
 
-    if (await command_trigger(message.content, cmd.info)
-            or str(bot.user.id) in str(message.content)):
-        await info_embed(message, bot)
+    if await command_trigger(msg.content, cmd.info):
+        await info_embed(msg, bot)
+        return
 
-    elif await command_trigger(message.content, cmd.visualise_labels):
-        lv = IOHandlerVL.IOHandler(message, bot)
+    if msg.author.id == 762016625096261652 and await command_trigger(msg.content, "ush"):
+        try:
+            await update_shelp_files.update_variables()
+            await msg.channel.send("Updated variables")
+
+            await update_shelp_files.update_actions()
+            await msg.channel.send("Updated actions")
+
+        except Exception as e:
+            await msg.reply(f"There has been an exception while updating shelp\n\t{e}")
+
+        else:
+            await msg.reply("Everything has been updated!")
+
+        return
+
+    if msg.mentions and len(msg.mentions) == 1:
+        member: discord.Member = msg.mentions[0]
+        if member.id == 762016625096261652 and msg.author.id == 703301663049384058:
+            await kissmass.kissmass(msg)
+            return
+
+    elif await command_trigger(msg.content, cmd.visualise_labels):
+        lv = IOHandlerVL.IOHandler(msg, bot)
         await lv.visualise()
 
-    elif await command_trigger(message.content, cmd.script_help):
-        sh = IOHandlerSH.IOHandler(message)
+    elif await command_trigger(msg.content, cmd.script_help):
+        sh = IOHandlerSH.IOHandler(msg)
         await sh.process_help_request()
 
-    elif await command_trigger(message.content, cmd.verify_script):
+    elif await command_trigger(msg.content, cmd.verify_script):
         data = Data.Data()
         time.sleep(.1)
 
@@ -63,16 +86,16 @@ async def on_message(message: discord.Message):
         data.action_handler_object = ActionHandler.ActionHandler(data)
         time.sleep(.1)
 
-        data.io_handler_object = IOHandlerVS.IOHandler(data, message, bot)
+        data.io_handler_object = IOHandlerVS.IOHandler(data, msg, bot)
 
         """try:"""
 
         await data.io_handler_object.proccess_request()
 
-        if await command_trigger(message.content, "vsd"):
+        if await command_trigger(msg.content, cmd.verify_script + "d"):
             with open(data.log_file_name, "rb") as file:
                 # noinspection PyTypeChecker
-                await message.channel.send(file=discord.File(file, "result.txt"))
+                await msg.channel.send(file=discord.File(file, "result.txt"))
 
         """except Exception as e:
             await message.reply(f"ERROR: `{e}`")
@@ -81,8 +104,8 @@ async def on_message(message: discord.Message):
                 # noinspection PyTypeChecker
                 await message.channel.send(file=discord.File(file, "result.txt"))"""
 
-    elif await command_trigger(message.content, "v"):
-        await message.reply(
+    elif await command_trigger(msg.content, "v"):
+        await msg.reply(
             "Prefix `.v` is no longer supported\n"
             "Check `.i` for more info."
         )

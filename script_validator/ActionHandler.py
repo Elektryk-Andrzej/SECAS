@@ -85,7 +85,7 @@ class ActionHandler:
         if not await self.param.is_number(1, float):
             return False
 
-        await self.param.mark_as_text(2)
+        await self.param.text(2)
 
         return True
 
@@ -99,7 +99,7 @@ class ActionHandler:
         if not await self.param.is_number(2, float):
             return False
 
-        await self.param.mark_as_text(3)
+        await self.param.text(3)
 
         return True
 
@@ -113,7 +113,7 @@ class ActionHandler:
         if not await self.param.is_number(2, int):
             return False
 
-        await self.param.mark_as_text(3)
+        await self.param.text(3)
 
         return True
 
@@ -127,7 +127,7 @@ class ActionHandler:
         if not await self.param.is_number(2, float):
             return False
 
-        await self.param.mark_as_text(3)
+        await self.param.text(3)
 
         return True
 
@@ -138,7 +138,7 @@ class ActionHandler:
         if not await self.param.is_number(1, float):
             return False
 
-        await self.param.mark_as_text(2)
+        await self.param.text(2)
 
         return True
 
@@ -152,7 +152,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, None):
             return False
 
-        await self.param.mark_as_text(1)
+        await self.param.text(1)
 
         return True
 
@@ -160,7 +160,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, None):
             return False
 
-        await self.param.mark_as_text(1)
+        await self.param.text(1)
 
         return True
 
@@ -277,7 +277,7 @@ class ActionHandler:
         if not await self.param.is_label(2):
             return False
 
-        await self.param.mark_as_condition(3)
+        await self.param.condition(3)
 
         return True
 
@@ -285,7 +285,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, None):
             return False
 
-        await self.param.mark_as_condition(1)
+        await self.param.condition(1)
 
         return True
 
@@ -299,7 +299,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, None):
             return False
 
-        await self.param.mark_as_condition(1)
+        await self.param.condition(1)
 
         return True
 
@@ -369,7 +369,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, 1):
             return False
 
-        await self.param.mark_as_text(1)
+        await self.param.text(1)
 
         return True
 
@@ -377,7 +377,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, None):
             return False
 
-        await self.param.mark_as_text(1)
+        await self.param.text(1)
 
         return True
 
@@ -385,7 +385,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, None):
             return False
 
-        await self.param.mark_as_text(1)
+        await self.param.text(1)
 
         return True
 
@@ -393,7 +393,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, None):
             return False
 
-        await self.param.mark_as_text(1)
+        await self.param.text(1)
 
         return True
 
@@ -404,7 +404,7 @@ class ActionHandler:
         if not await self.param.is_valid_mode(1, possible_modes=("SET", "CLEAR")):
             return False
 
-        await self.param.mark_as_text(2)
+        await self.param.text(2)
 
         return True
 
@@ -418,7 +418,7 @@ class ActionHandler:
         if not await self.param.is_number(2, float, required=False):
             return False
 
-        await self.param.mark_as_text(3)
+        await self.param.text(3)
 
         return True
 
@@ -462,7 +462,7 @@ class ActionHandler:
         if not await self.param.is_se_variable(1):
             return False
 
-        await self.param.mark_as_text(2)
+        await self.param.text(2)
 
         return True
 
@@ -830,7 +830,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, None):
             return False
 
-        await self.param.mark_as_condition(1)
+        await self.param.condition(1)
 
         return True
 
@@ -882,6 +882,16 @@ class ActionHandler:
         return True
 
     async def HTTPPOST(self) -> bool:
+        if not await self.param.is_required_len(2, 2):
+            return False
+
+        await self.param.mark_as_uncheckable(1)
+
+        await self.param.mark_as_uncheckable(2)
+
+        return True
+
+    async def CASSIEPLAYER(self) -> bool:
         if not await self.param.is_required_len(2, 2):
             return False
 

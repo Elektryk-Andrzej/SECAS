@@ -879,7 +879,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, 1):
             return False
 
-        await self.param.mark_as_uncheckable(1)
+        await self.param.mark_as_uncheckable(1, text_to_replace_with="<url>")
 
         return True
 
@@ -887,14 +887,14 @@ class ActionHandler:
         if not await self.param.is_required_len(2, 2):
             return False
 
-        await self.param.mark_as_uncheckable(1)
+        await self.param.mark_as_uncheckable(1, text_to_replace_with="<url>")
 
-        await self.param.mark_as_uncheckable(2)
+        await self.param.mark_as_uncheckable(2, text_to_replace_with="<jsn>")
 
         return True
 
     async def CASSIEPLAYER(self) -> bool:
-        if not await self.param.is_required_len(2, 2):
+        if not await self.param.is_required_len(2, None):
             return False
 
         await self.param.is_se_variable(1)

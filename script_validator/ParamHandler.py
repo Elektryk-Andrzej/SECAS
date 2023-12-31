@@ -223,13 +223,19 @@ class ParamHandler:
         await self.logs.close(False)
         return False
 
-    async def mark_as_uncheckable(self, line_index: int, to_line_end: bool = False) -> None:
+    async def mark_as_uncheckable(self,
+                                  line_index: int,
+                                  to_line_end: bool = False,
+                                  text_to_replace_with: str = "<cck>") -> None:
         """
         mark this as something that we cant check (a lot of stuff lol)
         """
 
-        await self.verdict.mark_uncheckable_parameters(line_index, to_line_end)
-        pass
+        await self.verdict.mark_uncheckable_parameters(
+            line_index,
+            to_line_end,
+            text_to_replace_with
+        )
 
     async def is_se_variable(self, line_index: int, report_error: bool = True) -> bool:
         """
@@ -370,23 +376,35 @@ class ParamHandler:
             await self.logs.close(True)
             return True
 
+        to_be_number = await self.utils.get_str_from_line_index(line_index)
+        numbers = '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'
+
+        is_valid_for_float: bool = all([(char in numbers or char == ".") for char in to_be_number])
+        is_valid_for_int: bool = all([(char in numbers) for char in to_be_number])
+
+        if var_type is float and is_valid_for_float:
+            await self.logs.close(True)
+            return True
+
+        if var_type is int:
+            if is_valid_for_int:
+                await self.logs.close(True)
+                return True
+
+            elif is_valid_for_float:
+                await self.verdict.error_template(
+                    line_index,
+                    "Invalid number",
+                    verdict_type=self.data.LineVerdict.TYPO,
+                    footer="It will work, but can lead to unexpected results"
+                )
+
         if math_supported:
             await self.verdict.mark_uncheckable_parameters(
                 line_index,
                 True,
                 "<mth>"
             )
-            await self.logs.close(True)
-            return True
-
-        to_be_number = await self.utils.get_str_from_line_index(line_index)
-        numbers = '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'
-
-        if var_type is int and all([(char in numbers) for char in to_be_number]):
-            await self.logs.close(True)
-            return True
-
-        elif var_type is float and all([(char in numbers or char == ".") for char in to_be_number]):
             await self.logs.close(True)
             return True
 

@@ -6,12 +6,13 @@ import inspect
 class IOHandler:
     def __init__(self, data: Data.Data, msg, bot):
         self.data: Data.Data = data
-        self.bot = bot
-        self.msg = msg
+        self.bot: discord.Client = bot
+        self.msg: discord.Message = msg
         self.verdict_handler: VerdictHandler.VerdictHandler = data.verdict_handler_object
         self.action_handler: ActionHandler.ActionHandler = data.action_handler_object
         self.utils: Utils.Utils = data.utils_object
         self.logs: LogHandler.LogHandler = data.log_handler_object
+        self.embeds_to_send: list = []
 
     async def format_code(self, count_first_line: bool) -> list:
         await self.logs.open(
@@ -39,6 +40,34 @@ class IOHandler:
                 await self.logs.log(f"Registered a new label: \"{label}\"")
 
         await self.logs.close(None)
+
+    async def run_check_for_action(self) -> bool:
+        action_name: str = self.data.line[0]
+
+        if action_name in self.action_handler.actions:
+            action_done = await self.action_handler.actions[action_name]()
+
+            if action_done:
+                await self.verdict_handler.line_verdict(self.data.LineVerdict.PASSED)
+
+            else:
+                if not self.data.line_verdict_set:
+                    await self.verdict_handler.line_verdict(
+                        self.data.LineVerdict.NOT_CHECKABLE,
+                        " ".join(self.data.line),
+                        "Unknown error"
+                    )
+
+            return True
+
+        if action_name.upper() in self.action_handler.actions:
+            await self.verdict_handler.error_template(
+                0,
+                "Action is not capitalized",
+            )
+            return True
+
+        return False
 
     async def proccess_request(self) -> None:
         await self.logs.open(
@@ -71,19 +100,8 @@ class IOHandler:
             self.data.line_verdict_set = False
             self.data.line_to_copy_for_verdict_processing = line
 
-            if (action_name := line[0]) in self.action_handler.actions:
-                action_done = await self.action_handler.actions[action_name]()
-
-                if action_done:
-                    await self.verdict_handler.line_verdict(self.data.LineVerdict.PASSED)
-
-                else:
-                    if not self.data.line_verdict_set:
-                        await self.verdict_handler.line_verdict(
-                            self.data.LineVerdict.NOT_CHECKABLE,
-                            " ".join(self.data.line),
-                            "Unknown error"
-                        )
+            if await self.run_check_for_action():
+                continue
 
             elif "#" in line[0]:
                 await self.verdict_handler.line_verdict(self.data.LineVerdict.COMMENT)
@@ -99,7 +117,8 @@ class IOHandler:
 
             else:
                 closest_match = await self.utils.get_closest_match(
-                    action_name, tuple(self.action_handler.actions.keys())
+                    self.data.line[0],
+                    tuple(self.action_handler.actions.keys())
                 )
                 await self.verdict_handler.error_template(0, "What is this?", closest_match)
 
@@ -117,11 +136,13 @@ class IOHandler:
         await self.logs.close(None)
 
     async def get_overview_embed_color(self) -> int:
-        for element in self.data.processed_lines:
-            if element[0] == "🟥":
-                return 0xdd2e44
-        else:
+        if any((element[0] == "🟥") for element in self.data.processed_lines):
+            return 0xdd2e44
+
+        if any((element[0] == "🟨") for element in self.data.processed_lines):
             return 0xfdcb58
+
+        return 0x77b255
 
     async def format_processed_lines_to_overview(self) -> list:
         await self.logs.open(inspect.getframeinfo(inspect.currentframe()))
@@ -208,38 +229,31 @@ class IOHandler:
 
     async def send_result_embed(self) -> None:
         await self.logs.open(inspect.getframeinfo(inspect.currentframe()))
-        color_overview = await self.get_overview_embed_color()
-        color_no_error = 0x77b255
+        color = await self.get_overview_embed_color()
+
+        for embed_content_list in await self.format_processed_lines_to_overview():
+            embed_content = "".join(embed_content_list)
+
+            self.embeds_to_send.append(
+                discord.Embed(
+                    description=embed_content,
+                    color=color
+                )
+            )
 
         if self.data.show_overview:
-            for embed_content_list in await self.format_processed_lines_to_overview():
-                embed_content = "".join(embed_content_list)
-
-                await self.msg.channel.send(
-                    embed=discord.Embed(
-                        description=embed_content,
-                        color=color_overview
-                    )
-                )
-
             for embed_content_list in await self.format_processed_lines_to_error_summary():
                 embed_content = "".join(embed_content_list)
 
-                await self.msg.channel.send(embed=discord.Embed(
+                self.embeds_to_send.append(
+                    discord.Embed(
                         description=embed_content,
-                        color=color_overview
+                        color=color
                     )
                 )
 
-        else:
-            for embed_content_list in await self.format_processed_lines_to_overview():
-                embed_content = "".join(embed_content_list)
-
-                await self.msg.channel.send(embed=discord.Embed(
-                        description=embed_content,
-                        color=color_no_error
-                    )
-                )
+        for embed_chunk in [self.embeds_to_send[i:i + 10] for i in range(0, len(self.embeds_to_send), 10)]:
+            await self.msg.channel.send(embeds=embed_chunk)
 
         await self.logs.close(None)
         return

@@ -144,18 +144,26 @@ class IOHandler:
 
         return 0x77b255
 
+    async def normalize_line_number_indent(self, line_number: str) -> str:
+        if type(line_number) is not str:
+            line_number = str(line_number)
+        num_of_nums_in_code_len: int = len(str(len(self.data.code)))
+        return " " * (num_of_nums_in_code_len - len(line_number)) + line_number
+
     async def format_processed_lines_to_overview(self) -> list:
         await self.logs.open(inspect.getframeinfo(inspect.currentframe()))
         character_limit: int = 2000
         overview_lines: list = []
 
         for element in self.data.processed_lines:
-            color, normal_line, _, _, index, _, _, _ = element
+            color, raw_line, _, _, line_num, _, _, _ = element
+
+            line_num = await self.normalize_line_number_indent(line_num)
 
             if color != "⬛":
-                overview_lines.append(f"`{index}`{color} `{normal_line}`\n")
+                overview_lines.append(f"`{line_num}`{color} `{raw_line}`\n")
             else:
-                overview_lines.append(f"`{index}`{color}\n")
+                overview_lines.append(f"`{line_num}`{color}\n")
 
         devided_overview_lines = []
         current_list = []
@@ -180,10 +188,12 @@ class IOHandler:
         error_summary_lines: list = []
 
         for element in self.data.processed_lines:
-            color, _, line_to_print, reason, index, closest_match, closest_match_print_string, footer = element
+            color, _, line_to_print, reason, line_num, closest_match, closest_match_print_string, footer = element
 
             if not reason or not line_to_print:
                 continue
+
+            line_num = await self.normalize_line_number_indent(line_num)
 
             new_line_prefix = "\nㅤ\n" if len(error_summary_lines) != 0 else ""
 
@@ -191,7 +201,7 @@ class IOHandler:
                 error_summary_lines.append(
                     f"{new_line_prefix}"
                     f"## > {reason}\n"
-                    f"`{index}`{color} `{line_to_print}`\n"
+                    f"`{line_num}`{color} `{line_to_print}`\n"
                     f"### {closest_match_print_string[0]}`{closest_match}`{closest_match_print_string[1]}"
                 )
 
@@ -199,7 +209,7 @@ class IOHandler:
                 error_summary_lines.append(
                     f"{new_line_prefix}"
                     f"## > {reason}\n"
-                    f"`{index}`{color} `{line_to_print}`\n"
+                    f"`{line_num}`{color} `{line_to_print}`\n"
                     f"### {footer}"
                 )
 
@@ -207,7 +217,7 @@ class IOHandler:
                 error_summary_lines.append(
                     f"{new_line_prefix}"
                     f"## > {reason}\n"
-                    f"`{index}`{color} `{line_to_print}`"
+                    f"`{line_num}`{color} `{line_to_print}`"
                 )
 
         devided_error_summary_lines = []

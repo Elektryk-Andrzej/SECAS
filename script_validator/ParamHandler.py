@@ -377,10 +377,27 @@ class ParamHandler:
             return True
 
         to_be_number = await self.utils.get_str_from_line_index(line_index)
-        numbers = '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'
+        allowed_chars: tuple = '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-'
 
-        is_valid_for_float: bool = all([(char in numbers or char == ".") for char in to_be_number])
-        is_valid_for_int: bool = all([(char in numbers) for char in to_be_number])
+        if min_value >= 0 or to_be_number.count("-") == 0:
+            pass
+
+        elif to_be_number.count("-") > 1:
+            await self.verdict.error_template(
+                line_index,
+                "More than one minus sign"
+            )
+            return False
+
+        elif to_be_number[0] != "-":
+            await self.verdict.error_template(
+                line_index,
+                "Incorrect minus sign placement"
+            )
+            return False
+
+        is_valid_for_float: bool = all([(char in allowed_chars or char == ".") for char in to_be_number])
+        is_valid_for_int: bool = all([(char in allowed_chars) for char in to_be_number])
 
         if var_type is float and is_valid_for_float:
             await self.logs.close(True)

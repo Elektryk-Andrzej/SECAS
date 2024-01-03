@@ -1,6 +1,7 @@
 from script_validator import Data
 
 
+# noinspection PyUnreachableCode,PyUnusedLocal
 class LogHandler:
     def __init__(self, data: Data.Data):
         self.data: Data.Data = data

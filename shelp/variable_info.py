@@ -1,6 +1,8 @@
+# noinspection PyPep8
 VEXISTS: list = ['{VEXISTS}', 'Whether or not the variable with the given name exists in the current context.', [['variableName', 'string', 'true', 'The name of the variable.']]]
 CASSIESPEAKING: list = ['{CASSIESPEAKING}', 'Whether or not CASSIE is currently speaking.', []]
 LOBBYLOCKED: list = ['{LOBBYLOCKED}', 'Indicates if the lobby is locked.', []]
+# noinspection PyPep8
 ISRUNNING: list = ['{ISRUNNING}', 'Whether or not a specific script is running.', [['scriptName', 'string', 'true', 'The name of the script.']]]
 CHANCE: list = ['{CHANCE}', 'Always returns a random decimal between 0-1.', []]
 CHANCE3: list = ['{CHANCE3}', 'Always returns a random number from 1-3.', []]
@@ -11,18 +13,23 @@ CHANCE100: list = ['{CHANCE100}', 'Always returns a random number from 1-100.', 
 ESCAPES: list = ['{ESCAPES}', 'The amount of escapes. Equivalent to {CLASSDESCAPES} + {SCIENTISTESCAPES}.', []]
 CLASSDESCAPES: list = ['{CLASSDESCAPES}', 'The amount of Class-D escapes.', []]
 SCIENTISTESCAPES: list = ['{SCIENTISTESCAPES}', 'The amount of Scientist escapes.', []]
+# noinspection PyPep8
 FILTER: list = ['{FILTER}', 'Filters a player variable by a certain type.', [['name', 'string', 'true', 'The name of the variable to filter.'], ['type', 'string', 'true', 'The mode to use to filter. Valid modes: ROLE, ZONE, TEAM, ROOM, USERID, INV, HELDITEM, ISSTAFF'], ['input', 'string', 'true', 'What to use as the filter (RoleType, ZoneType, etc)']]]
+# noinspection PyPep8
 INDEXVAR: list = ['{INDEXVAR}', 'Indexes a player variable and gets ONE player at the specified position.', [['name', 'string', 'true', 'The name of the variable to index.'], ['type', 'int', 'true', 'The index. Number variables can be used (if they are decimal, the decimal portion will be removed)']]]
 INTERCOMREADY: list = ['{INTERCOMREADY}', 'Indicates whether or not the intercom is ready to be used.', []]
 INTERCOMINUSE: list = ['{INTERCOMINUSE}', 'Indicates whether or not the intercom is currently being used.', []]
 INTERCOMCOOLDOWN: list = ['{INTERCOMCOOLDOWN}', "Indicates how much time is left on the intercom\'s cooldown.", []]
 INTERCOMUSETIME: list = ['{INTERCOMUSETIME}', 'Indicates how much time is left for the intercom speaker to speak.', []]
+# noinspection PyPep8
 INTERCOMSPEAKER: list = ['{INTERCOMSPEAKER}', 'Gets the amount of players who are speaking on the intercom (always either 0 or 1).', []]
+# noinspection PyPep8
 KILLS: list = ['{KILLS}', 'The amount of kills, the amount of kills per-role, or -1 if an invalid role type is provided.', [['role', 'RoleTypeId', 'false', 'The role or team to filter by. Optional.']]]
 SCPKILLS: list = ['{SCPKILLS}', 'The amount of SCP-related kills.', []]
 DECONTAMINATED: list = ['{DECONTAMINATED}', 'Whether or not Light Containment Zone has been decontaminated.', []]
 ENGAGEDGENERATORS: list = ['{ENGAGEDGENERATORS}', 'The amount of generators which are fully engaged.', []]
 SCP914ACTIVE: list = ['{SCP914ACTIVE}', 'Whether or not SCP-914 is currently active.', []]
+# noinspection PyPep8
 DOORSTATE: list = ['{DOORSTATE}', "Reveals the state of a door (either \'OPEN\' or \'CLOSED\').", [['door', 'DoorType', 'true', 'The door to get the state of.']]]
 PLAYERS: list = ['{PLAYERS}', 'The amount of players in the server.', []]
 NPCS: list = ['{NPCS}', 'The amount of NPCs in the server.', []]
@@ -30,6 +37,7 @@ PLAYERSALIVE: list = ['{PLAYERSALIVE}', 'The amount of alive players in the serv
 PLAYERSDEAD: list = ['{PLAYERSDEAD}', 'The amount of dead players in the server.', []]
 HUMANS: list = ['{HUMANS}', 'The amount of humans that are currently alive.', []]
 SERVERSTAFF: list = ['{SERVERSTAFF}', 'The amount of staff on the server (RA access)', []]
+# noinspection PyPep8
 INROOM: list = ['{INROOM}', 'The amount of players in the specified room.', [['roomType', 'RoomType', 'false', 'The room to filter by.']]]
 NONE: list = ['{NONE}', 'Will always be an empty variable with no players.', []]
 GUARDS: list = ['{GUARDS}', 'The amount of facility guards alive. Equivalent to {FACILITYGUARD}', []]
@@ -67,15 +75,20 @@ ROUNDINPROGRESS: list = ['{ROUNDINPROGRESS}', 'Whether or not the round is in pr
 ROUNDSTARTED: list = ['{ROUNDSTARTED}', 'Whether or not the round has started.', []]
 ROUNDMINUTES: list = ['{ROUNDMINUTES}', 'The amount of elapsed round time, in minutes.', []]
 ROUNDSECONDS: list = ['{ROUNDSECONDS}', 'The amount of elapsed round time, in seconds.', []]
+# noinspection PyPep8
 LOBBYTIME: list = ['{LOBBYTIME}', 'The amount of time remaining before the round starts. -1 if round already started.', []]
 HEAVILYMODDED: list = ['{HEAVILYMODDED}', 'Whether or not this server is heavily modded.', []]
 IP: list = ['{IP}', "This server\'s IP address.", []]
 PORT: list = ['{PORT}', "This server\'s PORT.", []]
 MAXPLAYERS: list = ['{MAXPLAYERS}', "This server\'s maximum player count.", []]
 VERIFIED: list = ['{VERIFIED}', 'Whether or not this server is verified.', []]
+# noinspection PyPep8
 LEN: list = ['{LEN}', 'Reveals the length of a player variable.', [['name', 'string', 'true', 'The name of the player variable to retrieve the length of.']]]
+# noinspection PyPep8
 C: list = ['{C}', 'Convert a player variable into a format to use with commands.', [['name', 'string', 'true', 'The name of the player variable.']]]
+# noinspection PyPep8
 SHOW: list = ['{SHOW}', 'Reveal certain properties about the players in a player variable. This variable is designed to only be used with a player variable containing one player. However, it CAN be used with multiple players, and will list the display in the form of a comma-separated list.', [['name', 'string', 'true', 'The name of the player variable to show.'], ['selector', 'string', 'false', 'The type to show. Defaults to \"NAME\" Options: NAME, USERID, PLAYERID, ROLE, TEAM, ROOM, ZONE, HP, HEALTH, INV, INVCOUNT, HELDITEM.']]]
+# noinspection PyPep8
 RANDOMROOM: list = ['{RANDOMROOM}', 'Gets the RoomType of a random room. Can be filtered by zone.', [['zone', 'ZoneType', 'false', 'A zone to filter by (optional).']]]
 LASTRESPAWNTEAM: list = ['{LASTRESPAWNTEAM}', 'The most recent team that spawn.', []]
 NEXTWAVE: list = ['{NEXTWAVE}', 'The next team to spawn, either NineTailedFox, ChaosInsurgency, or None.', []]
@@ -85,7 +98,9 @@ NTFTICKETS: list = ['{NTFTICKETS}', 'The amount of NTF tickets.', []]
 CHAOSTICKETS: list = ['{CHAOSTICKETS}', 'The amount of Chaos Insurgency tickets.', []]
 TOTALWAVES: list = ['{TOTALWAVES}', 'The amount of respawn waves.', []]
 TIMEUNTILNEXTWAVE: list = ['{TIMEUNTILNEXTWAVE}', 'The amount of time until the next respawn wave, in seconds.', []]
+# noinspection PyPep8
 TIMESINCELASTWAVE: list = ['{TIMESINCELASTWAVE}', 'The amount of time since the last respawn wave, in seconds. If a respawn wave has not occurred yet, this value will be very large.', []]
+# noinspection PyPep8
 RESPAWNEDPLAYERS: list = ['{RESPAWNEDPLAYERS}', 'The amount of players that have respawned in the most recent respawn wave.', [['roleType', 'RoleTypeId', 'false', 'The role to filter by.']]]
 CHAOSSPAWNS: list = ['{CHAOSSPAWNS}', 'Total amount of Chaos Insurgency respawns.', []]
 MTFSPAWNS: list = ['{MTFSPAWNS}', 'Total amount of Mobile Task Force respawns.', []]

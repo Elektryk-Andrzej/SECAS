@@ -2,7 +2,7 @@ import requests
 import re
 import asyncio
 from tokens.github_token import GITHUB_TOKEN
-import script_validator.Data
+import scpsl_vars
 
 headers = {
     'Authorization': GITHUB_TOKEN,
@@ -28,7 +28,8 @@ async def get_available_action_dirs() -> list:
 
 
 async def get_available_actions(directory: str) -> list:
-    api_endpoint = f'https://api.github.com/repos/Thundermaker300/ScriptedEvents/contents/ScriptedEvents/Actions/{directory}'
+    api_endpoint = (f'https://api.github.com/repos/Thundermaker300/ScriptedEvents/'
+                    f'contents/ScriptedEvents/Actions/{directory}')
     response = requests.get(api_endpoint, headers=headers)
     r: list = []
 
@@ -42,6 +43,7 @@ async def get_available_actions(directory: str) -> list:
     return r
 
 
+# noinspection PyBroadException
 async def get_action_shelp_info(file_path) -> list:
     url = f'https://raw.githubusercontent.com/Thundermaker300/ScriptedEvents/main/ScriptedEvents/Actions/{file_path}'
     response = requests.get(url, headers=headers)
@@ -133,6 +135,7 @@ async def get_available_variables() -> list:
     return r
 
 
+# noinspection PyBroadException
 async def get_variable_shelp_info(file_path) -> list:
     url = f'https://raw.githubusercontent.com/Thundermaker300/ScriptedEvents/main/ScriptedEvents/Variables/{file_path}'
     response = requests.get(url, headers=headers)
@@ -247,7 +250,7 @@ async def update_variables():
     for var_file in await get_available_variables():
         for var in await get_variable_shelp_info(var_file):
             if var[0] == '$"{{{RoleType.ToString().ToUpper()}}}':
-                for role in script_validator.Data.Data.Role.roles[1:]:
+                for role in scpsl_vars.Role.roles[1:]:
                     with open("../shelp/variable_info.py", "a") as file:
                         file.write(
                             f"{str(role).upper()}: list = "

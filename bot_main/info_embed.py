@@ -84,7 +84,7 @@ class SelectMenu(discord.ui.View):
 
 async def info_embed(message: discord.Message, bot: discord.Client):
     select_menu = SelectMenu(message, bot)
-    embed = await select_menu.send_initial_embed()
+    await select_menu.send_initial_embed()
 
     await message.channel.send(
         view=select_menu

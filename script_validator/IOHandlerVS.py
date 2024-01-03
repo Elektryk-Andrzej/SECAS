@@ -106,12 +106,23 @@ class IOHandler:
                 continue
 
             elif "#" in line[0]:
+                await self.verdict_handler.mark_uncheckable_parameters(
+                    1 if len(line) > 1 else 0,
+                    True,
+                    "<cmt>"
+                )
+
                 await self.verdict_handler.line_verdict(self.data.LineVerdict.COMMENT)
 
             elif ":" in line[-1] and len(line) == 1:
                 await self.verdict_handler.line_verdict(self.data.LineVerdict.LABEL)
 
             elif "!--" in line[0] and len(self.data.line) == 2:
+                await self.verdict_handler.mark_uncheckable_parameters(
+                    1,
+                    True,
+                    "<flg>"
+                )
                 await self.verdict_handler.line_verdict(self.data.LineVerdict.FLAG)
 
             elif line == ['']:

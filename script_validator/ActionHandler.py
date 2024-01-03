@@ -1,3 +1,4 @@
+import scpsl_vars
 from script_validator import Data, ParamHandler, Utils, VerdictHandler
 
 
@@ -197,7 +198,7 @@ class ActionHandler:
         if not await self.param.is_se_variable(1):
             return False
 
-        if not await self.param.is_non_se_variable(2, var_type=self.data.Item):
+        if not await self.param.is_non_se_variable(2, var_type=scpsl_vars.Item):
             return False
 
         if not await self.param.is_number(3, int, required=False):
@@ -212,7 +213,7 @@ class ActionHandler:
         if not await self.param.is_se_variable(1):
             return False
 
-        if not await self.param.is_non_se_variable(2, var_type=self.data.Item):
+        if not await self.param.is_non_se_variable(2, var_type=scpsl_vars.Item):
             return False
 
         if not await self.param.is_number(3, int, required=False):
@@ -225,7 +226,7 @@ class ActionHandler:
             return False
 
         if not await self.param.is_non_se_variable(1,
-                                                   var_type=self.data.Room,
+                                                   var_type=scpsl_vars.Room,
                                                    other_syntax_allowed=("*", "ALL")):
             return False
 
@@ -240,7 +241,7 @@ class ActionHandler:
             return False
 
         if not await self.param.is_non_se_variable(1,
-                                                   var_type=self.data.Room,
+                                                   var_type=scpsl_vars.Room,
                                                    other_syntax_allowed=("*", "ALL")):
             return False
 
@@ -251,7 +252,7 @@ class ActionHandler:
             return False
 
         if not await self.param.is_non_se_variable(1,
-                                                   var_type=self.data.Room,
+                                                   var_type=scpsl_vars.Room,
                                                    other_syntax_allowed=("*", "ALL")):
             return False
 
@@ -314,7 +315,7 @@ class ActionHandler:
             return False
 
         if not await self.param.is_non_se_variable(2,
-                                                   var_type=self.data.Door,
+                                                   var_type=scpsl_vars.Door,
                                                    other_syntax_allowed=("*", "ALL")):
             return False
 
@@ -339,7 +340,7 @@ class ActionHandler:
             if not await self.param.is_required_len(2, 2):
                 return False
 
-            if not await self.param.is_non_se_variable(2, var_type=self.data.Role):
+            if not await self.param.is_non_se_variable(2, var_type=scpsl_vars.Role):
                 return False
 
         elif mode_selected == "PLAYERS":
@@ -434,7 +435,7 @@ class ActionHandler:
         if not await self.param.is_se_variable(2):
             return False
 
-        if not await self.param.is_non_se_variable(3, var_type=self.data.Effect):
+        if not await self.param.is_non_se_variable(3, var_type=scpsl_vars.Effect):
             return False
 
         if not await self.param.is_number(4, float, required=False):
@@ -511,7 +512,7 @@ class ActionHandler:
         if not await self.param.is_se_variable(1):
             return False
 
-        if not await self.param.is_non_se_variable(2, var_type=self.data.Door):
+        if not await self.param.is_non_se_variable(2, var_type=scpsl_vars.Door):
             return False
 
         return True
@@ -535,7 +536,7 @@ class ActionHandler:
         if not await self.param.is_se_variable(1):
             return False
 
-        if not await self.param.is_non_se_variable(2, var_type=self.data.Room):
+        if not await self.param.is_non_se_variable(2, var_type=scpsl_vars.Room):
             return False
 
         return True
@@ -579,7 +580,7 @@ class ActionHandler:
         if not await self.param.is_se_variable(2):
             return False
 
-        if not await self.param.is_non_se_variable(3, var_type=self.data.Effect):
+        if not await self.param.is_non_se_variable(3, var_type=scpsl_vars.Effect):
             return False
 
         if not await self.param.is_number(4, int, required=False, min_value=0, max_value=255):
@@ -597,7 +598,7 @@ class ActionHandler:
         if not await self.param.is_se_variable(1):
             return False
 
-        if not await self.param.is_non_se_variable(2, var_type=self.data.Role):
+        if not await self.param.is_non_se_variable(2, var_type=scpsl_vars.Role):
             return False
 
         if not await self.param.is_number(3, int, required=False):
@@ -618,7 +619,7 @@ class ActionHandler:
         if not await self.param.is_se_variable(1):
             return False
 
-        if not await self.param.is_non_se_variable(2, var_type=self.data.Role):
+        if not await self.param.is_non_se_variable(2, var_type=scpsl_vars.Role):
             return False
 
         if not await self.param.is_bool(3, required=False):
@@ -680,13 +681,13 @@ class ActionHandler:
         for i in range(0, 2+1):
             role_var = await self.param.is_non_se_variable(
                 i,
-                var_type=self.data.Role,
+                var_type=scpsl_vars.Role,
                 report_error=False
             )
 
             team_var = await self.param.is_non_se_variable(
                 i,
-                var_type=self.data.Team,
+                var_type=scpsl_vars.Team,
                 report_error=False
             )
 
@@ -707,7 +708,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, 1):
             return False
 
-        if not await self.param.is_non_se_variable(1, var_type=self.data.Role):
+        if not await self.param.is_non_se_variable(1, var_type=scpsl_vars.Role):
             return False
 
         return True
@@ -744,11 +745,11 @@ class ActionHandler:
             return False
 
         if not await self.param.is_non_se_variable(1,
-                                                   var_type=self.data.Role,
+                                                   var_type=scpsl_vars.Role,
                                                    other_syntax_allowed=("*", "ALL")):
             return False
 
-        if not await self.param.is_non_se_variable(2, var_type=self.data.Role):
+        if not await self.param.is_non_se_variable(2, var_type=scpsl_vars.Role):
             return False
 
         if not await self.param.is_bool(3, required=False):
@@ -760,7 +761,7 @@ class ActionHandler:
         if not await self.param.is_required_len(1, 2):
             return False
 
-        if not await self.param.is_non_se_variable(1, var_type=self.data.Role):
+        if not await self.param.is_non_se_variable(1, var_type=scpsl_vars.Role):
             return False
 
         if not await self.param.is_number(2, int, required=False):
@@ -870,7 +871,7 @@ class ActionHandler:
         if not await self.param.is_se_variable(1):
             return False
 
-        if not await self.param.is_non_se_variable(2, var_type=self.data.Role):
+        if not await self.param.is_non_se_variable(2, var_type=scpsl_vars.Role):
             return False
 
         return True

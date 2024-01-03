@@ -1,5 +1,6 @@
 from script_validator import Data, LogHandler, Utils, VerdictHandler
 import inspect
+import scpsl_vars
 
 
 class ParamHandler:
@@ -153,39 +154,39 @@ class ParamHandler:
         variable = await self.utils.get_str_from_line_index(line_index)
 
         match var_type:
-            case Data.Data.Room:
+            case scpsl_vars.Room:
                 reason = "Invalid room"
-                group = Data.Data.Room.rooms
+                group = scpsl_vars.Room.rooms
 
-            case Data.Data.Item:
+            case scpsl_vars.Item:
                 reason = "Invalid item"
-                group = Data.Data.Item.items
+                group = scpsl_vars.Item.items
 
-            case Data.Data.Effect:
+            case scpsl_vars.Effect:
                 reason = "Invalid effect"
-                group = Data.Data.Effect.effects
+                group = scpsl_vars.Effect.effects
 
-            case Data.Data.Role:
+            case scpsl_vars.Role:
                 reason = "Invalid role"
-                group = Data.Data.Role.roles
+                group = scpsl_vars.Role.roles
 
-            case Data.Data.Door:
+            case scpsl_vars.Door:
                 reason = "Invalid door"
-                group = Data.Data.Door.doors
+                group = scpsl_vars.Door.doors
 
-            case Data.Data.SpawnPosition:
+            case scpsl_vars.SpawnPosition:
                 reason = "Invalid position"
-                group = Data.Data.SpawnPosition.positions
+                group = scpsl_vars.SpawnPosition.positions
 
             case Data.Data.DisableKey:
                 reason = "Invalid key"
                 group = Data.Data.DisableKey.keys
 
-            case Data.Data.Team:
+            case scpsl_vars.Team:
                 reason = "Invalid team"
-                group = Data.Data.Team.teams
+                group = scpsl_vars.Team.teams
 
-            case Data.Data.Candy:
+            case scpsl_vars.Candy:
                 if report_error:
                     await self.verdict.mark_uncheckable_parameters(line_index)
                 return True
@@ -272,7 +273,7 @@ class ParamHandler:
 
     async def text(self, start_line_index: int) -> None:
         """
-        some text that we dont care about, like broadcast or cassie
+        some text that we don't care about, like broadcast or cassie
         """
         if not await self._is_line_index_present(start_line_index):
             return

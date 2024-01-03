@@ -272,7 +272,8 @@ class IOHandler:
                         "Remember that everything that\n"
                         "is surrounded by angle brackets\n"
                         "`<>` is **NOT CHECKED**"
-                    )
+                    ),
+                    color=color
                 )
             )
 

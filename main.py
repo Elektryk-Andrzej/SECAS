@@ -7,7 +7,7 @@ from script_validator import VerdictHandler, LogHandler, IOHandlerVS, ParamHandl
 from label_visualiser import IOHandlerVL
 from tokens.discord_token import DISCORD_TOKEN
 from shelp import IOHandlerSH, update_shelp_files
-from easter_eggs import kissmass
+from easter_eggs import reply_vid
 import command_prefixes as cmd
 
 bot = discord.ext.commands.Bot(command_prefix=".", intents=discord.Intents.all())
@@ -53,21 +53,17 @@ async def on_message(msg: discord.Message):
 
         return
 
-    if msg.mentions and len(msg.mentions) == 1:
-        member: discord.Member = msg.mentions[0]
-        if member.id == 762016625096261652 and msg.author.id == 703301663049384058:
-            await kissmass.kissmass(msg)
-            return
-
-    elif await command_trigger(msg.content, cmd.visualise_labels):
+    if await command_trigger(msg.content, cmd.visualise_labels):
         lv = IOHandlerVL.IOHandler(msg, bot)
         await lv.visualise()
+        return
 
-    elif await command_trigger(msg.content, cmd.script_help):
+    if await command_trigger(msg.content, cmd.script_help):
         sh = IOHandlerSH.IOHandler(msg)
         await sh.process_help_request()
+        return
 
-    elif await command_trigger(msg.content, cmd.verify_script):
+    if await command_trigger(msg.content, cmd.verify_script):
         data = Data.Data()
         time.sleep(.1)
 
@@ -92,23 +88,33 @@ async def on_message(msg: discord.Message):
 
         await data.io_handler_object.proccess_request()
 
-        if await command_trigger(msg.content, cmd.verify_script + "d"):
-            with open(data.log_file_name, "rb") as file:
-                # noinspection PyTypeChecker
-                await msg.channel.send(file=discord.File(file, "result.txt"))
-
         """except Exception as e:
             await message.reply(f"ERROR: `{e}`")
 
             with open(data.log_file_name, "rb") as file:
                 # noinspection PyTypeChecker
                 await message.channel.send(file=discord.File(file, "result.txt"))"""
+        return
 
-    elif await command_trigger(msg.content, "v"):
+    if await command_trigger(msg.content, "v"):
         await msg.reply(
             "Prefix `.v` is no longer supported\n"
             "Check `.i` for more info."
         )
+        return
+
+    if "sex" in msg.content.casefold():
+        await reply_vid.bomb_them(msg)
+        return
+
+    if msg.mentions and len(msg.mentions) == 1:
+        member: discord.Member = msg.mentions[0]
+        beanz_id: int = 762016625096261652
+        andrzej_id: int = 703301663049384058
+
+        if member.id == andrzej_id and msg.author.id == beanz_id:
+            await reply_vid.kissmass(msg)
+            return
 
 
 if __name__ == "__main__":

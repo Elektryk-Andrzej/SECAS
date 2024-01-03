@@ -1,3 +1,5 @@
+import random
+
 from script_validator import Data, VerdictHandler, ActionHandler, Utils, LogHandler
 import discord
 import inspect
@@ -147,10 +149,11 @@ class IOHandler:
     async def normalize_line_number_indent(self, line_number: str) -> str:
         if type(line_number) is not str:
             line_number = str(line_number)
-        num_of_nums_in_code_len: int = len(str(len(self.data.code)))
-        return " " * (num_of_nums_in_code_len - len(line_number)) + line_number
 
-    async def format_processed_lines_to_overview(self) -> list:
+        num_of_chars_in_code_len: int = len(str(len(self.data.code)))
+        return " " * (num_of_chars_in_code_len - len(line_number)) + line_number
+
+    async def format_overview(self) -> list:
         await self.logs.open(inspect.getframeinfo(inspect.currentframe()))
         character_limit: int = 2000
         overview_lines: list = []
@@ -182,7 +185,7 @@ class IOHandler:
         await self.logs.close(devided_overview_lines)
         return devided_overview_lines
 
-    async def format_processed_lines_to_error_summary(self) -> list:
+    async def format_error_summary(self) -> list:
         await self.logs.open(inspect.getframeinfo(inspect.currentframe()))
         character_limit: int = 2000
         error_summary_lines: list = []
@@ -241,7 +244,7 @@ class IOHandler:
         await self.logs.open(inspect.getframeinfo(inspect.currentframe()))
         color = await self.get_overview_embed_color()
 
-        for embed_content_list in await self.format_processed_lines_to_overview():
+        for embed_content_list in await self.format_overview():
             embed_content = "".join(embed_content_list)
 
             self.embeds_to_send.append(
@@ -252,7 +255,7 @@ class IOHandler:
             )
 
         if self.data.show_overview:
-            for embed_content_list in await self.format_processed_lines_to_error_summary():
+            for embed_content_list in await self.format_error_summary():
                 embed_content = "".join(embed_content_list)
 
                 self.embeds_to_send.append(
@@ -261,6 +264,17 @@ class IOHandler:
                         color=color
                     )
                 )
+
+        if random.randint(1, 5) == 1:
+            self.embeds_to_send.append(
+                discord.Embed(
+                    description=(
+                        "Remember that everything that\n"
+                        "is surrounded by angle brackets\n"
+                        "`<>` is **NOT CHECKED**"
+                    )
+                )
+            )
 
         for embed_chunk in [self.embeds_to_send[i:i + 10] for i in range(0, len(self.embeds_to_send), 10)]:
             await self.msg.channel.send(embeds=embed_chunk)

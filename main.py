@@ -1,8 +1,9 @@
 import discord
 import discord.ext.commands
 import time
+from datetime import timedelta
 
-from bot_main.info_embed import info_embed
+from bot_utils.info_embed import info_embed
 from script_validator import VerdictHandler, LogHandler, IOHandlerVS, ParamHandler, ActionHandler, Utils, Data
 from label_visualiser import IOHandlerVL
 from tokens.discord_token import DISCORD_TOKEN
@@ -105,7 +106,10 @@ async def on_message(msg: discord.Message):
 
     if "sex" in msg.content.casefold():
         await reply_vid.bomb_them(msg)
-        return
+        try:
+            await msg.author.timeout(timedelta(seconds=10))
+        finally:
+            return
 
     if msg.mentions and len(msg.mentions) == 1:
         member: discord.Member = msg.mentions[0]

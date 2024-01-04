@@ -1,3 +1,5 @@
+import random
+
 import discord
 import discord.ext.commands
 import time
@@ -105,11 +107,11 @@ async def on_message(msg: discord.Message):
         return
 
     if "sex" in msg.content.casefold():
-        await reply_vid.bomb_them(msg)
-        try:
-            await msg.author.timeout(timedelta(seconds=10))
-        finally:
-            return
+        if random.randint(1, 3) > 1:
+            await reply_vid.bomb_them(msg)
+        else:
+            if not await reply_vid.timeout_clarkson(msg, timedelta(seconds=69)):
+                await reply_vid.bomb_them(msg)
 
     if msg.mentions and len(msg.mentions) == 1:
         member: discord.Member = msg.mentions[0]

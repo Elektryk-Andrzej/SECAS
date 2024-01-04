@@ -24,6 +24,7 @@ class IOHandler:
         self.variable_check_keyword: tuple = "VAR", "VARIABLE", "V"
 
         self.closest_match = script_validator.Utils.Utils.get_closest_match
+        self.embed_color: int = 0xf6be48
 
     async def process_help_request(self) -> None:
         message: list = self.msg.content.strip().upper().split(" ")
@@ -65,33 +66,55 @@ class IOHandler:
             )
 
             await self.msg.reply(
-                "I couldn't find what you were looking for :(\n"
                 f"## Did you mean `{closest_match}`?",
                 mention_author=False
             )
 
     async def get_info(self, key: str, group: dict):
+        embeds: list[discord.Embed] = []
         params: list = group[key]
-        embed_to_send: discord.Embed = discord.Embed(title=params[0], description=params[1])
+        desc = params[1]
+        structure: str = key
+        whitespace: str = " " if group is self.actions else ":"
 
         for param in params[2]:
-            param: list
-            param_name: str = param[0]
-            param_type: str = param[1]
-            param_required: str = param[2]
-            param_description: str = param[3]
+            param_name, _, param_required, param_description = param
+            param_required = "YES" if param_required == "true" else "NO"
 
-            embed_to_send.add_field(
-                name=param_name,
-                value=(
-                    f"{param_description}\n\n"
-                    f"type - `{param_type}`\n"
-                    f"required - `{param_required}`"
-                ),
-                inline=False
+            structure += (
+                f"{whitespace}<{param_name.upper()}>"
+                if param_required == "YES" else
+                f"{whitespace}[{param_name.upper()}]"
             )
 
-        await self.msg.reply(embed=embed_to_send, mention_author=False)
+            embeds.append(
+                discord.Embed(
+                    description=(
+                        f"### {param_name.upper()} argument\n"
+                        f"`Description` {param_description}\n"
+                        f"`Required` {param_required}"
+                    ),
+                    color=self.embed_color
+                )
+            )
+
+        if group is self.variables:
+            structure = "{" + structure + "}"
+
+        embeds.insert(
+            0,
+            discord.Embed(
+                description=(
+                    f"## {key}\n"
+                    f"`Description` {desc}\n"
+                    f"### {structure}"
+                ),
+                color=self.embed_color
+            )
+        )
+
+        for embed_chunk in [embeds[i:i + 10] for i in range(0, len(embeds), 10)]:
+            await self.msg.channel.send(embeds=embed_chunk)
 
     async def get_all_info(self, group: dict):
         embed_to_send: discord.Embed = discord.Embed(

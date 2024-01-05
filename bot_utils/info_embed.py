@@ -11,9 +11,17 @@ class Descriptions:
 
     verify_script_usage: str = (
         "SECAS supports `3 commands`, those being:\n"
-        "- `.vs` (verify script) - Checks for syntax errors.\n"
-        "- `.vl` (visualise labes) - Shows redirect logic.\n"
-        "- `.sh` (script help) - Brings up a summary of an action."
+        "> `.vs` (verify script)\n"
+        "This command is the most used and polished feature by far. "
+        "It will help you with finding syntax errors inside your script. "
+        "IMPORTANT: Everything inside angle brackrets like `<cnd>` can't be verified.\n"
+        "> `.vl` (visualise labes)\n"
+        "This command will show how your GOTO/GOTOIF actions function. "
+        "It's' not fully compleated and it's shipped \"as is\". "
+        "(fun fact: most uses of this command are by accident lol)\n"
+        "> `.sh` (shelp copy)\n"
+        "This command works exactly the same way as the built-in `shelp` command in ScriptedEvents. "
+        "It's recommended that you use the original shelp, because the command may contain errors."
     )
 
 
@@ -29,12 +37,13 @@ class SelectMenu(discord.ui.View):
         placeholder="Select an option",
         options=[
             discord.SelectOption(label="What is SECAS?", value="description"),
-            discord.SelectOption(label="Command - Verify Script", value="vs usage"),
+            discord.SelectOption(label="Commands", value="vs usage"),
             discord.SelectOption(label="Supporting!", value="donate"),
         ]
     )
-    async def select_error(self, interaction: discord.Interaction,
-                           select_item: discord.ui.Select):
+    async def _(self,
+                interaction: discord.Interaction,
+                select_item: discord.ui.Select):
 
         # noinspection PyUnresolvedReferences
         await interaction.response.defer()

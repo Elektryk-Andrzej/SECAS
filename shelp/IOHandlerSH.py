@@ -20,8 +20,6 @@ class IOHandler:
             shelp.variable_info.__dict__.items()
             if not var_name.startswith('__')
         }
-        self.action_check_keyword: tuple = "ACT", "ACTION", "A"
-        self.variable_check_keyword: tuple = "VAR", "VARIABLE", "V"
 
         self.closest_match = script_validator.Utils.Utils.get_closest_match
         self.embed_color: int = 0xf6be48
@@ -66,7 +64,7 @@ class IOHandler:
             )
 
             await self.msg.reply(
-                f"## Did you mean `{closest_match}`?",
+                f"### Did you mean `{closest_match}`?",
                 mention_author=False
             )
 

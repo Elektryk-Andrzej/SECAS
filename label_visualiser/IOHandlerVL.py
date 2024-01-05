@@ -11,11 +11,11 @@ class IOHandler:
     async def visualise(self) -> None:
         max_line_len: int = 30
 
-        self.lv.format_script(self.msg.content)
-        self.lv.register_labels()
-        self.lv.register_matrix()
-        self.lv.register_actions()
-        self.lv.draw_connections()
+        await self.lv.format_script(self.msg.content)
+        await self.lv.register_labels()
+        await self.lv.register_matrix()
+        await self.lv.register_actions()
+        await self.lv.draw_connections()
 
         result: str = "```"
         results = self.lv.get_result()
